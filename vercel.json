@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "public": false,
+  "rewrites": [
+    { "source": "/", "destination": "/frontend/role-selection.html" },
+    { "source": "/role-selection", "destination": "/frontend/role-selection.html" },
+    { "source": "/index", "destination": "/frontend/index.html" },
+    { "source": "/login", "destination": "/frontend/login.html" },
+    { "source": "/register", "destination": "/frontend/register.html" },
+    { "source": "/student-dashboard", "destination": "/frontend/student-dashboard.html" },
+    { "source": "/company-login", "destination": "/frontend/company-login.html" },
+    { "source": "/company-register", "destination": "/frontend/company-register.html" },
+    { "source": "/recruiter-home", "destination": "/frontend/recruiter-home.html" },
+    { "source": "/recruiter-dashboard", "destination": "/frontend/recruiter-dashboard.html" },
+    { "source": "/internships", "destination": "/frontend/internships.html" },
+    { "source": "/skill-assessment", "destination": "/frontend/skill-assessment.html" },
+    { "source": "/frontend/(.*)", "destination": "/frontend/$1" },
+    { "source": "/(.*)", "destination": "/frontend/$1" }
+  ]
+}

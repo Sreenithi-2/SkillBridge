@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="SkillBridge Student Login - Access your student dashboard, track internship applications, and view AI skill matches.">
+  <title>Student Login | SkillBridge</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  <!-- SkillBridge Platform API Configuration -->
+  <script src="js/config.js"></script>
+</head>
+
+<body class="bg-body d-flex flex-column min-vh-100">
+
+  <!-- ========================================================================
+       Top Navigation Bar
+       ======================================================================== -->
+  <nav class="navbar navbar-expand-lg bg-white border-bottom py-3">
+    <div class="container">
+      <a class="brand-logo" href="index.html">
+        <div class="brand-icon">
+          <i class="bi bi-mortarboard-fill"></i>
+        </div>
+        <span>Skill<span class="text-primary">Bridge</span></span>
+      </a>
+
+      <div class="d-flex align-items-center gap-3">
+        <a href="index.html" class="btn btn-outline-custom py-1 px-3">
+          <i class="bi bi-house-door me-1"></i> Back to Home
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ========================================================================
+       Login Page Content (Two-Column Layout)
+       ======================================================================== -->
+  <main class="auth-page-wrapper flex-grow-1 d-flex align-items-center py-5">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-11">
+
+          <div class="auth-card">
+            <div class="row g-0">
+
+              <!-- Left Section: Welcome Back, Brand Story & Career Graphic -->
+              <div class="col-lg-5 d-none d-lg-block">
+                <div class="auth-sidebar-banner">
+                  <div>
+                    <!-- SkillBridge Logo & Tagline -->
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                      <div class="rounded-3 bg-white p-2 d-inline-flex align-items-center justify-content-center"
+                        style="width: 38px; height: 38px;">
+                        <i class="bi bi-mortarboard-fill text-primary fs-5"></i>
+                      </div>
+                      <div>
+                        <h6 class="text-white fw-bold mb-0">SkillBridge</h6>
+                        <small class="text-light opacity-75" style="font-size: 0.72rem;">Internship & AI Career
+                          Platform</small>
+                      </div>
+                    </div>
+
+                    <span class="badge bg-soft-primary px-3 py-1 rounded-pill mb-3">
+                      <i class="bi bi-shield-lock-fill me-1"></i> Student Portal
+                    </span>
+
+                    <h3 class="fw-bold text-white mb-2">Welcome Back!</h3>
+                    <p class="text-light opacity-80 small mb-4">
+                      Continue your journey towards your dream career with verified internships and transparent hiring.
+                    </p>
+
+                    <!-- Attractive Career & Milestone Illustration Card -->
+                    <div class="login-visual-card">
+                      <div
+                        class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom border-white border-opacity-10">
+                        <div class="d-flex align-items-center gap-2">
+                          <div
+                            class="rounded-circle bg-white bg-opacity-20 text-white d-flex align-items-center justify-content-center fw-bold"
+                            style="width: 32px; height: 32px; font-size: 0.8rem;">
+                            YS
+                          </div>
+                          <div>
+                            <div class="fw-bold small text-white">Yazh S</div>
+                            <div class="text-light opacity-75" style="font-size: 0.7rem;">B.E. Computer Science</div>
+                          </div>
+                        </div>
+                        <span class="badge bg-soft-emerald py-1 px-2" style="font-size: 0.68rem;">Shortlisted</span>
+                      </div>
+
+                      <div class="mb-3">
+                        <div class="d-flex justify-content-between text-white small mb-1" style="font-size: 0.75rem;">
+                          <span>Java & Spring Boot Match</span>
+                          <span class="text-info fw-bold">96% Fit (Demo)</span>
+                        </div>
+                        <div class="progress" style="height: 6px; background-color: rgba(255,255,255,0.15);">
+                          <div class="progress-bar bg-info" style="width: 96%"></div>
+                        </div>
+                      </div>
+
+                      <div
+                        class="p-2 rounded-2 bg-white bg-opacity-10 d-flex justify-content-between align-items-center">
+                        <div class="text-light opacity-75 small" style="font-size: 0.72rem;">
+                          <i class="bi bi-building me-1"></i> Apex Cloud Systems
+                        </div>
+                        <span class="fw-bold text-white small" style="font-size: 0.75rem;">₹35,000/mo</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Short Motivational Message -->
+                  <div class="mt-4 pt-3 border-top border-white border-opacity-10">
+                    <p class="small text-light opacity-75 mb-0">
+                      <i class="bi bi-quote fs-5 text-primary me-1"></i> Over 50,000 students have accelerated their
+                      tech careers on SkillBridge. Your next opportunity awaits.
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Right Section: Login Form -->
+              <div class="col-lg-7">
+                <div class="auth-form-container d-flex flex-column justify-content-center h-100 py-4 py-lg-5">
+
+                  <!-- Heading & Subheading -->
+                  <div class="mb-4">
+                    <h3 class="fw-bold mb-1">Student Sign In</h3>
+                    <p class="text-muted small mb-0">Enter your credentials to access your dashboard, skill assessments,
+                      and active applications.</p>
+                  </div>
+
+                  <!-- Demo Alert Message Container -->
+                  <div id="loginAlertContainer"></div>
+
+                  <!-- Login Form -->
+                  <form id="studentLoginForm" novalidate>
+
+                    <!-- 1. Email Address Input -->
+                    <div class="mb-3">
+                      <label for="loginEmail" class="auth-form-label">Email Address <span
+                          class="text-danger">*</span></label>
+                      <div class="input-group">
+                        <span class="auth-input-icon">
+                          <i class="bi bi-envelope"></i>
+                        </span>
+                        <input type="email" class="form-control form-control-custom" id="loginEmail"
+                          placeholder="student@college.edu" required autocomplete="email">
+                      </div>
+                      <div class="invalid-feedback">Please enter a valid email address.</div>
+                    </div>
+
+                    <!-- 2. Password Input with Show/Hide Toggle -->
+                    <div class="mb-3">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <label for="loginPassword" class="auth-form-label">Password <span
+                            class="text-danger">*</span></label>
+                        <a href="#" class="text-primary small fw-semibold text-decoration-none" data-bs-toggle="modal"
+                          data-bs-target="#forgotPasswordModal">
+                          Forgot Password?
+                        </a>
+                      </div>
+                      <div class="input-group">
+                        <span class="auth-input-icon">
+                          <i class="bi bi-lock"></i>
+                        </span>
+                        <input type="password" class="form-control form-control-custom border-end-0" id="loginPassword"
+                          placeholder="Enter your password" required autocomplete="current-password">
+                        <button class="password-toggle-btn" type="button" data-target="loginPassword"
+                          aria-label="Toggle password visibility">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                      </div>
+                      <div class="invalid-feedback">Please enter your password (minimum 6 characters).</div>
+                    </div>
+
+                    <!-- 3. Remember Me Checkbox -->
+                    <div class="mb-4 d-flex align-items-center justify-content-between">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                        <label class="form-check-label small text-muted user-select-none" for="rememberMe">
+                          Remember my email on this browser
+                        </label>
+                      </div>
+                    </div>
+
+                    <!-- 4. Sign In Button -->
+                    <button type="submit" id="loginSubmitBtn" class="btn btn-primary-custom w-100 py-3 mb-4">
+                      Sign In to Student Portal <i class="bi bi-arrow-right-short fs-5"></i>
+                    </button>
+
+                    <!-- 5. Create Account & Back to Home Links -->
+                    <div class="text-center pt-2 border-top">
+                      <p class="text-muted small mb-2">
+                        Don't have a student account yet?
+                        <a href="register.html" class="text-primary fw-bold ms-1">Create Account</a>
+                      </p>
+
+                      <!-- Recruiter Cross-Authentication Navigation -->
+                      <div class="p-2.5 my-3 rounded-3 bg-light border text-center">
+                        <div class="small text-muted mb-1">
+                          <i class="bi bi-building text-success me-1"></i>
+                          <span>Hiring talent?</span>
+                          <a href="company-login.html" class="text-success fw-bold ms-1 text-decoration-none" id="crossNavRecruiterLogin">Sign in as a Recruiter &rarr;</a>
+                        </div>
+                        <div style="font-size: 0.78rem;" class="text-muted">
+                          New employer? <a href="company-register.html" class="text-decoration-none fw-semibold text-secondary" id="crossNavRecruiterRegister">Register as a Recruiter</a>
+                        </div>
+                      </div>
+
+                      <a href="index.html" class="text-muted small text-decoration-none">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Homepage
+                      </a>
+                    </div>
+
+                  </form>
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================================
+       Forgot Password Modal (Interactive Demo)
+       ======================================================================== -->
+  <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="d-flex align-items-center gap-2">
+            <div class="bg-soft-primary p-2 rounded-circle">
+              <i class="bi bi-key-fill text-primary"></i>
+            </div>
+            <h5 class="modal-title fw-bold" id="forgotPasswordModalLabel">Reset Your Password</h5>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="forgotPasswordForm" novalidate>
+          <div class="modal-body">
+            <p class="text-muted small mb-3">
+              Enter your registered student email address. We will verify your account and send password recovery
+              instructions.
+            </p>
+
+            <div id="forgotAlertContainer" class="mb-3"></div>
+
+            <div class="mb-3">
+              <label for="forgotEmailInput" class="auth-form-label">Registered Email</label>
+              <div class="input-group">
+                <span class="auth-input-icon"><i class="bi bi-envelope"></i></span>
+                <input type="email" class="form-control form-control-custom" id="forgotEmailInput"
+                  placeholder="student@college.edu" required>
+              </div>
+              <div class="invalid-feedback">Please enter a valid registered email address.</div>
+            </div>
+
+            <div class="p-2 bg-light rounded-2 border">
+              <small class="text-muted d-block">
+                <i class="bi bi-info-circle me-1 text-primary"></i> <strong>Demo Notice:</strong> In this frontend
+                prototype, submitting will simulate the password reset process without a backend.
+              </small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Close</button>
+            <button type="submit" id="forgotSubmitBtn" class="btn btn-primary-custom">
+              Send Reset Link <i class="bi bi-send-fill ms-1"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       Simple Brand Footer
+       ======================================================================== -->
+  <footer class="bg-white border-top py-4 text-center small text-muted mt-auto">
+    <div class="container">
+      <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center">
+        <div>&copy; 2026 SkillBridge Technologies Inc. All rights reserved.</div>
+        <div class="d-flex gap-3 mt-2 mt-sm-0">
+          <a href="index.html" class="text-muted text-decoration-none">Home</a>
+          <a href="register.html" class="text-muted text-decoration-none">Register</a>
+          <a href="#" class="text-muted text-decoration-none">Privacy Policy</a>
+          <a href="#" class="text-muted text-decoration-none">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap 5.3 Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+
+  <!-- Authentication Script -->
+  <script src="js/auth.js"></script>
+</body>
+
+</html>

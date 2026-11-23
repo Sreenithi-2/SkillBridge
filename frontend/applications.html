@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="SkillBridge Application Tracking Hub - Track your internship applications, interview schedules, recruiter feedback, and status updates in real-time.">
+  <title>My Applications | SkillBridge</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <script>
+    (function () {
+      function getSession(key) {
+        try {
+          var val = localStorage.getItem(key) || sessionStorage.getItem(key);
+          if (!val) return null;
+          var parsed = JSON.parse(val);
+          return (parsed && typeof parsed === 'object') ? parsed : null;
+        } catch (e) {
+          return null;
+        }
+      }
+      function isValidStudent(sess) {
+        if (!sess) return false;
+        var role = (sess.role || sess.authRole || '').toString().toLowerCase();
+        var id = sess.id || sess.studentId || sess.student_id;
+        if (!id || (typeof id === 'string' && !id.trim())) return false;
+        if (role === 'recruiter' || role === 'role_recruiter' || role === 'company') return false;
+        if (sess.companyId || sess.company_id || sess.officialEmail) return false;
+        if (role === 'student' || role === 'role_student' || (!role && (sess.fullName || sess.full_name || sess.email))) return true;
+        return false;
+      }
+      var studSess = getSession('skillbridge_student_session') || getSession('skillbridge_registered_student');
+      if (!isValidStudent(studSess)) {
+        console.warn('[SkillBridge Guard] No authenticated student session on Applications. Redirecting to login.html');
+        window.location.replace('login.html');
+      }
+    })();
+  </script>
+  <!-- SkillBridge Platform API Configuration -->
+  <script src="js/config.js"></script>
+</head>
+
+<body class="bg-body">
+
+  <div class="dashboard-container">
+
+    <!-- ========================================================================
+         Mobile Sidebar Backdrop
+         ======================================================================== -->
+    <div class="dashboard-sidebar-backdrop" id="dashboardSidebarBackdrop"></div>
+
+    <!-- ========================================================================
+         Fixed Left Sidebar
+         ======================================================================== -->
+    <aside class="dashboard-sidebar" id="dashboardSidebar">
+      <!-- Sidebar Brand Header -->
+      <div class="dashboard-sidebar-header">
+        <a class="brand-logo text-decoration-none" href="index.html">
+          <div class="brand-icon">
+            <i class="bi bi-mortarboard-fill"></i>
+          </div>
+          <span>Skill<span class="text-primary">Bridge</span></span>
+        </a>
+        <button type="button" class="btn btn-sm btn-light border d-lg-none" id="mobileSidebarClose"
+          aria-label="Close Sidebar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <!-- Sidebar Navigation Menu -->
+      <ul class="dashboard-nav-list">
+        <!-- 1. Overview -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="student-dashboard.html#overviewSection" data-title="Dashboard Overview">
+            <i class="bi bi-grid-fill"></i>
+            <span>Overview</span>
+          </a>
+        </li>
+
+        <!-- 2. My Profile -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="profile.html" data-title="Candidate Profile">
+            <i class="bi bi-person-circle"></i>
+            <span>My Profile</span>
+          </a>
+        </li>
+
+        <!-- 3. Skill Assessment -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="skill-assessment.html" data-title="Technical Skill Assessments">
+            <i class="bi bi-patch-check-fill"></i>
+            <span>Skill Assessment</span>
+            <span class="badge bg-light text-muted border px-2 py-0-5 rounded-pill ms-auto">Tests</span>
+          </a>
+        </li>
+
+        <!-- 4. My Skills -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="student-dashboard.html#skillsSection" data-title="Technical Skill Inventory">
+            <i class="bi bi-cpu-fill"></i>
+            <span>My Skills</span>
+          </a>
+        </li>
+
+        <!-- 5. Recommended Internships -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="internships.html" data-title="Recommended Internships">
+            <i class="bi bi-briefcase-fill"></i>
+            <span>Recommended Internships</span>
+            <span class="badge bg-primary text-white px-2 py-0-5 rounded-pill ms-auto">8 Live</span>
+          </a>
+        </li>
+
+        <!-- 6. My Applications (Active Page) -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link active" href="applications.html" data-title="Application Tracking Hub">
+            <i class="bi bi-send-check-fill"></i>
+            <span>My Applications</span>
+            <span class="badge bg-primary text-white px-2 py-0-5 rounded-pill ms-auto">Active</span>
+          </a>
+        </li>
+
+        <!-- 7. Resume Management -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="profile.html#resumeCard" data-title="Resume & Documents">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>Resume Management</span>
+          </a>
+        </li>
+
+        <!-- 8. Settings -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="student-dashboard.html#settingsSection" data-title="Account Settings">
+            <i class="bi bi-gear-fill"></i>
+            <span>Settings</span>
+          </a>
+        </li>
+
+        <li class="dashboard-nav-item pt-3 border-top mt-2">
+          <!-- 9. Logout -->
+          <a class="dashboard-nav-link text-danger dashboard-logout-trigger" role="button">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Sidebar User Profile Mini-Card -->
+      <div class="dashboard-sidebar-footer">
+        <div class="d-flex align-items-center gap-2">
+          <div
+            class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold user-avatar-initials flex-shrink-0"
+            id="sidebarAvatarInitials"
+            style="width: 38px; height: 38px; font-size: 0.85rem;">
+            YS
+          </div>
+          <img src="" alt="Profile Photo" class="sidebar-user-avatar-img d-none flex-shrink-0" id="sidebarAvatarImg" style="width: 38px; height: 38px;">
+          <div class="overflow-hidden">
+            <div class="fw-bold small text-dark text-truncate user-full-name">Yazh S</div>
+            <small class="text-muted text-truncate d-block" style="font-size: 0.72rem;">B.E. Final Year</small>
+          </div>
+          <button class="btn btn-sm btn-link text-muted ms-auto p-0 dashboard-logout-trigger" title="Log Out">
+            <i class="bi bi-box-arrow-right fs-6"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ========================================================================
+         Main Content Area
+         ======================================================================== -->
+    <div class="dashboard-main">
+
+      <!-- Top Sticky Dashboard Bar -->
+      <header class="dashboard-topbar d-flex justify-content-between align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <!-- Mobile Sidebar Toggle Hamburger -->
+          <button class="btn btn-sm btn-light border d-lg-none" id="mobileSidebarToggle" aria-label="Open Sidebar Menu">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+
+          <div>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a href="index.html" class="text-decoration-none text-muted">SkillBridge</a></li>
+                <li class="breadcrumb-item"><a href="student-dashboard.html" class="text-decoration-none text-muted">Student Portal</a></li>
+                <li class="breadcrumb-item active text-primary fw-semibold">My Applications</li>
+              </ol>
+            </nav>
+            <h5 class="fw-bold text-dark mb-0 d-none d-sm-block">Application Tracking Hub</h5>
+          </div>
+        </div>
+
+        <!-- Top Right Actions & Student Profile Dropdown -->
+        <div class="d-flex align-items-center gap-2 gap-sm-3">
+          <!-- Real-Time Sync Indicator -->
+          <span class="badge bg-soft-primary text-primary px-3 py-1 rounded-pill d-none d-md-inline-flex align-items-center gap-1 border border-primary-subtle small">
+            <i class="bi bi-arrow-repeat"></i> Real-Time Status Sync
+          </span>
+
+          <!-- Explore Internships Button -->
+          <a href="internships.html" class="btn btn-primary-custom btn-sm px-3 d-none d-sm-inline-flex align-items-center gap-1">
+            <i class="bi bi-search"></i>
+            <span>Find Internships</span>
+          </a>
+
+          <!-- Return to Dashboard Button -->
+          <a href="student-dashboard.html" class="btn btn-outline-custom btn-sm px-3 d-none d-sm-inline-flex align-items-center gap-1">
+            <i class="bi bi-grid-fill"></i>
+            <span>Dashboard</span>
+          </a>
+
+          <!-- User Profile Dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-light border rounded-pill d-flex align-items-center gap-2 py-1 px-2"
+              type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <div
+                class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold user-avatar-initials"
+                id="topbarAvatarInitials"
+                style="width: 30px; height: 30px; font-size: 0.75rem;">
+                YS
+              </div>
+              <img src="" alt="Profile Photo" class="topbar-user-avatar-img d-none" id="topbarAvatarImg" style="width: 30px; height: 30px;">
+              <span class="fw-semibold small text-dark d-none d-sm-inline user-full-name">Yazh S</span>
+              <i class="bi bi-chevron-down text-muted small me-1"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border p-2">
+              <li class="px-2 py-1">
+                <div class="fw-bold small text-dark user-full-name">Yazh S</div>
+                <small class="text-muted">B.E. Final Year</small>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <a class="dropdown-item small rounded-2" href="profile.html">
+                  <i class="bi bi-person me-2"></i> View Profile
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item small rounded-2" href="internships.html">
+                  <i class="bi bi-briefcase me-2"></i> Recommended Internships
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item small rounded-2" href="skill-assessment.html">
+                  <i class="bi bi-patch-check me-2"></i> Take Skill Assessment
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item small rounded-2" href="student-dashboard.html">
+                  <i class="bi bi-grid me-2"></i> Dashboard Overview
+                </a>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <a class="dropdown-item small rounded-2 text-danger dashboard-logout-trigger" href="#">
+                  <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dashboard Scrollable Body -->
+      <div class="dashboard-body">
+
+        <!-- ====================================================================
+             Hero Banner Section
+             ==================================================================== -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 text-white"
+          style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%); position: relative; overflow: hidden;">
+          <div class="position-absolute end-0 top-0 bottom-0 opacity-10 d-none d-md-flex align-items-center pe-5 pointer-events-none">
+            <i class="bi bi-send-check" style="font-size: 14rem;"></i>
+          </div>
+          <div class="position-relative" style="max-width: 760px; z-index: 1;">
+            <!-- Hero Section Overview Pill (Never Empty) -->
+            <div class="d-inline-flex align-items-center gap-2 px-3 py-1-5 rounded-pill mb-3" 
+              style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); backdrop-filter: blur(8px); color: #ffffff; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;">
+              <i class="bi bi-check2-circle text-warning fs-6"></i>
+              <span>Application Progress Overview</span>
+            </div>
+            <h2 class="display-6 fw-bold mb-2 text-white" style="letter-spacing: -0.5px; font-weight: 800;">
+              Internship Application Tracking Hub
+            </h2>
+            <p class="text-white text-opacity-90 mb-4 fs-6" style="line-height: 1.6; max-width: 680px;">
+              Track real-time candidate evaluations, interview schedules, recruiter feedback notes, 
+              and offer releases across all your corporate internship submissions.
+            </p>
+
+            <!-- Hero Section Dynamic Metric Cards (Pending, Interviews, Offers) -->
+            <div class="row g-3 mt-1" id="heroMetricsRow">
+              <!-- Pending Applications -->
+              <div class="col-12 col-sm-6 col-md-4">
+                <div class="bg-white rounded-3 p-3 shadow-sm d-flex align-items-center gap-3 h-100" style="border: 1px solid rgba(255, 255, 255, 0.45);">
+                  <div class="rounded-circle bg-warning-subtle text-warning-emphasis d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
+                    <i class="bi bi-hourglass-split fs-5"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <span class="text-muted small fw-semibold d-block text-truncate" style="font-size: 0.75rem;">Pending Applications</span>
+                    <h4 class="fw-bold text-dark mb-0 lh-sm" id="heroPendingCount">0</h4>
+                    <small class="text-muted d-block text-truncate" id="heroPendingSubtext" style="font-size: 0.72rem;">In Screening & Review</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Upcoming Interviews -->
+              <div class="col-12 col-sm-6 col-md-4">
+                <div class="bg-white rounded-3 p-3 shadow-sm d-flex align-items-center gap-3 h-100" style="border: 1px solid rgba(255, 255, 255, 0.45);">
+                  <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; background-color: #ecfeff; color: #06B6D4;">
+                    <i class="bi bi-calendar-check-fill fs-5"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <span class="text-muted small fw-semibold d-block text-truncate" style="font-size: 0.75rem;">Upcoming Interviews</span>
+                    <h4 class="fw-bold text-dark mb-0 lh-sm" id="heroInterviewsCount">0</h4>
+                    <small class="text-muted d-block text-truncate" id="heroInterviewsSubtext" style="font-size: 0.72rem;">Live Technical Rounds</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Offers Received -->
+              <div class="col-12 col-sm-6 col-md-4">
+                <div class="bg-white rounded-3 p-3 shadow-sm d-flex align-items-center gap-3 h-100" style="border: 1px solid rgba(255, 255, 255, 0.45);">
+                  <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
+                    <i class="bi bi-award-fill fs-5"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <span class="text-muted small fw-semibold d-block text-truncate" style="font-size: 0.75rem;">Offers Received</span>
+                    <h4 class="fw-bold text-dark mb-0 lh-sm" id="heroOffersCount">0</h4>
+                    <small class="text-muted d-block text-truncate" id="heroOffersSubtext" style="font-size: 0.72rem;">Corporate Offer Releases</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ====================================================================
+             1. Summary KPI Cards (Dynamically Calculated with Exact Color Mappings)
+             ==================================================================== -->
+        <div class="row g-2 g-md-3 mb-4">
+          <!-- Total Applications -->
+          <div class="col-6 col-sm-4 col-md-3 col-xl">
+            <div class="card border rounded-4 shadow-xs p-3 bg-white text-center h-100 kpi-card-clickable" data-kpi-status="all" role="button" tabindex="0">
+              <span class="text-muted small fw-semibold d-block mb-1" style="font-size: 0.75rem;">
+                <span class="status-indicator-circle me-1" style="background-color: #64748B;"></span>Total Applications
+              </span>
+              <h3 class="fw-bold text-dark mb-0" id="kpiTotalCount">0</h3>
+              <small class="text-muted" style="font-size: 0.72rem;">All Submissions</small>
+            </div>
+          </div>
+
+          <!-- Applied (Blue: #2563EB) -->
+          <div class="col-6 col-sm-4 col-md-3 col-xl">
+            <div class="card border rounded-4 shadow-xs p-3 bg-white text-center h-100 kpi-card-clickable" data-kpi-status="Applied" role="button" tabindex="0" style="border-color: rgba(37, 99, 235, 0.3) !important;">
+              <span class="small fw-bold d-block mb-1" style="font-size: 0.75rem; color: #2563EB !important;">
+                <span class="status-indicator-circle me-1" style="background-color: #2563EB;"></span>Applied
+              </span>
+              <h3 class="fw-bold mb-0" style="color: #2563EB;" id="kpiAppliedCount">0</h3>
+              <small class="text-muted" style="font-size: 0.72rem;">Initial Screening</small>
+            </div>
+          </div>
+
+          <!-- Under Review (Orange: #F59E0B) -->
+          <div class="col-6 col-sm-4 col-md-3 col-xl">
+            <div class="card border rounded-4 shadow-xs p-3 bg-white text-center h-100 kpi-card-clickable" data-kpi-status="Under Review" role="button" tabindex="0" style="border-color: rgba(245, 158, 11, 0.35) !important;">
+              <span class="small fw-bold d-block mb-1" style="font-size: 0.75rem; color: #F59E0B !important;">
+                <span class="status-indicator-circle me-1" style="background-color: #F59E0B;"></span>Under Review
+              </span>
+              <h3 class="fw-bold mb-0" style="color: #F59E0B;" id="kpiReviewCount">0</h3>
+              <small class="text-muted" style="font-size: 0.72rem;">Resume Evaluation</small>
+            </div>
+          </div>
+
+          <!-- Shortlisted (Purple: #9333EA) -->
+          <div class="col-6 col-sm-4 col-md-3 col-xl">
+            <div class="card border rounded-4 shadow-xs p-3 bg-white text-center h-100 kpi-card-clickable" data-kpi-status="Shortlisted" role="button" tabindex="0" style="border-color: rgba(147, 51, 234, 0.35) !important;">
+              <span class="small fw-bold d-block mb-1" style="font-size: 0.75rem; color: #9333EA !important;">
+                <span class="status-indicator-circle me-1" style="background-color: #9333EA;"></span>Shortlisted
+              </span>
+              <h3 class="fw-bold mb-0" style="color: #9333EA;" id="kpiShortlistedCount">0</h3>
+              <small class="text-muted" style="font-size: 0.72rem;">Candidate Pool</small>
+            </div>
+          </div>
+
+          <!-- Interview Scheduled (Cyan: #06B6D4) -->
+          <div class="col-6 col-sm-4 col-md-3 col-xl">
+            <div class="card border rounded-4 shadow-xs p-3 bg-white text-center h-100 kpi-card-clickable" data-kpi-status="Interview Scheduled" role="button" tabindex="0" style="border-color: rgba(6, 182, 212, 0.35) !important;">
+              <span class="small fw-bold d-block mb-1" style="font-size: 0.75rem; color: #06B6D4 !important;">
+                <span class="status-indicator-circle me-1" style="background-color: #06B6D4;"></span>Interview
+              </span>
+              <h3 class="fw-bold mb-0" style="color: #06B6D4;" id="kpiInterviewCount">0</h3>
+              <small class="text-muted" style="font-size: 0.72rem;">Rounds Scheduled</small>
+            </div>
+          </div>
+
+          <!-- Selected (Green: #16A34A) -->
+          <div class="col-6 col-sm-4 col-md-3 col-xl">
+            <div class="card border rounded-4 shadow-xs p-3 bg-white text-center h-100 kpi-card-clickable" data-kpi-status="Selected" role="button" tabindex="0" style="border-color: rgba(22, 163, 74, 0.35) !important;">
+              <span class="small fw-bold d-block mb-1" style="font-size: 0.75rem; color: #16A34A !important;">
+                <span class="status-indicator-circle me-1" style="background-color: #16A34A;"></span>Selected
+              </span>
+              <h3 class="fw-bold mb-0" style="color: #16A34A;" id="kpiSelectedCount">0</h3>
+              <small class="text-muted" style="font-size: 0.72rem;">Offers Extended</small>
+            </div>
+          </div>
+
+          <!-- Rejected (Red: #DC2626) -->
+          <div class="col-6 col-sm-4 col-md-3 col-xl">
+            <div class="card border rounded-4 shadow-xs p-3 bg-white text-center h-100 kpi-card-clickable" data-kpi-status="Rejected" role="button" tabindex="0" style="border-color: rgba(220, 38, 38, 0.35) !important;">
+              <span class="small fw-bold d-block mb-1" style="font-size: 0.75rem; color: #DC2626 !important;">
+                <span class="status-indicator-circle me-1" style="background-color: #DC2626;"></span>Rejected
+              </span>
+              <h3 class="fw-bold mb-0" style="color: #DC2626;" id="kpiRejectedCount">0</h3>
+              <small class="text-muted" style="font-size: 0.72rem;">Positions Closed</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- ====================================================================
+             Upcoming Interview Callout Banner (Rendered dynamically if shortlisted/interview scheduled)
+             ==================================================================== -->
+        <div id="interviewCalloutContainer" class="d-none"></div>
+
+        <!-- ====================================================================
+             Quick Status Filter Pills with Coloured Circular Indicators
+             ==================================================================== -->
+        <div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
+          <span class="text-muted small fw-semibold me-1"><i class="bi bi-funnel me-1"></i>Filter Status:</span>
+          <button type="button" class="filter-pill status-filter-pill active" data-status="all">
+            <i class="bi bi-grid-fill"></i> All Applications
+          </button>
+          <button type="button" class="filter-pill status-filter-pill" data-status="Applied">
+            <span class="status-indicator-circle" style="background-color: #2563EB;"></span> Applied
+          </button>
+          <button type="button" class="filter-pill status-filter-pill" data-status="Under Review">
+            <span class="status-indicator-circle" style="background-color: #F59E0B;"></span> Under Review
+          </button>
+          <button type="button" class="filter-pill status-filter-pill" data-status="Shortlisted">
+            <span class="status-indicator-circle" style="background-color: #9333EA;"></span> Shortlisted
+          </button>
+          <button type="button" class="filter-pill status-filter-pill" data-status="Interview Scheduled">
+            <span class="status-indicator-circle" style="background-color: #06B6D4;"></span> Interview Scheduled
+          </button>
+          <button type="button" class="filter-pill status-filter-pill" data-status="Selected">
+            <span class="status-indicator-circle" style="background-color: #16A34A;"></span> Selected
+          </button>
+          <button type="button" class="filter-pill status-filter-pill" data-status="Rejected">
+            <span class="status-indicator-circle" style="background-color: #DC2626;"></span> Rejected
+          </button>
+        </div>
+
+        <!-- ====================================================================
+             Search & Advanced Filter Control Card
+             ==================================================================== -->
+        <div class="card border shadow-xs rounded-4 bg-white p-4 mb-4">
+          <div class="row g-3 align-items-center">
+            <!-- Search Input -->
+            <div class="col-12 col-lg-5">
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted">
+                  <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control bg-light border-start-0" id="appSearchInput"
+                  placeholder="Search by company name, job role, or location..." aria-label="Search applications">
+              </div>
+            </div>
+
+            <!-- Custom Accessible Status Dropdown (Coloured Indicators, Clean Labels) -->
+            <div class="col-6 col-md-4 col-lg-3 position-relative" id="customStatusDropdownContainer">
+              <!-- Hidden select element for native/test compatibility -->
+              <select class="d-none" id="statusFilterSelect" aria-label="Filter by Status">
+                <option value="all">All Application Statuses</option>
+                <option value="Applied">Applied</option>
+                <option value="Under Review">Under Review</option>
+                <option value="Shortlisted">Shortlisted</option>
+                <option value="Interview Scheduled">Interview Scheduled</option>
+                <option value="Selected">Selected</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+
+              <!-- Custom Accessible Dropdown Toggle Button -->
+              <button type="button" class="form-select bg-light d-flex align-items-center justify-content-between text-start status-custom-select-btn w-100" 
+                id="statusDropdownToggleBtn" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">
+                <span class="d-flex align-items-center gap-2 text-truncate" id="statusSelectedDisplay">
+                  <span class="status-indicator-circle" id="statusSelectedDot" style="background-color: #64748B;"></span>
+                  <span class="status-selected-label fw-medium" id="statusSelectedText">All Application Statuses</span>
+                </span>
+              </button>
+
+              <!-- Dropdown Menu with Coloured Circular Indicators -->
+              <ul class="dropdown-menu shadow-lg border rounded-3 p-1 w-100 status-dropdown-menu" id="statusFilterDropdownMenu" aria-labelledby="statusDropdownToggleBtn">
+                <li>
+                  <button type="button" class="dropdown-item rounded-2 py-2 d-flex align-items-center justify-content-between active" data-status-val="all">
+                    <span class="d-flex align-items-center gap-2">
+                      <span class="status-indicator-circle" style="background-color: #64748B;"></span>
+                      <span class="fw-medium">All Application Statuses</span>
+                    </span>
+                    <i class="bi bi-check2 status-item-check"></i>
+                  </button>
+                </li>
+                <li><hr class="dropdown-divider my-1"></li>
+                <li>
+                  <button type="button" class="dropdown-item rounded-2 py-2 d-flex align-items-center justify-content-between" data-status-val="Applied">
+                    <span class="d-flex align-items-center gap-2">
+                      <span class="status-indicator-circle" style="background-color: #2563EB;"></span>
+                      <span class="fw-medium">Applied</span>
+                    </span>
+                    <i class="bi bi-check2 status-item-check d-none"></i>
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="dropdown-item rounded-2 py-2 d-flex align-items-center justify-content-between" data-status-val="Under Review">
+                    <span class="d-flex align-items-center gap-2">
+                      <span class="status-indicator-circle" style="background-color: #F59E0B;"></span>
+                      <span class="fw-medium">Under Review</span>
+                    </span>
+                    <i class="bi bi-check2 status-item-check d-none"></i>
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="dropdown-item rounded-2 py-2 d-flex align-items-center justify-content-between" data-status-val="Shortlisted">
+                    <span class="d-flex align-items-center gap-2">
+                      <span class="status-indicator-circle" style="background-color: #9333EA;"></span>
+                      <span class="fw-medium">Shortlisted</span>
+                    </span>
+                    <i class="bi bi-check2 status-item-check d-none"></i>
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="dropdown-item rounded-2 py-2 d-flex align-items-center justify-content-between" data-status-val="Interview Scheduled">
+                    <span class="d-flex align-items-center gap-2">
+                      <span class="status-indicator-circle" style="background-color: #06B6D4;"></span>
+                      <span class="fw-medium">Interview Scheduled</span>
+                    </span>
+                    <i class="bi bi-check2 status-item-check d-none"></i>
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="dropdown-item rounded-2 py-2 d-flex align-items-center justify-content-between" data-status-val="Selected">
+                    <span class="d-flex align-items-center gap-2">
+                      <span class="status-indicator-circle" style="background-color: #16A34A;"></span>
+                      <span class="fw-medium">Selected</span>
+                    </span>
+                    <i class="bi bi-check2 status-item-check d-none"></i>
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="dropdown-item rounded-2 py-2 d-flex align-items-center justify-content-between" data-status-val="Rejected">
+                    <span class="d-flex align-items-center gap-2">
+                      <span class="status-indicator-circle" style="background-color: #DC2626;"></span>
+                      <span class="fw-medium">Rejected</span>
+                    </span>
+                    <i class="bi bi-check2 status-item-check d-none"></i>
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div class="col-6 col-md-4 col-lg-2">
+              <select class="form-select bg-light" id="dateFilterSelect" aria-label="Filter by Application Date">
+                <option value="all">All Dates</option>
+                <option value="7days">Last 7 Days</option>
+                <option value="30days">Last 30 Days</option>
+              </select>
+            </div>
+
+            <!-- Sort By Select -->
+            <div class="col-12 col-md-4 col-lg-2">
+              <select class="form-select bg-light" id="sortBySelect" aria-label="Sort Applications">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Active Filter Results Bar -->
+          <div class="d-flex flex-wrap justify-content-between align-items-center pt-3 border-top mt-3 small text-muted">
+            <div class="d-flex align-items-center gap-2">
+              <span class="fw-bold text-dark" id="applicationsCountDisplay">Loading applications...</span>
+              <span>&bull;</span>
+              <span id="backendSyncBadge"><i class="bi bi-hdd-network me-1"></i>Checking Connection...</span>
+            </div>
+            <div>
+              <button type="button" class="btn btn-sm btn-link text-muted text-decoration-none p-0" id="resetFiltersBtn">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Filters
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ====================================================================
+             Applications Tracking Grid / Cards Container (Populated by JS)
+             ==================================================================== -->
+        <div class="row g-4" id="applicationsListContainer">
+          <!-- Dynamically populated from ApplicationsApiService via applications.js -->
+        </div>
+
+      </div><!-- /.dashboard-body -->
+
+    </div><!-- /.dashboard-main -->
+
+  </div><!-- /.dashboard-container -->
+
+  <!-- ========================================================================
+       Application Details & Recruiter Feedback Modal
+       ======================================================================== -->
+  <div class="modal fade" id="applicationDetailsModal" tabindex="-1" aria-labelledby="modalAppRoleTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        
+        <!-- Modal Header -->
+        <div class="modal-header border-bottom pb-3">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <div id="modalAppStatusPill">
+                <span class="badge bg-primary px-3 py-1 rounded-pill">Applied</span>
+              </div>
+              <span class="text-muted small">&bull; Candidate Submission Details</span>
+            </div>
+            <h5 class="modal-title fw-bold text-dark mb-0" id="modalAppRoleTitle">Full Stack Java Developer Intern</h5>
+            <small class="text-muted d-flex align-items-center gap-1 mt-1">
+              <i class="bi bi-building"></i>
+              <span id="modalAppCompany">CloudScale Solutions</span>
+              <i class="bi bi-patch-check-fill text-primary" title="Verified Corporate Partner"></i>
+            </small>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body p-4">
+
+          <!-- Key Metrics Grid -->
+          <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+              <div class="p-3 bg-light rounded-3 border text-center">
+                <small class="text-muted d-block" style="font-size: 0.75rem;">Applied On</small>
+                <span class="fw-bold text-dark small" id="modalAppAppliedDate">16 Nov 2026</span>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="p-3 bg-light rounded-3 border text-center">
+                <small class="text-muted d-block" style="font-size: 0.75rem;">Stipend (INR)</small>
+                <span class="fw-bold text-success" id="modalAppStipend">₹35,000 / mo</span>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="p-3 bg-light rounded-3 border text-center">
+                <small class="text-muted d-block" style="font-size: 0.75rem;">Location</small>
+                <span class="fw-bold text-dark small" id="modalAppLocation">Bengaluru (Hybrid)</span>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="p-3 bg-light rounded-3 border text-center">
+                <small class="text-muted d-block" style="font-size: 0.75rem;">Duration</small>
+                <span class="fw-bold text-primary small" id="modalAppDuration">6 Months</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interview Schedule Card (Shown when Interview Scheduled) -->
+          <div id="modalAppInterviewSection" class="d-none mb-3"></div>
+
+          <!-- Offer Details Card (Shown ONLY for Selected Candidates) -->
+          <div id="modalAppOfferSection" class="d-none mb-3"></div>
+
+          <!-- Visual Multi-Step Progress Timeline -->
+          <div class="card border rounded-3 p-3 bg-light mb-4">
+            <h6 class="fw-bold text-dark mb-1 small">Application Progress Tracker</h6>
+            <div id="modalAppTimelineContainer">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Recruiter Feedback -->
+          <h6 class="fw-bold text-dark mb-2">Recruiter Feedback & Notes</h6>
+          <div class="p-3 bg-white rounded-3 border mb-4 small text-dark lh-base" id="modalAppFeedback">
+            Loading recruiter feedback...
+          </div>
+
+          <!-- Submitted Resume Document Section -->
+          <h6 class="fw-bold text-dark mb-2">Submitted Candidate Resume</h6>
+          <div class="p-3 bg-light rounded-3 border d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex align-items-center gap-3">
+              <div class="rounded-circle bg-white shadow-xs p-2 text-danger">
+                <i class="bi bi-file-earmark-pdf-fill fs-3"></i>
+              </div>
+              <div>
+                <strong class="text-dark small d-block" id="modalAppResumeName">Yazh_S_Resume_2026.pdf</strong>
+                <small class="text-muted">Includes verified SkillBridge assessments & verified credentials</small>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-sm btn-outline-custom" id="modalDownloadResumeBtn">
+                <i class="bi bi-download me-1"></i> Download
+              </button>
+            </div>
+          </div>
+
+          <!-- Recruiter Simulator Control (For Live Demonstrations & Testing) -->
+          <div class="p-3 rounded-3 bg-soft-primary border border-primary-subtle">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+              <div>
+                <strong class="small text-primary d-block">
+                  <i class="bi bi-gear-fill me-1"></i>Recruiter Portal Simulation:
+                </strong>
+                <small class="text-muted" style="font-size: 0.75rem;">Test changing this application's review status dynamically</small>
+              </div>
+              <div style="min-width: 180px;">
+                <select class="form-select form-select-sm" id="modalRecruiterStatusSelect">
+                  <option value="Applied">Applied</option>
+                  <option value="Under Review">Under Review</option>
+                  <option value="Shortlisted">Shortlisted</option>
+                  <option value="Interview Scheduled">Interview Scheduled</option>
+                  <option value="Selected">Selected</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer border-top d-flex justify-content-between">
+          <button type="button" class="btn btn-outline-danger btn-sm px-3" id="modalWithdrawBtn">
+            <i class="bi bi-x-circle me-1"></i> Withdraw Application
+          </button>
+          <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Close</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       Withdraw Application Confirmation Dialog
+       ======================================================================== -->
+  <div class="modal fade" id="withdrawConfirmModal" tabindex="-1" aria-labelledby="withdrawModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold text-dark" id="withdrawModalTitle">
+            <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Withdraw Application?
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body py-3">
+          <p class="text-muted mb-2">
+            Are you sure you want to withdraw your application for:
+          </p>
+          <div class="p-3 bg-light rounded-3 border mb-3" id="withdrawModalRoleDisplay">
+            Loading position details...
+          </div>
+          <div class="alert alert-light border small text-muted mb-0">
+            <i class="bi bi-info-circle-fill text-primary me-1"></i>
+            Withdrawing will remove your profile from the employer's current active pool. You may re-apply later if the position is still open.
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-outline-custom px-4" data-bs-dismiss="modal">Keep Application</button>
+          <button type="button" class="btn btn-danger px-4" id="confirmWithdrawSubmitBtn">Yes, Withdraw</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Feedback Container -->
+  <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;"></div>
+
+  <!-- Bootstrap 5.3 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Applications Tracking Controller -->
+  <script src="js/applications.js"></script>
+
+</body>
+
+</html>

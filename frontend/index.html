@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="SkillBridge - AI-driven campus hiring platform connecting student skills in Java, Python, Spring Boot, MySQL, and Web Tech with verified internships.">
+  <title>SkillBridge | Connect Skills to Verified Internships</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  <!-- SkillBridge Platform API Configuration -->
+  <script src="js/config.js"></script>
+</head>
+
+<body>
+
+  <!-- ========================================================================
+       Navigation Bar
+       ======================================================================== -->
+  <nav class="navbar navbar-expand-lg fixed-top custom-navbar" id="mainNavbar">
+    <div class="container">
+      <a class="brand-logo" href="index.html">
+        <div class="brand-icon">
+          <i class="bi bi-mortarboard-fill"></i>
+        </div>
+        <span>Skill<span class="text-primary">Bridge</span></span>
+      </a>
+
+      <!-- Mobile Hamburger Toggle -->
+      <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
+        data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false"
+        aria-label="Toggle navigation">
+        <i class="bi bi-list fs-2 text-dark"></i>
+      </button>
+
+      <!-- Navbar Links -->
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-1">
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom active" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom" href="internships.html">Find Internships</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom" href="login.html" id="navStudentPortalLink">Student Portal</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom" href="#audience-section">For Employers</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom" href="#how-it-works">How It Works</a>
+          </li>
+        </ul>
+
+        <!-- Action / Auth Buttons -->
+        <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+          <!-- Sign In Dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-outline-custom dropdown-toggle" type="button" id="signInDropdown"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-2" aria-labelledby="signInDropdown">
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="login.html" id="navStudentSignIn">
+                  <i class="bi bi-mortarboard-fill text-primary fs-5"></i>
+                  <div>
+                    <div class="fw-semibold small">Student Sign In</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Access dashboard, skills & applications</div>
+                  </div>
+                </a>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="company-login.html" id="navRecruiterSignIn">
+                  <i class="bi bi-building-fill text-success fs-5"></i>
+                  <div>
+                    <div class="fw-semibold small">Recruiter Sign In</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Employer portal, ATS & candidates</div>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Get Started / Registration Dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-primary-custom dropdown-toggle" type="button" id="registerDropdown"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              Get Started <i class="bi bi-chevron-down ms-1" style="font-size: 0.75rem;"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-2" aria-labelledby="registerDropdown">
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="register.html" id="navStudentRegister">
+                  <i class="bi bi-person-plus-fill text-primary fs-5"></i>
+                  <div>
+                    <div class="fw-semibold small">Student Registration</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Create profile & apply for internships</div>
+                  </div>
+                </a>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="company-register.html" id="navRecruiterRegister">
+                  <i class="bi bi-briefcase-fill text-success fs-5"></i>
+                  <div>
+                    <div class="fw-semibold small">Recruiter Registration</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Hire pre-vetted campus talent</div>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ========================================================================
+       Hero Section (Side-By-Side Layout)
+       ======================================================================== -->
+  <header class="hero-section">
+    <div class="container">
+      <div class="row align-items-center g-5">
+
+        <!-- Left Side: Announcement, Headline, Description, Search Bar & Quick Tags -->
+        <div class="col-lg-6">
+          <div class="hero-pill">
+            <i class="bi bi-stars text-primary"></i>
+            <span>Summer 2025 Internship Cohort Now Live</span>
+          </div>
+
+          <h1 class="hero-title">
+            Bridge The Gap Between Your <span class="text-gradient-primary">Real Tech Skills</span> & Dream Internships
+          </h1>
+
+          <p class="hero-subtitle">
+            SkillBridge empowers students in <strong>Java, Spring Boot, MySQL, Python, and Web Development</strong> to
+            match directly with top companies based on verified technical abilities.
+          </p>
+
+          <!-- Interactive Search Bar -->
+          <div class="hero-search-box mb-4">
+            <div class="row g-2 align-items-center">
+              <div class="col-md-5">
+                <div class="search-field">
+                  <i class="bi bi-search"></i>
+                  <input type="text" id="hero-search-keyword" placeholder="Search Java, Python, Spring, MySQL..."
+                    aria-label="Search by skill or job title">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="search-field">
+                  <i class="bi bi-funnel"></i>
+                  <select id="hero-search-category" aria-label="Category filter">
+                    <option value="all">All Tech Domains</option>
+                    <option value="java-spring">Java & Spring Boot</option>
+                    <option value="python-data">Python & Backend</option>
+                    <option value="frontend-web">Frontend (HTML/CSS/JS)</option>
+                    <option value="database-mysql">Database (MySQL)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <button type="button" id="hero-search-btn" class="btn btn-primary-custom w-100 py-2">
+                  Explore <i class="bi bi-search ms-1"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Quick Search Tags -->
+          <div class="d-flex align-items-center flex-wrap gap-2 text-muted small">
+            <span class="fw-semibold text-dark">Popular searches:</span>
+            <span class="badge bg-light text-dark border popular-tag-item" data-query="Java">#Java</span>
+            <span class="badge bg-light text-dark border popular-tag-item" data-query="Spring Boot">#SpringBoot</span>
+            <span class="badge bg-light text-dark border popular-tag-item" data-query="Python">#Python</span>
+            <span class="badge bg-light text-dark border popular-tag-item" data-query="MySQL">#MySQL</span>
+            <span class="badge bg-light text-dark border popular-tag-item" data-query="JavaScript">#JavaScript</span>
+            <span class="badge bg-light text-dark border popular-tag-item" data-query="HTML">#HTML_CSS</span>
+          </div>
+        </div>
+
+        <!-- Right Side: Complete AI Skill Assessment Dashboard -->
+        <div class="col-lg-6">
+          <div class="hero-visual-container">
+
+            <!-- Floating Badge Top Right: 98% Skill Fit Card -->
+            <div class="floating-badge floating-badge-1">
+              <div class="bg-soft-emerald p-2 rounded-circle">
+                <i class="bi bi-check2-circle text-success fs-5"></i>
+              </div>
+              <div>
+                <div class="fw-bold small text-dark">98% Skill Fit <span
+                    class="badge bg-light text-muted border py-0 px-1" style="font-size: 0.65rem;">Demo</span></div>
+                <div class="text-muted" style="font-size: 0.75rem;">Selected for Technical Round</div>
+              </div>
+            </div>
+
+            <!-- Floating Badge Bottom Left: 1,400+ Verified Hiring Partners Card -->
+            <div class="floating-badge floating-badge-2">
+              <div class="bg-soft-primary p-2 rounded-circle">
+                <i class="bi bi-building text-primary fs-5"></i>
+              </div>
+              <div>
+                <div class="fw-bold small text-dark">1,400+ Verified Hiring Partners</div>
+                <div class="text-muted" style="font-size: 0.75rem;">Actively reviewing candidate code</div>
+              </div>
+            </div>
+
+            <!-- Main Interactive Card Mockup -->
+            <div class="hero-main-card">
+              <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                <div class="d-flex align-items-center gap-3">
+                  <div
+                    class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
+                    style="width: 44px; height: 44px;">
+                    YS
+                  </div>
+                  <div>
+                    <h6 class="mb-0 fw-bold">Yazh S</h6>
+                    <small class="text-muted">B.E. Computer Science &bull; Final Year</small>
+                  </div>
+                </div>
+                <span class="badge bg-soft-emerald px-2 py-1 rounded-pill">Open to Internships</span>
+              </div>
+
+              <!-- Skill Assessment Breakdown (Progress Bars) -->
+              <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-uppercase fw-bold text-muted"
+                    style="font-size: 0.72rem; letter-spacing: 0.05em;">Skill Assessment Breakdown</span>
+                  <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"
+                    style="font-size: 0.68rem;">Demo Result</span>
+                </div>
+
+                <div class="d-flex justify-content-between small fw-semibold mb-1">
+                  <span>Java & Spring Boot Architecture</span>
+                  <span class="text-primary">94% Fit <small class="text-muted">(Demo)</small></span>
+                </div>
+                <div class="progress mb-3" style="height: 8px;">
+                  <div class="progress-bar bg-primary" role="progressbar" style="width: 94%" aria-valuenow="94"
+                    aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+
+                <div class="d-flex justify-content-between small fw-semibold mb-1">
+                  <span>MySQL Database & Query Optimization</span>
+                  <span class="text-success">91% Fit <small class="text-muted">(Demo)</small></span>
+                </div>
+                <div class="progress mb-3" style="height: 8px;">
+                  <div class="progress-bar bg-success" role="progressbar" style="width: 91%" aria-valuenow="91"
+                    aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+
+                <div class="d-flex justify-content-between small fw-semibold mb-1">
+                  <span>Web Frontend (HTML5, CSS3 & JavaScript)</span>
+                  <span class="text-info">89% Fit <small class="text-muted">(Demo)</small></span>
+                </div>
+                <div class="progress mb-3" style="height: 8px;">
+                  <div class="progress-bar bg-info" role="progressbar" style="width: 89%" aria-valuenow="89"
+                    aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+
+                <div class="d-flex justify-content-between small fw-semibold mb-1">
+                  <span>Python Backend & Scripting</span>
+                  <span class="text-warning">86% Fit <small class="text-muted">(Demo)</small></span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                  <div class="progress-bar bg-warning" role="progressbar" style="width: 86%" aria-valuenow="86"
+                    aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+              </div>
+
+              <!-- Top Matched Opportunity with 97% Match & Apply Now Button -->
+              <div class="bg-light p-3 rounded-3 border">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-uppercase fw-bold text-muted"
+                    style="font-size: 0.72rem; letter-spacing: 0.05em;">Top Matched Opportunity</span>
+                  <span class="match-score-badge"><i class="bi bi-lightning-charge-fill me-1"></i>97% Match <small
+                      class="opacity-75">(Demo)</small></span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-0 fw-bold">Full Stack Java & Spring Boot Intern</h6>
+                    <small class="text-muted">Apex Cloud Systems &bull; Remote &bull;
+                      <strong>₹35,000/mo</strong></small>
+                  </div>
+                  <a href="internships.html" class="btn btn-sm btn-primary-custom py-1 px-3">
+                    Apply Now
+                  </a>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       Company Trust Bar
+       ======================================================================== -->
+  <section class="partners-section">
+    <div class="container">
+      <p class="text-center text-muted small fw-semibold mb-3 text-uppercase" style="letter-spacing: 0.06em;">
+        Illustrative Hiring Partner Organizations <span class="badge bg-light text-muted border py-1 px-2 ms-1"
+          style="font-size: 0.68rem;">Demo Preview</span>
+      </p>
+      <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-4 align-items-center justify-content-center text-center">
+        <div class="col">
+          <div class="partner-logo-item"><i class="bi bi-google fs-4"></i> Google</div>
+        </div>
+        <div class="col">
+          <div class="partner-logo-item"><i class="bi bi-microsoft fs-4"></i> Microsoft</div>
+        </div>
+        <div class="col">
+          <div class="partner-logo-item"><i class="bi bi-amazon fs-4"></i> Amazon</div>
+        </div>
+        <div class="col">
+          <div class="partner-logo-item"><i class="bi bi-spotify fs-4"></i> Spotify</div>
+        </div>
+        <div class="col">
+          <div class="partner-logo-item"><i class="bi bi-stripe fs-4"></i> Stripe</div>
+        </div>
+        <div class="col">
+          <div class="partner-logo-item"><i class="bi bi-meta fs-4"></i> Meta</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Core Features / Why SkillBridge
+       ======================================================================== -->
+  <section class="section-padding" id="features">
+    <div class="container">
+      <div class="text-center">
+        <span class="section-tag">Empowering Careers</span>
+        <h2 class="section-heading">Built to Modernize Campus & Early Career Hiring</h2>
+        <p class="section-subheading">
+          Traditional job boards drop your resume into black holes. SkillBridge evaluates and matches candidates based
+          on verified skills in Java, Python, Spring Boot, MySQL, and Modern Web.
+        </p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Feature 1 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon-wrapper bg-soft-primary">
+              <i class="bi bi-cpu-fill"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Smart Skill Matching</h5>
+            <p class="text-muted mb-0">
+              Our intelligent engine analyzes your technical stack, projects, and coursework to score how closely your
+              skills fit each internship opening.
+            </p>
+          </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon-wrapper bg-soft-cyan">
+              <i class="bi bi-send-check-fill"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Direct Recruiter Access</h5>
+            <p class="text-muted mb-0">
+              Skip gatekeepers. Applications reach engineering leads directly, highlighting your GitHub repositories,
+              Java services, and web demos.
+            </p>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon-wrapper bg-soft-emerald">
+              <i class="bi bi-kanban-fill"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Live Application Tracking</h5>
+            <p class="text-muted mb-0">
+              Experience 100% transparency. Track every stage of your application—from Review to Interview to Offer—in
+              real time on your dashboard.
+            </p>
+          </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon-wrapper bg-soft-amber">
+              <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Skill Gap Analytics</h5>
+            <p class="text-muted mb-0">
+              Get actionable feedback. If you have an 85% match for a Spring Boot or Python role, SkillBridge identifies
+              which concepts to practice to reach 100%.
+            </p>
+          </div>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon-wrapper bg-soft-primary">
+              <i class="bi bi-patch-check-fill"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Verified Skill Badges</h5>
+            <p class="text-muted mb-0">
+              Stand out with verifiable assessments in Java, Spring Boot, MySQL, Python, JavaScript, and HTML/CSS to
+              demonstrate real competence.
+            </p>
+          </div>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon-wrapper bg-soft-cyan">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Guaranteed Paid Stipends (₹)</h5>
+            <p class="text-muted mb-0">
+              No unpaid traps. Every internship listed on SkillBridge offers verified, transparent stipends in INR (₹)
+              with clear full-time conversion paths.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Interactive Audience Switcher ("For Students" vs "For Recruiters")
+       ======================================================================== -->
+  <section class="section-padding bg-white border-top border-bottom" id="audience-section">
+    <div class="container text-center">
+      <span class="section-tag">Tailored Experience</span>
+      <h2 class="section-heading">Designed For Both Sides of Campus Hiring</h2>
+      <p class="section-subheading">
+        Whether you are seeking your first breakthrough role in software engineering or hiring early-career builders,
+        SkillBridge provides the right tools.
+      </p>
+
+      <!-- Toggle Buttons -->
+      <div class="audience-tabs-container">
+        <button type="button" class="audience-tab-btn active" data-audience="students">
+          <i class="bi bi-mortarboard-fill"></i> For Students & Graduates
+        </button>
+        <button type="button" class="audience-tab-btn" data-audience="recruiters">
+          <i class="bi bi-briefcase-fill"></i> For Recruiters & Companies
+        </button>
+      </div>
+
+      <!-- Content Pane: For Students -->
+      <div class="audience-pane active" id="pane-students">
+        <div class="row align-items-center g-5 text-start">
+          <div class="col-lg-6">
+            <h3 class="fw-bold mb-3">Launch Your Career on What You Can Actually Build</h3>
+            <p class="text-muted mb-4">
+              Stop stressing over arbitrary GPA cutoffs. SkillBridge matches your code projects in Java, Python, Spring
+              Boot, and Web Frontend with companies who value practical engineering ability.
+            </p>
+            <ul class="list-unstyled mb-4">
+              <li class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-check-circle-fill text-primary fs-5"></i>
+                <span><strong>Personalized Match Score:</strong> Know your technical compatibility before
+                  applying.</span>
+              </li>
+              <li class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-check-circle-fill text-primary fs-5"></i>
+                <span><strong>No Ghosting Guarantee:</strong> Receive real-time stage updates on every
+                  application.</span>
+              </li>
+              <li class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-check-circle-fill text-primary fs-5"></i>
+                <span><strong>Transparent Stipends in INR:</strong> Guaranteed competitive monthly stipends.</span>
+              </li>
+            </ul>
+            <div class="d-flex flex-wrap gap-2">
+              <a href="register.html" class="btn btn-primary-custom" id="studentGetStartedBtn">
+                Get Started (Free) <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+              <a href="login.html" class="btn btn-outline-custom" id="studentSignInBtn">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Student Sign In
+              </a>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="p-4 bg-light rounded-4 border shadow-sm">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="badge bg-primary">Student Dashboard Preview</span>
+                <span class="badge bg-light text-muted border">Demo Status</span>
+              </div>
+              <div class="card border-0 mb-3 p-3 shadow-xs">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1 fw-bold">Full Stack Java Intern</h6>
+                    <small class="text-muted">FinTech Innovations &bull; Interview Scheduled</small>
+                  </div>
+                  <span class="badge bg-soft-emerald">Interview: Tomorrow 3 PM</span>
+                </div>
+              </div>
+              <div class="card border-0 mb-3 p-3 shadow-xs">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1 fw-bold">Python & MySQL Backend Intern</h6>
+                    <small class="text-muted">Nexus Data &bull; Technical Review</small>
+                  </div>
+                  <span class="badge bg-soft-primary">Stage 2 of 3</span>
+                </div>
+              </div>
+              <div class="card border-0 p-3 shadow-xs">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1 fw-bold">Web Frontend Developer Intern</h6>
+                    <small class="text-muted">CraftStudio &bull; Application Submitted</small>
+                  </div>
+                  <span class="badge bg-soft-amber">Under Screening</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Pane: For Recruiters -->
+      <div class="audience-pane" id="pane-recruiters">
+        <div class="row align-items-center g-5 text-start">
+          <div class="col-lg-6">
+            <h3 class="fw-bold mb-3">Hire Pre-Vetted Early Career Talent in Record Time</h3>
+            <p class="text-muted mb-4">
+              Eliminate weeks of resume triage. SkillBridge automatically scores and filters applicants against your
+              exact prerequisites in Java, Spring Boot, MySQL, and Python, delivering high-signal candidates.
+            </p>
+            <ul class="list-unstyled mb-4">
+              <li class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                <span><strong>Objective Skill Verification:</strong> Inspect verified GitHub repositories and code
+                  assessments.</span>
+              </li>
+              <li class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                <span><strong>70% Faster Time-to-Hire:</strong> Focus your interview team solely on top-matching
+                  talent.</span>
+              </li>
+              <li class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                <span><strong>Campus Pipeline Builder:</strong> Seamlessly hire interns with high full-time conversion
+                  rates.</span>
+              </li>
+            </ul>
+            <div class="d-flex flex-wrap gap-2">
+              <a href="company-register.html" class="btn btn-primary-custom" id="employerPostInternshipBtn">
+                Post an Internship / Hire Talent <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+              <a href="company-login.html" class="btn btn-outline-custom" id="employerSignInBtn">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Recruiter Sign In
+              </a>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="p-4 bg-light rounded-4 border shadow-sm">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="badge bg-success">Recruiter Pipeline Preview</span>
+                <span class="badge bg-light text-muted border">Active Cohort Demo</span>
+              </div>
+              <div class="p-3 bg-white rounded-3 border mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-0 fw-bold">Java Spring Boot Intern Pipeline</h6>
+                    <small class="text-muted">38 Qualified &bull; 6 Shortlisted &bull; 2 Offers</small>
+                  </div>
+                  <a href="company-login.html" class="btn btn-sm btn-outline-custom">View Recruiter Board</a>
+                </div>
+              </div>
+              <div class="p-3 bg-white rounded-3 border">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-0 fw-bold">Candidate: Backend Specialist</h6>
+                    <small class="text-muted">Java, Spring Boot, MySQL &bull; 96% Match</small>
+                  </div>
+                  <span class="badge bg-soft-emerald">Direct Match</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Featured Internships Section (Interactive Filtering with INR & Relevant Tech)
+       ======================================================================== -->
+  <section class="section-padding" id="explore-internships">
+    <div class="container">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+        <div>
+          <span class="section-tag">Explore Opportunities</span>
+          <h2 class="section-heading mb-1">Featured Internships For You <span
+              class="badge bg-light text-muted border fw-normal fs-6 align-middle ms-2">Illustrative Openings</span>
+          </h2>
+          <p class="text-muted mb-0">Browse verified openings focused on Java, Spring Boot, Python, MySQL, and Web Tech.
+          </p>
+        </div>
+
+        <!-- Category Filter Buttons -->
+        <div class="d-flex flex-wrap gap-2 mt-3 mt-md-0">
+          <button type="button" class="category-filter-btn active" data-category="all">All Roles</button>
+          <button type="button" class="category-filter-btn" data-category="java-spring">Java & Spring Boot</button>
+          <button type="button" class="category-filter-btn" data-category="python-data">Python & Backend</button>
+          <button type="button" class="category-filter-btn" data-category="frontend-web">Frontend (HTML/CSS/JS)</button>
+          <button type="button" class="category-filter-btn" data-category="database-mysql">Database (MySQL)</button>
+        </div>
+      </div>
+
+      <!-- Internship Grid (All Stipends in INR ₹, Tech Stack Aligned, Demo AI Match Labeled) -->
+      <div class="row g-4" id="internshipCardsGrid">
+
+        <!-- Card 1: Java & Spring Boot -->
+        <div class="col-md-6 col-lg-4 internship-grid-item" data-category="java-spring">
+          <div class="internship-card" data-title="Full Stack Java Developer Intern" data-company="Apex Financial Tech"
+            data-location="Bangalore / Hybrid" data-stipend="₹40,000 / month" data-match="96%"
+            data-desc="Build enterprise microservices using Java and Spring Boot, design normalized MySQL database schemas, and create RESTful endpoints connected to modern web frontends."
+            data-skills="Java, Spring Boot, MySQL, REST APIs">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="company-avatar" style="background-color: #4f46e5;">
+                  <i class="bi bi-cup-hot-fill"></i>
+                </div>
+                <span class="match-score-badge" title="Simulated demonstration evaluation">
+                  <i class="bi bi-stars me-1"></i>96% Match <small class="opacity-75">(Demo)</small>
+                </span>
+              </div>
+              <h5 class="fw-bold mb-1">Full Stack Java Developer Intern</h5>
+              <p class="text-muted small mb-2">Apex Financial Tech &bull; Bangalore (Hybrid)</p>
+              <p class="small text-muted mb-3">
+                Develop scalable REST APIs with Spring Boot, optimize MySQL database transactions, and test modular
+                services.
+              </p>
+              <div class="d-flex flex-wrap gap-1 mb-4">
+                <span class="skill-tag">Java</span>
+                <span class="skill-tag">Spring Boot</span>
+                <span class="skill-tag">MySQL</span>
+                <span class="skill-tag">REST APIs</span>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+              <span class="fw-bold text-dark">₹40,000<span class="text-muted fw-normal"
+                  style="font-size: 0.8rem;">/mo</span></span>
+              <button type="button" class="btn btn-sm btn-outline-custom btn-view-details">
+                Details <i class="bi bi-chevron-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Python & Backend -->
+        <div class="col-md-6 col-lg-4 internship-grid-item" data-category="python-data">
+          <div class="internship-card" data-title="Python Backend & Automation Intern" data-company="DataBridge Labs"
+            data-location="Hyderabad / Remote" data-stipend="₹35,000 / month" data-match="94%"
+            data-desc="Develop automated data extraction pipelines with Python, integrate with MySQL databases, and write clean, modular API services."
+            data-skills="Python, MySQL, REST APIs, Scripting">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="company-avatar" style="background-color: #0284c7;">
+                  <i class="bi bi-terminal-fill"></i>
+                </div>
+                <span class="match-score-badge" title="Simulated demonstration evaluation">
+                  <i class="bi bi-stars me-1"></i>94% Match <small class="opacity-75">(Demo)</small>
+                </span>
+              </div>
+              <h5 class="fw-bold mb-1">Python Backend & Automation Intern</h5>
+              <p class="text-muted small mb-2">DataBridge Labs &bull; Hyderabad (Remote)</p>
+              <p class="small text-muted mb-3">
+                Build backend scripts in Python, manage automated data transformations, and write MySQL database
+                queries.
+              </p>
+              <div class="d-flex flex-wrap gap-1 mb-4">
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">MySQL</span>
+                <span class="skill-tag">REST APIs</span>
+                <span class="skill-tag">Scripting</span>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+              <span class="fw-bold text-dark">₹35,000<span class="text-muted fw-normal"
+                  style="font-size: 0.8rem;">/mo</span></span>
+              <button type="button" class="btn btn-sm btn-outline-custom btn-view-details">
+                Details <i class="bi bi-chevron-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Frontend Web Development -->
+        <div class="col-md-6 col-lg-4 internship-grid-item" data-category="frontend-web">
+          <div class="internship-card" data-title="Frontend Web Developer Intern" data-company="CraftUI Studio"
+            data-location="Pune / Remote" data-stipend="₹30,000 / month" data-match="92%"
+            data-desc="Craft responsive, accessible user interfaces using semantic HTML5, modern CSS3, Bootstrap 5 components, and vanilla JavaScript."
+            data-skills="HTML5, CSS3, JavaScript, Bootstrap">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="company-avatar" style="background-color: #f43f5e;">
+                  <i class="bi bi-filetype-html"></i>
+                </div>
+                <span class="match-score-badge" title="Simulated demonstration evaluation">
+                  <i class="bi bi-stars me-1"></i>92% Match <small class="opacity-75">(Demo)</small>
+                </span>
+              </div>
+              <h5 class="fw-bold mb-1">Frontend Web Developer Intern</h5>
+              <p class="text-muted small mb-2">CraftUI Studio &bull; Remote / Pune</p>
+              <p class="small text-muted mb-3">
+                Translate design specs into responsive HTML5, CSS3, Bootstrap 5 UI layouts, and interactive client
+                JavaScript.
+              </p>
+              <div class="d-flex flex-wrap gap-1 mb-4">
+                <span class="skill-tag">HTML5</span>
+                <span class="skill-tag">CSS3</span>
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">Bootstrap 5</span>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+              <span class="fw-bold text-dark">₹30,000<span class="text-muted fw-normal"
+                  style="font-size: 0.8rem;">/mo</span></span>
+              <button type="button" class="btn btn-sm btn-outline-custom btn-view-details">
+                Details <i class="bi bi-chevron-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Database (MySQL) -->
+        <div class="col-md-6 col-lg-4 internship-grid-item" data-category="database-mysql">
+          <div class="internship-card" data-title="Database & MySQL Developer Intern" data-company="ScaleGrid Systems"
+            data-location="Chennai / Hybrid" data-stipend="₹32,000 / month" data-match="95%"
+            data-desc="Design relational database schemas, write complex joins and stored procedures in MySQL, and profile query performance for high-throughput systems."
+            data-skills="MySQL, SQL Queries, Java, Database Design">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="company-avatar" style="background-color: #059669;">
+                  <i class="bi bi-database-fill"></i>
+                </div>
+                <span class="match-score-badge" title="Simulated demonstration evaluation">
+                  <i class="bi bi-stars me-1"></i>95% Match <small class="opacity-75">(Demo)</small>
+                </span>
+              </div>
+              <h5 class="fw-bold mb-1">Database & MySQL Developer Intern</h5>
+              <p class="text-muted small mb-2">ScaleGrid Systems &bull; Chennai (Hybrid)</p>
+              <p class="small text-muted mb-3">
+                Maintain schema migrations, write optimized SQL joins, index tables, and support Java backend
+                developers.
+              </p>
+              <div class="d-flex flex-wrap gap-1 mb-4">
+                <span class="skill-tag">MySQL</span>
+                <span class="skill-tag">SQL</span>
+                <span class="skill-tag">Database Design</span>
+                <span class="skill-tag">Java</span>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+              <span class="fw-bold text-dark">₹32,000<span class="text-muted fw-normal"
+                  style="font-size: 0.8rem;">/mo</span></span>
+              <button type="button" class="btn btn-sm btn-outline-custom btn-view-details">
+                Details <i class="bi bi-chevron-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5: Java & Spring Boot MVC -->
+        <div class="col-md-6 col-lg-4 internship-grid-item" data-category="java-spring">
+          <div class="internship-card" data-title="Junior Spring Boot & Web Intern"
+            data-company="FinTech Core Solutions" data-location="Mumbai / Hybrid" data-stipend="₹38,000 / month"
+            data-match="91%"
+            data-desc="Collaborate on core business modules using Spring Boot MVC and Hibernate, connecting backend controllers to interactive JavaScript frontends."
+            data-skills="Java, Spring Boot, JavaScript, HTML/CSS">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="company-avatar" style="background-color: #d97706;">
+                  <i class="bi bi-gear-wide-connected"></i>
+                </div>
+                <span class="match-score-badge" title="Simulated demonstration evaluation">
+                  <i class="bi bi-stars me-1"></i>91% Match <small class="opacity-75">(Demo)</small>
+                </span>
+              </div>
+              <h5 class="fw-bold mb-1">Junior Spring Boot & Web Intern</h5>
+              <p class="text-muted small mb-2">FinTech Core Solutions &bull; Mumbai</p>
+              <p class="small text-muted mb-3">
+                Work alongside senior Java engineers to implement Spring Boot backend controllers and write frontend
+                integration code.
+              </p>
+              <div class="d-flex flex-wrap gap-1 mb-4">
+                <span class="skill-tag">Java</span>
+                <span class="skill-tag">Spring Boot</span>
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">HTML/CSS</span>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+              <span class="fw-bold text-dark">₹38,000<span class="text-muted fw-normal"
+                  style="font-size: 0.8rem;">/mo</span></span>
+              <button type="button" class="btn btn-sm btn-outline-custom btn-view-details">
+                Details <i class="bi bi-chevron-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 6: Python & Data Engineering -->
+        <div class="col-md-6 col-lg-4 internship-grid-item" data-category="python-data">
+          <div class="internship-card" data-title="Python & Data Engineering Intern" data-company="MetricFlow Analytics"
+            data-location="Delhi NCR / Remote" data-stipend="₹34,000 / month" data-match="89%"
+            data-desc="Build scalable data ingestion scripts in Python, clean and normalize data into MySQL repositories, and prepare analytical report views."
+            data-skills="Python, MySQL, Data Processing, HTML5">
+            <div>
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="company-avatar bg-dark">
+                  <i class="bi bi-code-square"></i>
+                </div>
+                <span class="match-score-badge" title="Simulated demonstration evaluation">
+                  <i class="bi bi-stars me-1"></i>89% Match <small class="opacity-75">(Demo)</small>
+                </span>
+              </div>
+              <h5 class="fw-bold mb-1">Python & Data Engineering Intern</h5>
+              <p class="text-muted small mb-2">MetricFlow Analytics &bull; Remote / Delhi</p>
+              <p class="small text-muted mb-3">
+                Process datasets with Python, build ETL routines into MySQL databases, and generate dashboard data
+                feeds.
+              </p>
+              <div class="d-flex flex-wrap gap-1 mb-4">
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">MySQL</span>
+                <span class="skill-tag">Data Processing</span>
+                <span class="skill-tag">JavaScript</span>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+              <span class="fw-bold text-dark">₹34,000<span class="text-muted fw-normal"
+                  style="font-size: 0.8rem;">/mo</span></span>
+              <button type="button" class="btn btn-sm btn-outline-custom btn-view-details">
+                Details <i class="bi bi-chevron-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Empty State If Nothing Matches -->
+      <div id="no-internships-found" class="text-center py-5" style="display: none;">
+        <i class="bi bi-search text-muted fs-1 mb-3"></i>
+        <h5 class="fw-bold">No demo internships found matching your query</h5>
+        <p class="text-muted">Try searching for Java, Python, Spring Boot, MySQL, or JavaScript.</p>
+        <button type="button" id="reset-filters-btn" class="btn btn-outline-custom btn-sm mt-2">
+          <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Search & Filters
+        </button>
+      </div>
+
+      <!-- Explore More Button -->
+      <div class="text-center mt-5">
+        <a href="internships.html" class="btn btn-outline-custom px-4 py-2">
+          View All 1,400+ Open Positions <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       How It Works (3 Steps)
+       ======================================================================== -->
+  <section class="section-padding bg-white border-top border-bottom" id="how-it-works">
+    <div class="container">
+      <div class="text-center">
+        <span class="section-tag">Simple & Transparent</span>
+        <h2 class="section-heading">How SkillBridge Works</h2>
+        <p class="section-subheading">
+          Go from student to hired intern in three seamless steps designed to showcase your practical skills in Java,
+          Python, MySQL, and Web Tech.
+        </p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Step 1 -->
+        <div class="col-md-4">
+          <div class="p-4 border rounded-4 text-center h-100 bg-body">
+            <div
+              class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center fw-bold mb-3"
+              style="width: 54px; height: 54px; font-size: 1.25rem;">
+              1
+            </div>
+            <h5 class="fw-bold mb-2">Build Your Skill Profile</h5>
+            <p class="text-muted small mb-0">
+              Showcase your GitHub repositories, Java Spring Boot services, Python scripts, MySQL schema models, and
+              responsive web projects.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="col-md-4">
+          <div class="p-4 border rounded-4 text-center h-100 bg-body">
+            <div
+              class="rounded-circle bg-info text-white d-inline-flex align-items-center justify-content-center fw-bold mb-3"
+              style="width: 54px; height: 54px; font-size: 1.25rem;">
+              2
+            </div>
+            <h5 class="fw-bold mb-2">Get AI-Matched to Roles</h5>
+            <p class="text-muted small mb-0">
+              Our algorithm evaluates your exact technical capabilities against recruiter prerequisites, generating
+              transparent match scores.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="col-md-4">
+          <div class="p-4 border rounded-4 text-center h-100 bg-body">
+            <div
+              class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center fw-bold mb-3"
+              style="width: 54px; height: 54px; font-size: 1.25rem;">
+              3
+            </div>
+            <h5 class="fw-bold mb-2">Track & Land Verified Offers (₹)</h5>
+            <p class="text-muted small mb-0">
+              Apply in one click, monitor hiring stages transparently on your dashboard, and receive guaranteed paid
+              internship offers.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Live Impact & Statistics Counters (Demo Data Identified & INR Currency)
+       ======================================================================== -->
+  <section class="stats-section">
+    <div class="container text-center">
+      <!-- Clear Demo Identifier Badge -->
+      <div class="mb-4">
+        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1 rounded-pill">
+          <i class="bi bi-info-circle me-1"></i> Demo Platform Statistics
+        </span>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-6 col-lg-3">
+          <div class="stat-item">
+            <h3 class="stat-number" data-target="52000" data-suffix="+">52,000+</h3>
+            <p>Students Placed</p>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-item">
+            <h3 class="stat-number" data-target="1450" data-suffix="+">1,450+</h3>
+            <p>Verified Employers</p>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-item">
+            <h3 class="stat-number" data-target="96" data-suffix="%">96%</h3>
+            <p>Match Satisfaction</p>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-item">
+            <h3 class="stat-number" data-target="5" data-prefix="₹" data-suffix=" Cr+">₹5 Cr+</h3>
+            <p>Total Stipends Earned</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Demo Disclaimer Footnote -->
+      <div class="mt-4">
+        <small class="text-white-50" style="font-size: 0.78rem;">
+          * Note: The statistics shown above represent simulated platform demonstration metrics.
+        </small>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Testimonials & Success Stories (Sample Demo Identified)
+       ======================================================================== -->
+  <section class="section-padding">
+    <div class="container">
+      <div class="text-center">
+        <!-- Clear Demo Identifier Badge -->
+        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-3 py-1 mb-2 rounded-pill">
+          <i class="bi bi-stars me-1"></i> Sample Demo Testimonials
+        </span>
+        <h2 class="section-heading">Loved By Students & Hiring Teams</h2>
+        <p class="section-subheading">
+          Illustrative reviews highlighting student career progression and recruiter satisfaction on SkillBridge.
+        </p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Testimonial 1 -->
+        <div class="col-md-4">
+          <div class="testimonial-card">
+            <div class="text-warning mb-3">
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+            </div>
+            <p class="text-muted mb-4">
+              "On conventional job boards my resume was lost. SkillBridge showcased my Java Spring Boot backend and
+              MySQL project. Within two weeks, I accepted an internship paying ₹40,000/month!"
+            </p>
+            <div class="d-flex align-items-center gap-3">
+              <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
+                style="width: 44px; height: 44px;">
+                SR
+              </div>
+              <div>
+                <h6 class="mb-0 fw-bold">Sarah Rahman</h6>
+                <small class="text-muted">Java Backend Intern &bull; UCLA '25</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="col-md-4">
+          <div class="testimonial-card">
+            <div class="text-warning mb-3">
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+            </div>
+            <p class="text-muted mb-4">
+              "As an engineering lead, vetting 500+ generic applications was exhausting. SkillBridge matches students
+              whose verified skills in Java, Python, and SQL directly fit our tech stack."
+            </p>
+            <div class="d-flex align-items-center gap-3">
+              <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center fw-bold"
+                style="width: 44px; height: 44px;">
+                DK
+              </div>
+              <div>
+                <h6 class="mb-0 fw-bold">David Kim</h6>
+                <small class="text-muted">VP of Engineering &bull; Apex Tech</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div class="col-md-4">
+          <div class="testimonial-card">
+            <div class="text-warning mb-3">
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+            </div>
+            <p class="text-muted mb-4">
+              "The skill gap recommendation was invaluable. SkillBridge noted I needed more MySQL indexing skills for a
+              Python role. I learned it, refreshed my score, and received an offer!"
+            </p>
+            <div class="d-flex align-items-center gap-3">
+              <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center fw-bold"
+                style="width: 44px; height: 44px;">
+                MC
+              </div>
+              <div>
+                <h6 class="mb-0 fw-bold">Marcus Chen</h6>
+                <small class="text-muted">Python & Data Intern &bull; Purdue '26</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Demo Disclaimer Footnote -->
+      <div class="text-center mt-4">
+        <small class="text-muted" style="font-size: 0.78rem;">
+          * Note: The testimonials shown above are sample demo records for illustrative presentation.
+        </small>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Call To Action (CTA) Banner
+       ======================================================================== -->
+  <section class="container mb-5">
+    <div class="cta-banner text-center">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <h2 class="display-6 fw-bold mb-3">Ready to Launch Your Career Journey?</h2>
+          <p class="lead opacity-90 mb-4" style="font-size: 1.15rem;">
+            Join thousands of students and verified hiring partners matching on SkillBridge. Free forever for students.
+          </p>
+          <div class="d-flex flex-wrap justify-content-center gap-3">
+            <a href="register.html" class="btn btn-light text-primary fw-bold px-4 py-2">
+              Join as a Student <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+            <a href="company-register.html" class="btn btn-outline-light fw-bold px-4 py-2">
+              Hire Student Talent <i class="bi bi-briefcase ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Footer
+       ======================================================================== -->
+  <footer class="footer-section">
+    <div class="container">
+      <div class="row g-5">
+        <!-- Col 1: Brand & About -->
+        <div class="col-lg-4">
+          <div class="brand-logo text-white mb-3">
+            <div class="brand-icon">
+              <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <span>Skill<span class="text-primary">Bridge</span></span>
+          </div>
+          <p class="small text-light opacity-75 mb-4">
+            SkillBridge is the premier skill-driven campus hiring platform. We connect student talent in Java, Spring
+            Boot, MySQL, Python, and Web Development with verified employers through transparent skill intelligence.
+          </p>
+          <div class="d-flex gap-2">
+            <a href="#" class="social-icon-btn" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+            <a href="#" class="social-icon-btn" aria-label="GitHub"><i class="bi bi-github"></i></a>
+            <a href="#" class="social-icon-btn" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+            <a href="#" class="social-icon-btn" aria-label="Discord"><i class="bi bi-discord"></i></a>
+          </div>
+        </div>
+
+        <!-- Col 2: For Students -->
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">For Students</h6>
+          <a href="internships.html" class="footer-link">Explore Internships</a>
+          <a href="login.html" id="footerStudentPortalLink" class="footer-link">Student Portal</a>
+          <a href="register.html" class="footer-link">Skill Assessments</a>
+          <a href="#how-it-works" class="footer-link">How It Works</a>
+          <a href="login.html" class="footer-link">Student Sign In</a>
+        </div>
+
+        <!-- Col 3: For Employers -->
+        <div class="col-6 col-lg-2">
+          <h6 class="footer-heading">For Employers</h6>
+          <a href="company-register.html" class="footer-link">Post an Internship</a>
+          <a href="company-register.html" class="footer-link">Recruiter Registration</a>
+          <a href="company-login.html" id="footerRecruiterPortalLink" class="footer-link">Recruiter Portal</a>
+          <a href="company-login.html" class="footer-link">Recruiter Sign In</a>
+          <a href="#features" class="footer-link">Verification Badges</a>
+        </div>
+
+        <!-- Col 4: Newsletter & Updates -->
+        <div class="col-lg-4">
+          <h6 class="footer-heading">Subscribe to Internship Alerts</h6>
+          <p class="small text-light opacity-75 mb-3">
+            Receive curated weekly alerts for Java, Python, and Web internships directly to your inbox.
+          </p>
+          <form id="newsletter-form" class="d-flex gap-2">
+            <input type="email" class="form-control form-control-sm" placeholder="Enter your college email" required
+              aria-label="Email address">
+            <button type="submit" class="btn btn-primary-custom btn-sm text-nowrap">
+              Subscribe
+            </button>
+          </form>
+          <small class="text-light opacity-50 mt-2 d-block">No spam. Unsubscribe at any time.</small>
+        </div>
+      </div>
+
+      <hr class="footer-divider">
+
+      <div
+        class="d-flex flex-column flex-md-row justify-content-between align-items-center small text-light opacity-75">
+        <div>
+          &copy; 2026 SkillBridge Technologies Inc. All rights reserved.
+        </div>
+        <div class="d-flex gap-3 mt-3 mt-md-0">
+          <a href="#" class="text-light opacity-75">Privacy Policy</a>
+          <a href="#" class="text-light opacity-75">Terms of Service</a>
+          <a href="#" class="text-light opacity-75">Security</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       Quick View / Apply Modal (Dynamic Data Injection & INR Currency)
+       ======================================================================== -->
+  <div class="modal fade" id="internshipPreviewModal" tabindex="-1" aria-labelledby="modalInternshipTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <span class="badge bg-soft-primary mb-1" id="modalInternshipCompany">Company</span>
+            <h5 class="modal-title fw-bold" id="modalInternshipTitle">Internship Title</h5>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded">
+            <div>
+              <small class="text-muted d-block">Location</small>
+              <span class="fw-semibold small" id="modalInternshipLocation">Remote</span>
+            </div>
+            <div>
+              <small class="text-muted d-block">Stipend</small>
+              <span class="fw-bold text-success small" id="modalInternshipStipend">₹35,000 / month</span>
+            </div>
+            <div>
+              <small class="text-muted d-block">Match Quality</small>
+              <span class="badge bg-soft-emerald" id="modalInternshipMatch">95% Fit (Demo AI Match)</span>
+            </div>
+          </div>
+
+          <h6 class="fw-bold mb-2">Role Overview</h6>
+          <p class="small text-muted mb-3" id="modalInternshipDesc">
+            Job description goes here.
+          </p>
+
+          <h6 class="fw-bold mb-2">Key Required Skills</h6>
+          <div id="modalInternshipSkills" class="d-flex flex-wrap gap-1 mb-4">
+            <!-- Dynamic skills injected via script.js -->
+          </div>
+
+          <div class="p-3 bg-soft-primary rounded-3">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-info-circle-fill text-primary"></i>
+              <span class="small fw-semibold text-primary">Quick Apply Enabled</span>
+            </div>
+            <p class="small text-muted mb-0 mt-1">
+              Applying will share your SkillBridge verified skill score and project portfolio with the hiring team.
+            </p>
+          </div>
+
+          <div class="mt-2 text-center">
+            <small class="text-muted" style="font-size: 0.75rem;">
+              * Note: AI match scores and application steps are for platform demonstration.
+            </small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary-custom" id="modalQuickApplyBtn">
+            Confirm Application <i class="bi bi-send-fill ms-1"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5.3 Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+
+  <!-- Core JavaScript -->
+  <script src="js/script.js"></script>
+
+  <!-- Role-Based Navigation & Session Synchronization -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const studentSession = localStorage.getItem('skillbridge_student_session') || localStorage.getItem('skillbridge_active_session');
+        if (studentSession) {
+          const sess = JSON.parse(studentSession);
+          if (sess && (sess.role === 'student' || sess.fullName)) {
+            const navPortal = document.getElementById('navStudentPortalLink');
+            if (navPortal) navPortal.href = 'student-dashboard.html';
+            const footerPortal = document.getElementById('footerStudentPortalLink');
+            if (footerPortal) footerPortal.href = 'student-dashboard.html';
+          }
+        }
+        const recruiterSession = localStorage.getItem('skillbridge_recruiter_session') || localStorage.getItem('skillbridge_active_session');
+        if (recruiterSession) {
+          const sess = JSON.parse(recruiterSession);
+          if (sess && (sess.role === 'recruiter' || sess.companyId || sess.companyName)) {
+            const footerRecruiter = document.getElementById('footerRecruiterPortalLink');
+            if (footerRecruiter) footerRecruiter.href = 'recruiter-dashboard.html';
+          }
+        }
+      } catch (e) {
+        console.warn('Session check warning:', e);
+      }
+    });
+  </script>
+</body>
+
+</html>

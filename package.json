@@ -1,0 +1,18 @@
+{
+  "name": "skillbridge",
+  "version": "1.0.0",
+  "description": "SkillBridge Enterprise Career & Recruiter Portal",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node scratch/test_company_auth.js"
+  },
+  "keywords": [
+    "skillbridge",
+    "recruitment",
+    "internships",
+    "assessment"
+  ],
+  "author": "SkillBridge Technologies Inc.",
+  "license": "ISC"
+}

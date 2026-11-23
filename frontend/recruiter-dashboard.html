@@ -1,0 +1,2802 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="SkillBridge Recruiter Dashboard - SaaS Portal for Talent Acquisition, AI Candidate Matching, ATS Pipeline, and Technical Interview Management.">
+  <title>Recruiter Dashboard | SkillBridge</title>
+
+  <!-- ========================================================================
+       Role-Based Dashboard Access Protection Guard (Anti-Flicker & Session Check)
+       ======================================================================== -->
+  <style id="sbRecruiterGuardStyle">html { display: none !important; }</style>
+  <script>
+    (function () {
+      function getSession(key) {
+        try {
+          var val = localStorage.getItem(key) || sessionStorage.getItem(key);
+          if (!val) return null;
+          var parsed = JSON.parse(val);
+          return (parsed && typeof parsed === 'object') ? parsed : null;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function isValidRecruiter(sess) {
+        if (!sess) return false;
+        var role = (sess.role || sess.authRole || '').toString().toLowerCase();
+        var id = sess.id || sess.companyId || sess.company_id;
+        if (!id || (typeof id === 'string' && !id.trim())) return false;
+        if (role !== 'recruiter' && role !== 'role_recruiter' && role !== 'company') return false;
+        if (role === 'student' || role === 'role_student') return false;
+        return true;
+      }
+
+      function isValidStudent(sess) {
+        if (!sess) return false;
+        var role = (sess.role || sess.authRole || '').toString().toLowerCase();
+        var id = sess.id || sess.studentId || sess.student_id;
+        if (!id || (typeof id === 'string' && !id.trim())) return false;
+        if (role !== 'student' && role !== 'role_student') return false;
+        if (sess.companyId || sess.company_id || sess.officialEmail) return false;
+        return true;
+      }
+
+      function runGuard() {
+        var recSess = getSession('skillbridge_recruiter_session') || getSession('skillbridge_company_session');
+        var activeSess = getSession('skillbridge_active_session');
+        var validRecruiter = isValidRecruiter(recSess) ? recSess : (isValidRecruiter(activeSess) ? activeSess : null);
+
+        // If valid recruiter session exists, grant access
+        if (validRecruiter) {
+          var guardStyle = document.getElementById('sbRecruiterGuardStyle');
+          if (guardStyle && guardStyle.parentNode) {
+            guardStyle.parentNode.removeChild(guardStyle);
+          } else {
+            document.documentElement.style.display = '';
+          }
+          return;
+        }
+
+        // If no valid recruiter session exists, redirect to company-login.html
+        console.warn('[SkillBridge Guard] No authenticated recruiter session. Redirecting to company-login.html');
+        window.location.replace('company-login.html');
+      }
+
+      runGuard();
+      window.addEventListener('pageshow', function (e) {
+        if (e.persisted) runGuard();
+      });
+    })();
+  </script>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- html2pdf.js for Client-Side Real PDF Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <!-- Recruiter Dashboard Stylesheet (Matching Student Dashboard Visual Design System) -->
+  <link rel="stylesheet" href="recruiter-dashboard.css">
+  <!-- SkillBridge Platform API Configuration -->
+  <script src="js/config.js"></script>
+</head>
+
+<body class="bg-body">
+
+  <div class="dashboard-container">
+
+    <!-- ========================================================================
+         Mobile Sidebar Backdrop
+         ======================================================================== -->
+    <div class="dashboard-sidebar-backdrop" id="dashboardSidebarBackdrop"></div>
+
+    <!-- ========================================================================
+         Fixed Left Sidebar (Exact 270px Width & Student Dashboard Style)
+         ======================================================================== -->
+    <aside class="dashboard-sidebar" id="dashboardSidebar">
+      <!-- Sidebar Brand Header -->
+      <div class="dashboard-sidebar-header">
+        <a class="brand-logo text-decoration-none" href="index.html">
+          <div class="brand-icon">
+            <i class="bi bi-mortarboard-fill"></i>
+          </div>
+          <span>Skill<span class="text-primary">Bridge</span></span>
+        </a>
+        <button type="button" class="btn btn-sm btn-light border d-lg-none" id="mobileSidebarClose"
+          aria-label="Close Sidebar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <!-- Recruiter Navigation Menu (Exact Items Requested) -->
+      <ul class="dashboard-nav-list">
+        <!-- 1. Overview -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link active" href="#section-overview" data-view="overviewSection" data-title="Dashboard Overview" id="navLinkOverview">
+            <i class="bi bi-grid-fill"></i>
+            <span>Overview</span>
+          </a>
+        </li>
+
+        <!-- 2. Company Profile -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#section-company-profile" data-view="profileSection" data-title="Company Profile" id="navLinkCompanyProfile">
+            <i class="bi bi-buildings-fill"></i>
+            <span>Company Profile</span>
+          </a>
+        </li>
+
+        <!-- 3. Post Internship -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#section-post-internship" data-view="postInternshipSection" data-title="Post Internship" id="navLinkPostInternship">
+            <i class="bi bi-plus-circle-fill"></i>
+            <span>Post Internship</span>
+          </a>
+        </li>
+
+        <!-- 4. Manage Internships -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#section-manage-internships" data-view="manageInternshipsSection" data-title="Manage Internships" id="navLinkManageInternships">
+            <i class="bi bi-briefcase-fill"></i>
+            <span>Manage Internships</span>
+            <span class="badge bg-primary text-white px-2 py-0-5 rounded-pill ms-auto" id="sidebarActiveInternshipsBadge">4</span>
+          </a>
+        </li>
+
+        <!-- 5. Applicants -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#section-applicants" data-view="applicantsSection" data-title="Applicants & ATS" id="navLinkApplicants">
+            <i class="bi bi-people-fill"></i>
+            <span>Applicants</span>
+            <span class="badge bg-soft-primary text-primary px-2 py-0-5 rounded-pill ms-auto" id="sidebarTotalApplicantsBadge">6</span>
+          </a>
+        </li>
+
+        <!-- 6. AI Candidate Matching -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#section-ai-matching" data-view="aiMatchingSection" data-title="AI Candidate Matching" id="navLinkAiMatching">
+            <i class="bi bi-stars"></i>
+            <span>AI Candidate Matching</span>
+            <span class="badge bg-soft-emerald text-success px-2 py-0-5 rounded-pill ms-auto">96% Fit</span>
+          </a>
+        </li>
+
+        <!-- 7. Skill Assessment Results -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#section-skill-assessment" data-view="skillAssessmentSection" data-title="Skill Assessment Results" id="navLinkSkillAssessment">
+            <i class="bi bi-patch-check-fill"></i>
+            <span>Skill Assessment Results</span>
+            <span class="badge bg-soft-primary text-primary px-2 py-0-5 rounded-pill ms-auto">Verified</span>
+          </a>
+        </li>
+
+        <!-- 8. Interview Scheduling -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#section-interviews" data-view="interviewsSection" data-title="Interview Scheduling" id="navLinkInterviews">
+            <i class="bi bi-calendar2-check-fill"></i>
+            <span>Interview Scheduling</span>
+            <span class="badge bg-soft-cyan text-info px-2 py-0-5 rounded-pill ms-auto" id="sidebarInterviewsBadge">2</span>
+          </a>
+        </li>
+
+        <!-- 9. Offers & Selection -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#section-offers" data-view="offersSection" data-title="Offers & Selection" id="navLinkOffers">
+            <i class="bi bi-award-fill"></i>
+            <span>Offers &amp; Selection</span>
+            <span class="badge bg-soft-emerald text-success px-2 py-0-5 rounded-pill ms-auto" id="sidebarOffersBadge">1</span>
+          </a>
+        </li>
+
+        <!-- 10. Messages -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#section-messages" data-view="messagesSection" data-title="Candidate Messages" id="navLinkMessages">
+            <i class="bi bi-chat-dots-fill"></i>
+            <span>Messages</span>
+            <span class="badge bg-primary text-white px-2 py-0-5 rounded-pill ms-auto" id="sidebarMessagesBadge">2</span>
+          </a>
+        </li>
+
+        <!-- 11. Settings -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#section-settings" data-view="settingsSection" data-title="Account Settings" id="navLinkSettings">
+            <i class="bi bi-gear-fill"></i>
+            <span>Settings</span>
+          </a>
+        </li>
+
+        <!-- 12. Logout -->
+        <li class="dashboard-nav-item pt-3 border-top mt-2">
+          <a class="dashboard-nav-link text-danger recruiter-logout-btn" role="button" id="sidebarLogoutBtn">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Sidebar Recruiter Profile Mini-Card -->
+      <div class="dashboard-sidebar-footer">
+        <div class="d-flex align-items-center gap-2">
+          <div
+            class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold user-avatar-initials flex-shrink-0"
+            style="width: 38px; height: 38px; font-size: 0.85rem;" id="sidebarAvatarLetter">
+            PS
+          </div>
+          <div class="overflow-hidden">
+            <div class="fw-bold small text-dark text-truncate user-full-name" id="sidebarRecruiterName">Priya Sharma</div>
+            <small class="text-muted text-truncate d-block user-role-label" style="font-size: 0.72rem;" id="sidebarCompanyName">CloudScale Solutions</small>
+          </div>
+          <button class="btn btn-sm btn-link text-muted ms-auto p-0 recruiter-logout-btn" title="Log Out">
+            <i class="bi bi-box-arrow-right fs-6"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ========================================================================
+         Main Content Area (With Topbar Breadcrumbs & Scrollable Content)
+         ======================================================================== -->
+    <div class="dashboard-main">
+
+      <!-- Top Sticky Dashboard Bar -->
+      <header class="dashboard-topbar d-flex justify-content-between align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <!-- Mobile Sidebar Toggle Hamburger -->
+          <button class="btn btn-sm btn-light border d-lg-none" id="mobileSidebarToggle" aria-label="Open Sidebar Menu">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+
+          <div>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a href="index.html" class="text-decoration-none text-muted">SkillBridge</a></li>
+                <li class="breadcrumb-item active text-primary fw-semibold" id="dashboardBreadcrumbCurrent">Overview</li>
+              </ol>
+            </nav>
+            <h5 class="fw-bold text-dark mb-0 d-none d-sm-block" id="dashboardPageTitle">Dashboard Overview</h5>
+          </div>
+        </div>
+
+        <!-- Top Right Actions & Recruiter Profile Dropdown -->
+        <div class="d-flex align-items-center gap-2 gap-sm-3">
+          <!-- Recruiter Portal Badge -->
+          <span class="badge bg-soft-primary text-primary px-3 py-1 rounded-pill d-none d-md-inline-block">
+            <i class="bi bi-patch-check-fill me-1"></i> Enterprise Recruiter Portal
+          </span>
+
+          <!-- Notifications Dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-light border rounded-circle position-relative p-2" type="button"
+              data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+              <i class="bi bi-bell-fill text-muted"></i>
+              <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                <span class="visually-hidden">New alerts</span>
+              </span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border p-2" style="width: 300px;">
+              <li class="dropdown-header small fw-bold text-dark d-flex justify-content-between align-items-center">
+                <span>ATS Notifications</span>
+                <span class="badge bg-primary">3 New</span>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <a class="dropdown-item py-2 rounded-2" href="#">
+                  <div class="fw-bold small text-dark"><i class="bi bi-person-plus text-primary me-1"></i> New Application</div>
+                  <small class="text-muted d-block text-truncate">Meera Nambiar applied for AI/ML Platform Intern</small>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-2 rounded-2" href="#">
+                  <div class="fw-bold small text-dark"><i class="bi bi-calendar-check text-info me-1"></i> Interview Confirmed</div>
+                  <small class="text-muted d-block text-truncate">Yazh S confirmed Google Meet for Nov 27</small>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-2 rounded-2" href="#">
+                  <div class="fw-bold small text-dark"><i class="bi bi-award text-success me-1"></i> Offer Accepted</div>
+                  <small class="text-muted d-block text-truncate">Sneha Reddy accepted Frontend Systems Intern offer</small>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Recruiter Profile Dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-light border rounded-pill d-flex align-items-center gap-2 py-1 px-2"
+              type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <div
+                class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold user-avatar-initials"
+                style="width: 30px; height: 30px; font-size: 0.75rem;" id="topbarAvatarLetter">
+                PS
+              </div>
+              <span class="fw-semibold small text-dark d-none d-sm-inline user-full-name" id="topbarRecruiterName">Priya Sharma</span>
+              <i class="bi bi-chevron-down text-muted small me-1"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border p-2">
+              <li class="px-2 py-1">
+                <div class="fw-bold small text-dark user-full-name" id="menuRecruiterName">Priya Sharma</div>
+                <small class="text-muted" id="menuRecruiterCompany">CloudScale Solutions</small>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <a class="dropdown-item small rounded-2 dashboard-nav-link" data-view="profileSection" data-title="Company Profile" href="#">
+                  <i class="bi bi-building me-2"></i> Company Profile
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item small rounded-2 dashboard-nav-link" data-view="applicantsSection" data-title="Applicants & ATS" href="#">
+                  <i class="bi bi-people me-2"></i> Review Applicants
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item small rounded-2 dashboard-nav-link" data-view="settingsSection" data-title="Account Settings" href="#">
+                  <i class="bi bi-gear me-2"></i> Settings
+                </a>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <a class="dropdown-item small rounded-2 text-danger recruiter-logout-btn" href="#">
+                  <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dashboard Scrollable Body -->
+      <main class="dashboard-content" id="dashboardMainArea">
+
+        <!-- ====================================================================
+             VIEW 1: OVERVIEW SECTION (DEFAULT VIEW)
+             ==================================================================== -->
+        <section class="dashboard-view-section active" id="overviewSection">
+
+          <!-- 1. Welcome Hero Section -->
+          <div class="p-4 p-md-5 mb-4 rounded-4 bg-white border shadow-sm position-relative overflow-hidden">
+            <div class="row align-items-center g-4">
+              <div class="col-12 col-lg-8">
+                <span class="badge bg-soft-emerald px-3 py-1 rounded-pill mb-2 fw-semibold">
+                  <i class="bi bi-check-circle-fill me-1"></i> Verified Recruiter Account &bull; Demo Portal
+                </span>
+                <h2 class="fw-bold mb-1 text-dark">
+                  Welcome back, <span class="text-primary" id="welcomeRecruiterName">Priya</span>! 👋
+                </h2>
+                <p class="text-muted mb-3" id="welcomeCompanyDetails">
+                  CloudScale Solutions &bull; Bengaluru, Karnataka &bull; Active Spring 2026 Campus Drive
+                </p>
+
+                <!-- Hiring Target Progress Bar -->
+                <div class="bg-light p-3 rounded-3 border">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small fw-bold text-dark">
+                      <i class="bi bi-speedometer2 text-primary me-1"></i> Cohort Hiring Target Progress
+                    </span>
+                    <span class="small fw-bold text-primary" id="hiringTargetPercentage">80%</span>
+                  </div>
+                  <div class="progress mb-2" style="height: 8px; border-radius: 999px;">
+                    <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated"
+                      id="hiringTargetBar" role="progressbar" style="width: 80%;" aria-valuenow="80"
+                      aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <small class="text-muted d-block" style="font-size: 0.78rem;">
+                    <strong>4 of 5</strong> target engineering intern roles filled or currently in final evaluation rounds.
+                  </small>
+                </div>
+              </div>
+              <div class="col-12 col-lg-4 text-lg-end">
+                <div class="d-inline-flex flex-column flex-sm-row flex-lg-column gap-2">
+                  <button class="btn btn-primary-custom" data-view="postInternshipSection" data-route="section-post-internship" data-title="Post Internship">
+                    <i class="bi bi-plus-circle-fill me-1"></i> Post New Internship
+                  </button>
+                  <button class="btn btn-outline-custom" data-view="applicantsSection" data-route="section-applicants" data-title="Applicants & ATS">
+                    <i class="bi bi-people-fill me-1"></i> Review Applicants
+                  </button>
+                  <button class="btn btn-outline-custom" data-view="aiMatchingSection" data-route="section-ai-matching" data-title="AI Candidate Matching">
+                    <i class="bi bi-stars me-1 text-primary"></i> Run AI Matching
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Statistics KPI Cards (Exact 6 Required Metrics) -->
+          <div class="row g-3 mb-4">
+            <!-- 1. Total Active Internships -->
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">Active Internships</span>
+                  <div class="stat-icon-wrapper bg-soft-primary text-primary">
+                    <i class="bi bi-briefcase-fill"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0 text-dark" id="kpiActiveInternships">4</h3>
+                  <span class="badge bg-soft-primary text-primary px-2 py-0-5 rounded-pill" style="font-size: 0.72rem;">Live</span>
+                </div>
+                <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">Receiving applications</small>
+              </div>
+            </div>
+
+            <!-- 2. Total Applicants -->
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">Total Applicants</span>
+                  <div class="stat-icon-wrapper bg-soft-cyan text-info">
+                    <i class="bi bi-people-fill"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0 text-dark" id="kpiTotalApplicants">6</h3>
+                  <span class="badge bg-soft-cyan text-info px-2 py-0-5 rounded-pill" style="font-size: 0.72rem;">Verified</span>
+                </div>
+                <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">Assessed students</small>
+              </div>
+            </div>
+
+            <!-- 3. New Applicants -->
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">New Applicants</span>
+                  <div class="stat-icon-wrapper bg-soft-amber text-warning">
+                    <i class="bi bi-person-plus-fill"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0 text-dark" id="kpiNewApplicants">2</h3>
+                  <span class="badge bg-soft-amber text-warning px-2 py-0-5 rounded-pill" style="font-size: 0.72rem;">Pending</span>
+                </div>
+                <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">Awaiting first review</small>
+              </div>
+            </div>
+
+            <!-- 4. Shortlisted Candidates -->
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">Shortlisted</span>
+                  <div class="stat-icon-wrapper" style="background-color: var(--accent-purple-light) !important; color: var(--accent-purple) !important;">
+                    <i class="bi bi-star-fill"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0" style="color: var(--accent-purple);" id="kpiShortlisted">2</h3>
+                  <span class="badge px-2 py-0-5 rounded-pill" style="background-color: var(--accent-purple-light); color: var(--accent-purple); font-size: 0.72rem;">&ge; 90%</span>
+                </div>
+                <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">Top AI match fit</small>
+              </div>
+            </div>
+
+            <!-- 5. Interviews Scheduled -->
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">Interviews</span>
+                  <div class="stat-icon-wrapper bg-soft-cyan text-info">
+                    <i class="bi bi-calendar2-check-fill"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0 text-dark" id="kpiInterviewsScheduled">2</h3>
+                  <span class="badge bg-soft-cyan text-info px-2 py-0-5 rounded-pill" style="font-size: 0.72rem;">Active</span>
+                </div>
+                <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">1 scheduled today</small>
+              </div>
+            </div>
+
+            <!-- 6. Offers Released -->
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">Offers Released</span>
+                  <div class="stat-icon-wrapper bg-soft-emerald text-success">
+                    <i class="bi bi-award-fill"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0 text-success" id="kpiOffersReleased">1</h3>
+                  <span class="badge bg-soft-emerald text-success px-2 py-0-5 rounded-pill" style="font-size: 0.72rem;">Accepted</span>
+                </div>
+                <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">Frontend Intern cohort</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Application Status Analytics with Charts -->
+          <div class="row g-3 mb-4">
+            <!-- Donut Chart: Application Status Distribution -->
+            <div class="col-12 col-lg-5">
+              <div class="card border shadow-sm p-4 rounded-4 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <h5 class="fw-bold text-dark mb-0">Application Status Distribution</h5>
+                    <p class="text-muted small mb-0">Live candidate pipeline breakdown</p>
+                  </div>
+                  <span class="badge bg-soft-primary text-primary px-2 py-1 rounded-pill small">Real-time</span>
+                </div>
+
+                <div class="chart-donut-wrapper">
+                  <div class="donut-chart-svg-container">
+                    <svg class="donut-chart-svg" viewBox="0 0 100 100" id="overviewStatusDonutSvg">
+                      <!-- SVG rendered dynamically -->
+                    </svg>
+                    <div class="donut-chart-center-label">
+                      <div class="donut-center-total" id="donutTotalCount">6</div>
+                      <div class="donut-center-sub">Candidates</div>
+                    </div>
+                  </div>
+
+                  <div class="donut-legend-grid" id="overviewStatusLegend">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Weekly Inflow Trend Bars -->
+            <div class="col-12 col-lg-7">
+              <div class="card border shadow-sm p-4 rounded-4 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <h5 class="fw-bold text-dark mb-0">Weekly Application Inflow</h5>
+                    <p class="text-muted small mb-0">Applicant volume over the past 7 days</p>
+                  </div>
+                  <span class="badge bg-soft-emerald text-success px-2 py-1 rounded-pill small">
+                    <i class="bi bi-arrow-up-right me-1"></i> +34% vs last week
+                  </span>
+                </div>
+
+                <div class="weekly-bar-chart-container" id="overviewWeeklyTrendBars">
+                  <!-- Rendered dynamically -->
+                </div>
+
+                <div class="d-flex justify-content-around pt-3 border-top mt-3 text-center">
+                  <div>
+                    <div class="text-muted small">Peak Day</div>
+                    <div class="fw-bold text-dark">Thursday (5 Apps)</div>
+                  </div>
+                  <div>
+                    <div class="text-muted small">Average Match</div>
+                    <div class="fw-bold text-primary">88.5% AI Fit</div>
+                  </div>
+                  <div>
+                    <div class="text-muted small">Conversion Rate</div>
+                    <div class="fw-bold text-success">33.3% To Interview</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Recent Applicants with AI Match Score & Upcoming Interview Schedule -->
+          <div class="row g-3 mb-4">
+            <!-- Recent Applicants Table -->
+            <div class="col-12 col-lg-8">
+              <div class="card border shadow-sm p-4 rounded-4 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <h5 class="fw-bold text-dark mb-0">Recent Applicants &amp; AI Match Score</h5>
+                    <p class="text-muted small mb-0">Assessed engineering students ready for interview review</p>
+                  </div>
+                  <button class="btn btn-outline-custom btn-sm" data-view="applicantsSection" data-title="Applicants & ATS">
+                    View All <i class="bi bi-arrow-right ms-1"></i>
+                  </button>
+                </div>
+
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                      <tr>
+                        <th>Candidate</th>
+                        <th>Applied Role</th>
+                        <th>AI Match Score</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="overviewRecentApplicantsTableBody" class="small">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upcoming Interview Schedule Preview -->
+            <div class="col-12 col-lg-4">
+              <div class="card border shadow-sm p-4 rounded-4 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <h5 class="fw-bold text-dark mb-0">Upcoming Interviews</h5>
+                    <p class="text-muted small mb-0">Technical evaluations this week</p>
+                  </div>
+                  <button class="btn btn-sm btn-link text-primary p-0 text-decoration-none" data-view="interviewsSection" data-title="Interview Scheduling">
+                    Manage
+                  </button>
+                </div>
+
+                <div id="overviewUpcomingInterviewsList">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Recently Posted Internships & Recent Activity Notifications -->
+          <div class="row g-3">
+            <!-- Recently Posted Internships -->
+            <div class="col-12 col-lg-8">
+              <div class="card border shadow-sm p-4 rounded-4 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <h5 class="fw-bold text-dark mb-0">Recently Posted Internships</h5>
+                    <p class="text-muted small mb-0">Live opportunities currently published on the student portal</p>
+                  </div>
+                  <button class="btn btn-outline-custom btn-sm" data-view="manageInternshipsSection" data-title="Manage Internships">
+                    Manage All
+                  </button>
+                </div>
+
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                      <tr>
+                        <th>Role Title</th>
+                        <th>Domain Track</th>
+                        <th>Mode &bull; Location</th>
+                        <th>Stipend</th>
+                        <th>Applicants</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="overviewRecentInternshipsTableBody" class="small">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Notifications -->
+            <div class="col-12 col-lg-4">
+              <div class="card border shadow-sm p-4 rounded-4 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <h5 class="fw-bold text-dark mb-0">Recent Notifications</h5>
+                    <p class="text-muted small mb-0">Live ATS timeline audit feed</p>
+                  </div>
+                  <span class="badge bg-soft-primary text-primary px-2 py-1 rounded-pill small">Active</span>
+                </div>
+
+                <div id="overviewActivityFeed">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ====================================================================
+             VIEW 2: COMPANY PROFILE SECTION
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="profileSection">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h4 class="fw-bold text-dark mb-1">Company Profile &amp; Employer Branding</h4>
+              <p class="text-muted small mb-0">Manage corporate identity, verified office locations, and recruiter contacts.</p>
+            </div>
+            <button class="btn btn-primary-custom" id="saveCompanyProfileBtn">
+              <i class="bi bi-check2 me-1"></i> Save Changes
+            </button>
+          </div>
+
+          <div class="row g-4 align-items-start">
+            <div class="col-12 col-lg-4">
+              <div class="card border shadow-sm p-4 rounded-4 bg-white text-center">
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3"
+                  style="width: 72px; height: 72px; font-size: 1.8rem; box-shadow: var(--shadow-sm);">
+                  <i class="bi bi-buildings-fill"></i>
+                </div>
+                <h5 class="fw-bold mb-1" id="profileCardCompanyName">CloudScale Solutions</h5>
+                <p class="text-muted small mb-2" id="profileCardTagline">Enterprise Cloud &amp; AI Infrastructure Platform</p>
+                <div class="d-flex justify-content-center gap-2 mb-3">
+                  <span class="badge bg-soft-primary text-primary px-3 py-1 rounded-pill"><i class="bi bi-patch-check-fill me-1"></i>Verified Partner</span>
+                  <span class="badge bg-soft-emerald text-success px-3 py-1 rounded-pill">Active Hiring</span>
+                </div>
+                <hr class="my-2">
+                <div class="text-start small text-muted">
+                  <div class="mb-2"><i class="bi bi-envelope me-2 text-primary"></i><span id="profileCardEmail">recruiter@cloudscale.io</span></div>
+                  <div class="mb-2"><i class="bi bi-person me-2 text-primary"></i><span id="profileCardContact">Priya Sharma</span></div>
+                  <div class="mb-2"><i class="bi bi-telephone me-2 text-primary"></i><span id="profileCardPhone">+91 98450 12345</span></div>
+                  <div class="mb-2"><i class="bi bi-geo-alt me-2 text-primary"></i><span id="profileCardLocation">Bengaluru, Karnataka (HQ)</span></div>
+                  <div class="mb-2"><i class="bi bi-globe me-2 text-primary"></i><a href="https://cloudscale.io" target="_blank" class="text-primary fw-semibold" id="profileCardWebsite">https://cloudscale.io</a></div>
+                  <div class="mb-2"><i class="bi bi-briefcase me-2 text-primary"></i><span id="profileCardIndustry">Cloud Infrastructure &amp; DevOps</span></div>
+                  <div><i class="bi bi-people me-2 text-primary"></i><span id="profileCardSize">200 - 500 Employees</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-8">
+              <div class="card border shadow-sm p-4 rounded-4 bg-white">
+                <form id="companyProfileForm">
+                  <h6 class="fw-bold text-dark mb-3">Corporate Details</h6>
+                  <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                      <label class="form-label small fw-semibold text-dark">Company Legal Name</label>
+                      <input type="text" class="form-control" id="profileInputCompanyName" value="CloudScale Solutions" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-semibold text-dark">Official Recruiter Email</label>
+                      <input type="email" class="form-control bg-light" id="profileInputEmail" value="recruiter@cloudscale.io" readonly>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-semibold text-dark">Primary Recruiter Contact</label>
+                      <input type="text" class="form-control" id="profileInputContactName" value="Priya Sharma" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-semibold text-dark">Direct Contact Phone</label>
+                      <input type="tel" class="form-control" id="profileInputPhone" value="+91 98450 12345">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-semibold text-dark">Official Website</label>
+                      <input type="url" class="form-control" id="profileInputWebsite" value="https://cloudscale.io">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-semibold text-dark">Primary Domain</label>
+                      <select class="form-select" id="profileInputIndustry">
+                        <option value="Cloud Infrastructure & DevOps" selected>Cloud Infrastructure &amp; DevOps</option>
+                        <option value="Artificial Intelligence & ML">Artificial Intelligence &amp; ML</option>
+                        <option value="Fintech & Banking">Fintech &amp; Banking</option>
+                        <option value="Healthcare Tech">Healthcare Tech</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-semibold text-dark">Company Size</label>
+                      <select class="form-select" id="profileInputSize">
+                        <option value="1-50 Employees">1 - 50 Employees (Startup)</option>
+                        <option value="51-200 Employees">51 - 200 Employees (Growth)</option>
+                        <option value="200-500 Employees" selected>200 - 500 Employees (Scale-up)</option>
+                        <option value="500+ Employees">500+ Employees (Enterprise)</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-semibold text-dark">Headquarters Location</label>
+                      <input type="text" class="form-control" id="profileInputLocation" value="Bengaluru, Karnataka (HQ)">
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label small fw-semibold text-dark">Company Overview &amp; Culture</label>
+                      <textarea class="form-control" id="profileInputDescription" rows="3">CloudScale Solutions develops next-generation distributed cloud orchestration systems and intelligent telemetry pipelines for enterprise hybrid multi-cloud workloads.</textarea>
+                    </div>
+                  </div>
+                  <div class="alert alert-success d-none py-2 px-3 small" id="companyProfileSaveAlert">
+                    <i class="bi bi-check-circle-fill me-1"></i> Company profile changes saved successfully!
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 3: POST INTERNSHIP SECTION
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="postInternshipSection">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h4 class="fw-bold text-dark mb-1">Post New Technical Internship</h4>
+              <p class="text-muted small mb-0">Publish an opportunity to thousands of SkillBridge student engineers with automated AI skill pre-screening.</p>
+            </div>
+            <button class="btn btn-outline-custom btn-sm" data-view="manageInternshipsSection" data-title="Manage Internships">
+              View Active Listings
+            </button>
+          </div>
+
+          <div class="card border shadow-sm p-4 rounded-4 bg-white">
+            <form id="postInternshipForm">
+              <div class="row g-3">
+                <div class="col-md-8">
+                  <label class="form-label small fw-semibold text-dark">Internship Title <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="postTitle" placeholder="e.g. Full Stack Cloud Engineer Intern" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small fw-semibold text-dark">Domain Track <span class="text-danger">*</span></label>
+                  <select class="form-select" id="postDomain" required>
+                    <option value="" disabled selected>Select Track</option>
+                    <option value="Full Stack Development">Full Stack Development</option>
+                    <option value="Cloud Architecture & DevOps">Cloud Architecture &amp; DevOps</option>
+                    <option value="AI & Machine Learning">AI &amp; Machine Learning</option>
+                    <option value="Frontend Engineering">Frontend Engineering</option>
+                    <option value="Data Engineering">Data Engineering</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small fw-semibold text-dark">Workplace Mode <span class="text-danger">*</span></label>
+                  <select class="form-select" id="postWorkMode" required>
+                    <option value="Hybrid (Bengaluru)">Hybrid (Bengaluru)</option>
+                    <option value="Remote (India)">Remote (India)</option>
+                    <option value="On-Site (Bengaluru Tech Park)">On-Site (Bengaluru Tech Park)</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small fw-semibold text-dark">Monthly Stipend (INR) <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="postStipend" placeholder="e.g. ₹35,000 / month" value="₹35,000 / month" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small fw-semibold text-dark">Duration <span class="text-danger">*</span></label>
+                  <select class="form-select" id="postDuration">
+                    <option value="3 Months">3 Months</option>
+                    <option value="6 Months" selected>6 Months</option>
+                    <option value="6 Months (PPO Convertible)">6 Months (PPO Convertible)</option>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <label class="form-label small fw-semibold text-dark">Required Tech Stack (Comma separated) <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="postSkills" placeholder="e.g. Java, Spring Boot, MySQL, REST APIs, Docker, Git" value="Java, Spring Boot, MySQL, Docker, REST APIs" required>
+                  <small class="text-muted">SkillBridge AI matches applicants possessing verified assessment scores in these keywords.</small>
+                </div>
+                <div class="col-12">
+                  <label class="form-label small fw-semibold text-dark">Internship Description &amp; Responsibilities <span class="text-danger">*</span></label>
+                  <textarea class="form-control" id="postDescription" rows="4" placeholder="Detail the technical tasks, mentorship scope, and deliverables..." required>Work directly with our core backend engineering team to architect, build, and deploy containerized microservices in Java/Spring Boot. You will interact with distributed MySQL databases and cloud infrastructure.</textarea>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold text-dark">Minimum SkillBridge Assessment Score</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="postMinScore" min="50" max="100" value="85">
+                    <span class="input-group-text">% AI Fit Score</span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold text-dark">Application Deadline</label>
+                  <input type="date" class="form-control" id="postDeadline" value="2026-12-15">
+                </div>
+              </div>
+
+              <div class="alert alert-success d-none mt-3 py-2 px-3 small" id="postInternshipSuccessAlert">
+                <i class="bi bi-check-circle-fill me-1"></i> Internship listing published successfully! Visible immediately on the Student Portal.
+              </div>
+
+              <div class="mt-4 pt-3 border-top text-end">
+                <button type="reset" class="btn btn-light border me-2">Clear Form</button>
+                <button type="submit" class="btn btn-primary-custom" id="submitPostInternshipBtn">
+                  <i class="bi bi-cloud-arrow-up-fill me-1"></i> Publish Opportunity
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 4: MANAGE INTERNSHIPS SECTION
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="manageInternshipsSection">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h4 class="fw-bold text-dark mb-1">Manage Posted Internships</h4>
+              <p class="text-muted small mb-0">Monitor open technical listings, toggle status, review applicant volume, and edit role details.</p>
+            </div>
+            <button class="btn btn-primary-custom" data-view="postInternshipSection" data-title="Post Internship">
+              <i class="bi bi-plus-lg me-1"></i> Post New Internship
+            </button>
+          </div>
+
+          <div class="card border shadow-sm p-4 rounded-4 bg-white">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small">
+                  <tr>
+                    <th>Internship Role</th>
+                    <th>Domain Track</th>
+                    <th>Stipend &bull; Duration</th>
+                    <th>Applicants</th>
+                    <th>Min AI Score</th>
+                    <th>Status</th>
+                    <th class="text-end">Manage</th>
+                  </tr>
+                </thead>
+                <tbody id="manageInternshipsTableBody" class="small">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 5: APPLICANTS & ATS PIPELINE SECTION
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="applicantsSection">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h4 class="fw-bold text-dark mb-1">Applicants &amp; ATS Pipeline</h4>
+              <p class="text-muted small mb-0">Evaluate candidates, inspect verified assessment scores, shortlist, and schedule interviews.</p>
+            </div>
+            <button class="btn btn-outline-custom btn-sm" id="exportApplicantsCsvBtn">
+              <i class="bi bi-download me-1"></i> Export Applicants CSV
+            </button>
+          </div>
+
+          <!-- Multi-Criteria Filters Toolbar -->
+          <div class="card border shadow-sm p-3 rounded-4 bg-white mb-3">
+            <div class="row g-2 align-items-center">
+              <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="applicantsSearchInput" placeholder="Search by name, college, or skills...">
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <select class="form-select form-select-sm" id="applicantsInternshipFilter">
+                  <option value="All">All Internships</option>
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <select class="form-select form-select-sm" id="applicantsStatusFilter">
+                  <option value="All">All Statuses</option>
+                  <option value="Applied">Applied (Blue)</option>
+                  <option value="Under Review">Under Review (Orange)</option>
+                  <option value="Shortlisted">Shortlisted (Purple)</option>
+                  <option value="Interview Scheduled">Interview Scheduled (Cyan)</option>
+                  <option value="Selected">Selected (Green)</option>
+                  <option value="Rejected">Rejected (Red)</option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <select class="form-select form-select-sm" id="applicantsSortSelect">
+                  <option value="match-desc">AI Match: High to Low</option>
+                  <option value="date-desc">Newest First</option>
+                  <option value="date-asc">Oldest First</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Full Applicants Table -->
+          <div class="card border shadow-sm p-4 rounded-4 bg-white">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small">
+                  <tr>
+                    <th>Candidate &bull; College</th>
+                    <th>Applied Role</th>
+                    <th>Verified Skills</th>
+                    <th>AI Match Fit</th>
+                    <th>Applied Date</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="fullApplicantsTableBody" class="small">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-3 small text-muted">
+              <div>Showing <span class="fw-bold text-dark" id="applicantsCountDisplay">6</span> candidate applications</div>
+              <div class="d-flex gap-1">
+                <button class="btn btn-sm btn-light border px-3" disabled>Previous</button>
+                <button class="btn btn-sm btn-primary px-3">1</button>
+                <button class="btn btn-sm btn-light border px-3" disabled>Next</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 6: AI CANDIDATE MATCHING SECTION
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="aiMatchingSection">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <span class="badge bg-soft-primary text-primary px-3 py-1 rounded-pill mb-1">
+                <i class="bi bi-stars me-1"></i> SkillBridge AI Engine
+              </span>
+              <h4 class="fw-bold text-dark mb-1">AI Candidate Matching &amp; Recommendations</h4>
+              <p class="text-muted small mb-0">Algorithmic talent ranking comparing internship tech stack against verified student assessments and project portfolios.</p>
+            </div>
+            <button class="btn btn-primary-custom" id="recalculateAiMatchBtn">
+              <i class="bi bi-arrow-repeat me-1"></i> Re-Score Candidates
+            </button>
+          </div>
+
+          <!-- AI Top Matches Grid -->
+          <div class="row g-3" id="aiCandidateCardsGrid">
+            <!-- Cards populated dynamically -->
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 6.5: SKILL ASSESSMENT RESULTS SECTION
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="skillAssessmentSection">
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+              <span class="badge bg-soft-primary text-primary px-3 py-1 rounded-pill mb-1">
+                <i class="bi bi-patch-check-fill me-1"></i> Verified Skill Assessments
+              </span>
+              <h4 class="fw-bold text-dark mb-1">Skill Assessment Results &amp; Test Analytics</h4>
+              <p class="text-muted small mb-0">Evaluate student candidate competency on standardized coding assessments, score percentages, and certified credentials.</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-soft-emerald text-success px-3 py-2 rounded-pill fw-semibold" id="assessmentsCountBadge">
+                <i class="bi bi-check-circle-fill me-1"></i> <span id="assessmentsCountDisplay">0</span> Validated Tests
+              </span>
+            </div>
+          </div>
+
+          <!-- Assessment Filter Controls -->
+          <div class="card border shadow-sm p-3 rounded-4 bg-white mb-4">
+            <div class="row g-2 align-items-center">
+              <div class="col-12 col-md-4">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="assessmentSearchInput"
+                    placeholder="Search candidate, college or skill...">
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <select class="form-select form-select-sm" id="assessmentTechFilter">
+                  <option value="All">All Technologies</option>
+                  <option value="Java">Java</option>
+                  <option value="Spring Boot">Spring Boot</option>
+                  <option value="MySQL">MySQL</option>
+                  <option value="Python">Python</option>
+                </select>
+              </div>
+              <div class="col-6 col-md-3">
+                <select class="form-select form-select-sm" id="assessmentScoreFilter">
+                  <option value="0">All Scores (0%+)</option>
+                  <option value="70">70% and above</option>
+                  <option value="80">80% and above (Proficient)</option>
+                  <option value="90">90% and above (Master)</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-2">
+                <select class="form-select form-select-sm" id="assessmentSortSelect">
+                  <option value="date-desc">Newest First</option>
+                  <option value="score-desc">Highest Score</option>
+                  <option value="score-asc">Lowest Score</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Assessment Results Table -->
+          <div class="card border shadow-sm rounded-4 bg-white overflow-hidden">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="ps-4">Candidate</th>
+                    <th>Assessment / Skill</th>
+                    <th>Score</th>
+                    <th>Percentage</th>
+                    <th>Proficiency Tier</th>
+                    <th>Certificate Code</th>
+                    <th>Completed Date</th>
+                    <th class="text-end pe-4">Verification</th>
+                  </tr>
+                </thead>
+                <tbody id="skillAssessmentsTableBody">
+                  <!-- Populated dynamically via recruiter-dashboard.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 7: INTERVIEW SCHEDULING SECTION
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="interviewsSection">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h4 class="fw-bold text-dark mb-1">Interview Scheduling &amp; Calendar</h4>
+              <p class="text-muted small mb-0">Manage technical evaluations, generate Google Meet invites, reschedule, cancel, and record feedback.</p>
+            </div>
+            <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#scheduleInterviewModal">
+              <i class="bi bi-calendar-plus me-1"></i> Schedule Technical Round
+            </button>
+          </div>
+
+          <div class="row g-4">
+            <div class="col-12 col-lg-8">
+              <div class="card border shadow-sm p-4 rounded-4 bg-white">
+                <h6 class="fw-bold text-dark mb-3">Confirmed Technical Interviews</h6>
+                <div id="interviewsListContainer">
+                  <!-- Populated dynamically with Reschedule, Cancel, and Feedback actions -->
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+              <div class="card border shadow-sm p-4 rounded-4 bg-white">
+                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-info-circle-fill text-primary me-1"></i> Technical Round Guidelines</h6>
+                <p class="small text-muted mb-3">Evaluations are conducted via Google Meet with proctored pair-coding environments enabled.</p>
+                <ul class="small text-muted ps-3 mb-0">
+                  <li class="mb-1">Verify applicant identity against university enrollment.</li>
+                  <li class="mb-1">Focus on core algorithmic design and framework fundamentals.</li>
+                  <li class="mb-1">Use the <strong>Reschedule</strong> button to update date/time with instant candidate alert.</li>
+                  <li>Click <strong>Submit Feedback</strong> after the round to grade the candidate and update candidate progress.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 8: OFFERS & SELECTION SECTION
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="offersSection">
+          <!-- Section Topbar Header -->
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+              <h4 class="fw-bold text-dark mb-1">Offers &amp; Selection</h4>
+              <p class="text-muted small mb-0">Generate formal internship offer letters, track candidate response lifecycle, and finalize cohort onboarding.</p>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-primary-custom" id="releaseNewOfferQuickBtn">
+                <i class="bi bi-file-earmark-plus me-1"></i> Generate New Offer
+              </button>
+              <button class="btn btn-outline-custom" id="exportOffersCsvBtn">
+                <i class="bi bi-download me-1"></i> Export Offers CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- 1. OFFER OVERVIEW: 6 Summary Metric Cards -->
+          <div class="row g-3 mb-4">
+            <!-- Total Offers -->
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">Total Offers</span>
+                  <div class="stat-icon-wrapper bg-soft-primary text-primary">
+                    <i class="bi bi-folder2-open"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0 text-dark" id="offersKpiTotal">0</h3>
+                </div>
+                <small class="text-muted" style="font-size: 0.72rem;">All generated offers</small>
+              </div>
+            </div>
+
+            <!-- Offers Released -->
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">Offers Released</span>
+                  <div class="stat-icon-wrapper bg-soft-primary text-primary">
+                    <i class="bi bi-send-check-fill"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0 text-dark" id="offersKpiReleased">0</h3>
+                </div>
+                <small class="text-muted" style="font-size: 0.72rem;">Delivered to candidates</small>
+              </div>
+            </div>
+
+            <!-- Pending Responses -->
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">Pending Responses</span>
+                  <div class="stat-icon-wrapper bg-soft-cyan text-info">
+                    <i class="bi bi-hourglass-split"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0 text-dark" id="offersKpiPending">0</h3>
+                </div>
+                <small class="text-muted" style="font-size: 0.72rem;">Awaiting student action</small>
+              </div>
+            </div>
+
+            <!-- Offers Accepted -->
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">Offers Accepted</span>
+                  <div class="stat-icon-wrapper bg-soft-emerald text-success">
+                    <i class="bi bi-check-circle-fill"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0 text-dark" id="offersKpiAccepted">0</h3>
+                </div>
+                <small class="text-muted" style="font-size: 0.72rem;">Selected &amp; onboarding</small>
+              </div>
+            </div>
+
+            <!-- Offers Rejected -->
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">Offers Rejected</span>
+                  <div class="stat-icon-wrapper" style="background-color: #fff1f2; color: #f43f5e;">
+                    <i class="bi bi-x-circle-fill"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0 text-dark" id="offersKpiRejected">0</h3>
+                </div>
+                <small class="text-muted" style="font-size: 0.72rem;">Candidate declined</small>
+              </div>
+            </div>
+
+            <!-- Expired Offers -->
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">Expired Offers</span>
+                  <div class="stat-icon-wrapper bg-soft-amber text-warning">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0 text-dark" id="offersKpiExpired">0</h3>
+                </div>
+                <small class="text-muted" style="font-size: 0.72rem;">Past validity deadline</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. CANDIDATE SELECTION: Shortlisted Candidates Eligible for Offer -->
+          <div class="card border shadow-sm p-4 rounded-4 bg-white mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+              <div>
+                <div class="d-flex align-items-center gap-2">
+                  <h6 class="fw-bold text-dark mb-0">Shortlisted Candidates Eligible for Offer</h6>
+                  <span class="badge bg-soft-primary text-primary px-2 py-0-5 rounded-pill" id="eligibleCandidatesBadge">0 Shortlisted</span>
+                </div>
+                <small class="text-muted">Only candidates in the Shortlisted or Technical Evaluation Cleared stage are eligible for offer generation.</small>
+              </div>
+              <div class="text-muted small">
+                <i class="bi bi-info-circle me-1 text-primary"></i> Select candidate to auto-populate the formal offer letter below.
+              </div>
+            </div>
+
+            <!-- Shortlisted Candidates Grid -->
+            <div class="row g-3" id="eligibleShortlistedCandidatesGrid">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- 3. GENERATE OFFER LETTER FORM -->
+          <div class="card border shadow-sm p-4 rounded-4 bg-white mb-4" id="generateOfferCard">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+              <div>
+                <h6 class="fw-bold text-dark mb-0" id="offerFormTitle">Generate Formal Internship Offer Letter</h6>
+                <small class="text-muted">Configure compensation, joining dates, work location, and customized clauses.</small>
+              </div>
+              <span class="badge bg-soft-primary text-primary px-3 py-1 rounded-pill fw-semibold">
+                <i class="bi bi-file-earmark-lock me-1"></i> Verified SkillBridge Template
+              </span>
+            </div>
+
+            <form id="generateOfferForm">
+              <input type="hidden" id="editingOfferId" value="">
+              <div class="row g-3 mb-3">
+                <!-- Candidate Name Select -->
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-semibold text-dark">Candidate Name <span class="text-danger">*</span></label>
+                  <select class="form-select" id="offerCandidateSelect" required>
+                    <option value="" disabled selected>-- Select Shortlisted Candidate --</option>
+                  </select>
+                </div>
+
+                <!-- Internship Role -->
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-semibold text-dark">Internship Role <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="offerRoleInput" placeholder="e.g. Full Stack Cloud Engineer Intern" required>
+                </div>
+
+                <!-- Company Name -->
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-semibold text-dark">Company Name <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control bg-light" id="offerCompanyNameInput" value="CloudScale Solutions" required readonly>
+                </div>
+              </div>
+
+              <div class="row g-3 mb-3">
+                <!-- Offered Monthly Stipend -->
+                <div class="col-12 col-md-3">
+                  <label class="form-label small fw-semibold text-dark">Offered Monthly Stipend <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">₹</span>
+                    <input type="text" class="form-control border-start-0" id="offerStipendInput" placeholder="35,000 / month" value="₹35,000 / month" required>
+                  </div>
+                </div>
+
+                <!-- Internship Duration -->
+                <div class="col-12 col-md-3">
+                  <label class="form-label small fw-semibold text-dark">Internship Duration <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="offerDurationInput" placeholder="e.g. 6 Months (Jan - Jun 2027)" value="6 Months (Jan - Jun 2027)" required>
+                </div>
+
+                <!-- Joining Date -->
+                <div class="col-12 col-md-3">
+                  <label class="form-label small fw-semibold text-dark">Joining Date <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" id="offerJoiningDateInput" required>
+                </div>
+
+                <!-- Work Location -->
+                <div class="col-12 col-md-3">
+                  <label class="form-label small fw-semibold text-dark">Work Location <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="offerLocationInput" placeholder="e.g. Bengaluru, Karnataka (Hybrid)" value="Bengaluru, Karnataka (Hybrid)" required>
+                </div>
+              </div>
+
+              <div class="row g-3 mb-3">
+                <!-- Offer Expiry Date -->
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-semibold text-dark">Offer Expiry Date <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" id="offerExpiryDateInput" required>
+                  <small class="text-muted" style="font-size: 0.72rem;">Candidate must accept before this deadline.</small>
+                </div>
+
+                <!-- Additional Terms and Conditions -->
+                <div class="col-12 col-md-8">
+                  <label class="form-label small fw-semibold text-dark">Additional Terms and Conditions</label>
+                  <textarea class="form-control" id="offerTermsInput" rows="3" placeholder="Enter terms regarding IP ownership, nondisclosure, performance reviews, equipment provided, and conversion criteria...">1. Standard NDA and intellectual property assignment applies to all source code and infrastructure scripts.
+2. Full-time pre-placement offer (PPO) evaluation conducted at 4-month performance review.
+3. High-spec laptop and cloud infrastructure sandbox access will be provisioned on Day 1.</textarea>
+                </div>
+              </div>
+
+              <!-- Form Buttons -->
+              <div class="d-flex flex-wrap gap-2 justify-content-end pt-2 border-top">
+                <button type="button" class="btn btn-outline-custom" id="btnCancelOfferEdit" style="display: none;">
+                  Cancel Edit
+                </button>
+                <button type="button" class="btn btn-outline-custom" id="btnSaveDraftOffer">
+                  <i class="bi bi-save me-1"></i> Generate Offer (Draft)
+                </button>
+                <button type="button" class="btn btn-outline-custom" id="btnPreviewOffer">
+                  <i class="bi bi-eye me-1"></i> Preview Offer Letter
+                </button>
+                <button type="button" class="btn btn-outline-custom" id="btnDownloadOfferPdf">
+                  <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> Download Offer Letter as PDF
+                </button>
+                <button type="submit" class="btn btn-primary-custom" id="btnReleaseOffer">
+                  <i class="bi bi-send-fill me-1"></i> Release Offer
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- 4. OFFER STATUS TRACKING TABLE -->
+          <div class="card border shadow-sm p-4 rounded-4 bg-white">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-3">
+              <div>
+                <h6 class="fw-bold text-dark mb-0">Offer Status Tracking &amp; Pipeline</h6>
+                <small class="text-muted">Track candidate acceptance, simulate student responses, download letters, and withdraw offers.</small>
+              </div>
+
+              <!-- Search and Filter Bar -->
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <!-- Search Input -->
+                <div class="input-group input-group-sm" style="width: 200px;">
+                  <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="offersSearchInput" placeholder="Search candidate...">
+                </div>
+
+                <!-- Role Filter -->
+                <select class="form-select form-select-sm" id="offersRoleFilter" style="width: 170px;">
+                  <option value="all">All Roles</option>
+                </select>
+
+                <!-- Status Filter -->
+                <select class="form-select form-select-sm" id="offersStatusFilter" style="width: 160px;">
+                  <option value="all">All Statuses</option>
+                  <option value="pending">Pending Responses</option>
+                  <option value="Draft">Draft</option>
+                  <option value="Released">Released</option>
+                  <option value="Viewed">Viewed</option>
+                  <option value="Accepted">Accepted</option>
+                  <option value="Rejected">Rejected</option>
+                  <option value="Expired">Expired</option>
+                </select>
+
+                <!-- Sort Filter -->
+                <select class="form-select form-select-sm" id="offersSortSelect" style="width: 145px;">
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="candidate">Candidate Name</option>
+                  <option value="stipend">Highest Stipend</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small">
+                  <tr>
+                    <th>Candidate</th>
+                    <th>Internship Role</th>
+                    <th>Offered Stipend</th>
+                    <th>Offer Date</th>
+                    <th>Expiry Date</th>
+                    <th>Current Status</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="offersTableBody" class="small">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 9: MESSAGES SECTION (Two-Panel Messaging Interface)
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="messagesSection">
+          <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+              <h4 class="fw-bold text-dark mb-1">Candidate Messaging</h4>
+              <p class="text-muted small mb-0">Direct real-time communication with applicants regarding interview logistics, technical evaluations, and offer letters.</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-soft-primary text-primary px-3 py-1 rounded-pill small fw-semibold" id="messagesActiveThreadsCount">
+                <i class="bi bi-chat-dots-fill me-1"></i> 6 Active Conversations
+              </span>
+              <button type="button" class="btn btn-sm btn-outline-custom" id="markAllMessagesReadBtn" title="Mark All as Read">
+                <i class="bi bi-check2-all me-1"></i> Mark All Read
+              </button>
+            </div>
+          </div>
+
+          <div class="card border shadow-sm rounded-4 overflow-hidden bg-white">
+            <div class="row g-0">
+              <!-- Left Panel: Conversations List -->
+              <div class="col-12 col-md-5 col-lg-4 border-end d-flex flex-column" style="height: 650px;">
+                <!-- Search & Filters Header -->
+                <div class="p-3 border-bottom bg-light">
+                  <div class="input-group input-group-sm mb-2">
+                    <span class="input-group-text bg-white border-end-0 text-muted">
+                      <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0" id="messagesSearchInput" placeholder="Search candidate, role or message...">
+                    <button class="btn btn-outline-secondary border-start-0 bg-white text-muted" type="button" id="clearMessagesSearchBtn" title="Clear search" style="display: none;">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+
+                  <!-- Filter Pills: All vs Unread -->
+                  <div class="d-flex gap-1" role="tablist">
+                    <button class="btn btn-sm btn-primary-custom flex-fill py-1 px-2" id="filterMessagesAllBtn" style="font-size: 0.76rem;">
+                      All Conversations (<span id="totalConvosCount">6</span>)
+                    </button>
+                    <button class="btn btn-sm btn-outline-custom flex-fill py-1 px-2" id="filterMessagesUnreadBtn" style="font-size: 0.76rem;">
+                      Unread (<span id="unreadConvosCount">2</span>)
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Conversation Thread Items List -->
+                <div class="conversations-thread-list flex-grow-1 overflow-auto" id="messagesThreadList">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+
+              <!-- Right Panel: Active Chat View & Controls -->
+              <div class="col-12 col-md-7 col-lg-8 d-flex flex-column" style="height: 650px;" id="chatViewPanel">
+                
+                <!-- Chat Header (Candidate Info & Actions) -->
+                <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center flex-wrap gap-2" id="chatHeaderBar">
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="position-relative">
+                      <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                        style="width: 42px; height: 42px; font-size: 0.95rem;" id="chatActiveAvatar">YS</div>
+                      <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-light rounded-circle" title="Online Candidate"></span>
+                    </div>
+                    <div>
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="fw-bold text-dark fs-6" id="chatActiveName">Yazh S</span>
+                        <span class="badge bg-soft-emerald text-success px-2 py-0-5 rounded-pill small fw-bold" id="chatActiveMatchScore">
+                          <i class="bi bi-stars me-1"></i>96% Match
+                        </span>
+                      </div>
+                      <div class="text-muted small" id="chatActiveDetails">
+                        <span id="chatActiveRole">Full Stack Cloud Engineer Intern</span> &bull; 
+                        <span id="chatActiveCollege">PSG College of Technology</span>
+                      </div>
+                      <div class="d-flex flex-wrap gap-1 mt-1" id="chatActiveSkills">
+                        <!-- Verified skills chips populated dynamically -->
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Quick Action Buttons -->
+                  <div class="d-flex align-items-center gap-1.5">
+                    <button type="button" class="btn btn-outline-custom btn-sm" id="chatViewProfileBtn" title="View Full Candidate Profile">
+                      <i class="bi bi-person-lines-fill me-1"></i> Profile
+                    </button>
+                    <button type="button" class="btn btn-outline-custom btn-sm text-primary" id="chatScheduleRoundBtn" title="Schedule Interview Round">
+                      <i class="bi bi-calendar2-plus me-1"></i> Schedule Round
+                    </button>
+                    <button type="button" class="btn btn-outline-custom btn-sm text-success" id="chatQuickOfferBtn" title="Create Internship Offer">
+                      <i class="bi bi-award me-1"></i> Make Offer
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Chat Messages Scroll Viewport -->
+                <div class="p-3 flex-grow-1 overflow-auto d-flex flex-column gap-2.5" id="chatMessagesArea" style="background-color: #f8fafc;">
+                  <!-- Messages populated dynamically -->
+                </div>
+
+                <!-- Empty State (Shown when no conversation is selected) -->
+                <div class="d-none flex-grow-1 d-flex flex-column align-items-center justify-content-center text-center p-4" id="chatEmptyState" style="background-color: #fafbfd;">
+                  <div class="rounded-circle bg-soft-primary text-primary d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;">
+                    <i class="bi bi-chat-square-text-fill fs-2"></i>
+                  </div>
+                  <h5 class="fw-bold text-dark mb-1">Select an Applicant Conversation</h5>
+                  <p class="text-muted small mb-0" style="max-width: 360px;">
+                    Choose a candidate from the left panel to review past correspondence, answer queries, or coordinate interview rounds.
+                  </p>
+                </div>
+
+                <!-- Quick Response Templates Chips -->
+                <div class="px-3 pt-2 pb-1 bg-white border-top border-light d-flex align-items-center gap-1.5 overflow-auto text-nowrap" id="chatQuickTemplatesBar">
+                  <small class="text-muted me-1 fw-semibold" style="font-size: 0.72rem;">Quick templates:</small>
+                  <button type="button" class="btn btn-sm btn-light border py-0 px-2 text-muted rounded-pill chat-template-chip" style="font-size: 0.72rem;" data-text="Hello! Looking forward to our scheduled technical discussion. Please have your development environment ready.">
+                    🗓️ Interview Logistics
+                  </button>
+                  <button type="button" class="btn btn-sm btn-light border py-0 px-2 text-muted rounded-pill chat-template-chip" style="font-size: 0.72rem;" data-text="Great news! The engineering team was very impressed with your assessment. We would like to advance you to the next evaluation round.">
+                    🎉 Next Round Advance
+                  </button>
+                  <button type="button" class="btn btn-sm btn-light border py-0 px-2 text-muted rounded-pill chat-template-chip" style="font-size: 0.72rem;" data-text="Hi there! We have released your formal internship offer letter on SkillBridge. Please review and confirm your acceptance.">
+                    📄 Offer Released
+                  </button>
+                </div>
+
+                <!-- Chat Input Footer -->
+                <div class="p-3 border-top bg-white">
+                  <form id="sendMessageForm" class="d-flex align-items-center gap-2">
+                    <div class="input-group">
+                      <input type="text" class="form-control" id="chatMessageInput" placeholder="Type a message to candidate... (Press Enter to send)" autocomplete="off">
+                      <button type="button" class="btn btn-light border border-start-0 text-muted" id="chatEmojiBtn" title="Add thumbs up">
+                        👍
+                      </button>
+                    </div>
+                    <button type="submit" class="btn btn-primary-custom px-3 py-2 flex-shrink-0" id="sendMessageBtn" title="Send message">
+                      <i class="bi bi-send-fill me-1"></i> Send
+                    </button>
+                  </form>
+                  <div class="d-flex justify-content-between align-items-center mt-1 px-1">
+                    <small class="text-muted" style="font-size: 0.7rem;">
+                      <i class="bi bi-info-circle me-1"></i>Press <kbd class="bg-light text-dark border px-1">Enter</kbd> to send.
+                    </small>
+                    <small class="text-muted" style="font-size: 0.7rem;" id="chatStatusHint">
+                      <i class="bi bi-shield-check text-success me-1"></i>End-to-end encrypted messaging via SkillBridge
+                    </small>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 10: SETTINGS SECTION (Comprehensive Enterprise Settings)
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="settingsSection">
+          <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+              <h4 class="fw-bold text-dark mb-1">Recruiter &amp; Enterprise Settings</h4>
+              <p class="text-muted small mb-0">Manage recruiter profile credentials, corporate identity, security policies, team roles, and platform integrations.</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-soft-primary text-primary px-3 py-1 rounded-pill small fw-semibold">
+                <i class="bi bi-shield-check me-1"></i> Admin Console
+              </span>
+            </div>
+          </div>
+
+          <div class="row g-4">
+            <!-- Left Column: Settings Navigation Pills -->
+            <div class="col-12 col-lg-3">
+              <div class="card border shadow-sm rounded-4 p-2 bg-white sticky-lg-top" style="top: 85px;">
+                <div class="nav flex-column nav-pills settings-nav-pills gap-1" id="settingsTabList" role="tablist">
+                  <button class="nav-link settings-tab-link active text-start py-2.5 px-3 rounded-3" id="tabLinkAccount" data-tab="settingsPaneAccount" type="button" role="tab">
+                    <i class="bi bi-person-circle me-2 fs-6"></i> Account Profile
+                  </button>
+                  <button class="nav-link settings-tab-link text-start py-2.5 px-3 rounded-3" id="tabLinkCompany" data-tab="settingsPaneCompany" type="button" role="tab">
+                    <i class="bi bi-building me-2 fs-6"></i> Company Details
+                  </button>
+                  <button class="nav-link settings-tab-link text-start py-2.5 px-3 rounded-3" id="tabLinkSecurity" data-tab="settingsPaneSecurity" type="button" role="tab">
+                    <i class="bi bi-shield-lock me-2 fs-6"></i> Security &amp; Password
+                  </button>
+                  <button class="nav-link settings-tab-link text-start py-2.5 px-3 rounded-3" id="tabLinkNotifications" data-tab="settingsPaneNotifications" type="button" role="tab">
+                    <i class="bi bi-bell me-2 fs-6"></i> Notifications
+                  </button>
+                  <button class="nav-link settings-tab-link text-start py-2.5 px-3 rounded-3" id="tabLinkTeam" data-tab="settingsPaneTeam" type="button" role="tab">
+                    <i class="bi bi-people me-2 fs-6"></i> Team Management
+                  </button>
+                  <button class="nav-link settings-tab-link text-start py-2.5 px-3 rounded-3" id="tabLinkIntegrations" data-tab="settingsPaneIntegrations" type="button" role="tab">
+                    <i class="bi bi-plugin me-2 fs-6"></i> Integrations
+                  </button>
+                  <button class="nav-link settings-tab-link text-start py-2.5 px-3 rounded-3" id="tabLinkPrivacy" data-tab="settingsPanePrivacy" type="button" role="tab">
+                    <i class="bi bi-database-lock me-2 fs-6"></i> Privacy &amp; Data
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Settings Tab Content Panes -->
+            <div class="col-12 col-lg-9">
+              
+              <!-- PANE 1: Account Settings -->
+              <div class="settings-tab-pane active" id="settingsPaneAccount">
+                <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+                  <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-4">
+                    <div>
+                      <h5 class="fw-bold text-dark mb-1">Recruiter Profile Information</h5>
+                      <p class="text-muted small mb-0">Personal details displayed to applicants and team members.</p>
+                    </div>
+                    <button type="button" class="btn btn-primary-custom" id="saveAccountProfileBtn">
+                      <i class="bi bi-check2 me-1"></i> Save Profile
+                    </button>
+                  </div>
+
+                  <form id="accountSettingsForm">
+                    <input type="file" id="avatarUploadInput" accept="image/*" class="d-none">
+                    <!-- Profile Photo / Initials Header -->
+                    <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-3 border">
+                      <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                        style="width: 58px; height: 58px; font-size: 1.3rem;" id="accountAvatarPreview">
+                        PS
+                      </div>
+                      <div>
+                        <div class="fw-bold text-dark fs-6" id="accountAvatarNameDisplay">Priya Sharma</div>
+                        <div class="text-muted small" id="accountAvatarRoleDisplay">Head of Campus Talent Acquisition &bull; CloudScale Solutions</div>
+                        <div class="d-flex gap-2 mt-2">
+                          <button type="button" class="btn btn-sm btn-outline-custom" id="uploadAvatarPhotoBtn">
+                            <i class="bi bi-camera me-1"></i> Change Photo
+                          </button>
+                          <button type="button" class="btn btn-sm btn-light border text-danger" id="resetAvatarPhotoBtn">
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row g-3">
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark">Recruiter Full Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="accountSettingsName" value="Priya Sharma" required>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark">Official Work Email <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="accountSettingsEmail" value="recruiter@cloudscale.io" required>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark">Phone Number</label>
+                        <input type="tel" class="form-control" id="accountSettingsPhone" value="+91 98765 43210" placeholder="+91 XXXXX XXXXX">
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark">Job Designation / Title</label>
+                        <input type="text" class="form-control" id="accountSettingsDesignation" value="Head of Campus Talent Acquisition" placeholder="e.g. Lead Technical Recruiter">
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label small fw-semibold text-dark">Recruiter Bio &amp; Campus Notes</label>
+                        <textarea class="form-control" id="accountSettingsBio" rows="3" placeholder="Brief note about your recruitment cohort goals...">Directing campus talent acquisition for CloudScale Solutions. Focused on cloud platforms, distributed architectures, and distributed systems engineering talent.</textarea>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <!-- PANE 2: Company Settings -->
+              <div class="settings-tab-pane d-none" id="settingsPaneCompany">
+                <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+                  <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-4">
+                    <div>
+                      <h5 class="fw-bold text-dark mb-1">Corporate Identity &amp; Employer Branding</h5>
+                      <p class="text-muted small mb-0">Configure company details presented across internship postings and corporate offer letters.</p>
+                    </div>
+                    <button type="button" class="btn btn-primary-custom" id="saveCompanySettingsBtn">
+                      <i class="bi bi-building-check me-1"></i> Save Company
+                    </button>
+                  </div>
+
+                  <form id="companySettingsForm">
+                    <div class="row g-3">
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark">Company Legal Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="companySettingsName" value="CloudScale Solutions" required>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark">Corporate Website URL</label>
+                        <input type="url" class="form-control" id="companySettingsWebsite" value="https://cloudscale.io">
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark">Corporate Contact Email</label>
+                        <input type="email" class="form-control" id="companySettingsEmail" value="contact@cloudscale.io">
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark">Industry Sector</label>
+                        <select class="form-select" id="companySettingsIndustry">
+                          <option value="Cloud Infrastructure & DevOps" selected>Cloud Infrastructure &amp; DevOps</option>
+                          <option value="Artificial Intelligence & Machine Learning">Artificial Intelligence &amp; Machine Learning</option>
+                          <option value="SaaS & Enterprise Platforms">SaaS &amp; Enterprise Platforms</option>
+                          <option value="Cybersecurity & Telemetry">Cybersecurity &amp; Telemetry</option>
+                          <option value="FinTech & Distributed Systems">FinTech &amp; Distributed Systems</option>
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark">Company Size</label>
+                        <select class="form-select" id="companySettingsSize">
+                          <option value="1-50 Employees">1-50 Employees (Early Stage)</option>
+                          <option value="51-200 Employees">51-200 Employees (Growth Scale)</option>
+                          <option value="200-500 Employees" selected>200-500 Employees (Mid Enterprise)</option>
+                          <option value="500+ Employees">500+ Employees (Global Enterprise)</option>
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark">Headquarters &amp; Office Location</label>
+                        <input type="text" class="form-control" id="companySettingsLocation" value="Bengaluru, Karnataka (HQ)">
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label small fw-semibold text-dark">Company Overview &amp; Culture Statement</label>
+                        <textarea class="form-control" id="companySettingsDescription" rows="4">CloudScale Solutions develops distributed cloud orchestration systems and intelligent telemetry pipelines for enterprise hybrid multi-cloud workloads.</textarea>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <!-- PANE 3: Security & Password -->
+              <div class="settings-tab-pane d-none" id="settingsPaneSecurity">
+                <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+                  <div class="pb-3 border-bottom mb-4">
+                    <h5 class="fw-bold text-dark mb-1">Account Security &amp; Credentials</h5>
+                    <p class="text-muted small mb-0">Update recruiter login credentials and manage active sessions.</p>
+                  </div>
+
+                  <!-- Change Password Form -->
+                  <form id="changePasswordForm" class="mb-4">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-key-fill text-primary me-2"></i>Change Master Password</h6>
+                    
+                    <div class="row g-3">
+                      <!-- Current Password -->
+                      <div class="col-12">
+                        <label class="form-label small fw-semibold text-dark">Current Password <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                          <input type="password" class="form-control" id="securityCurrentPassword" placeholder="Enter current password" required>
+                          <button class="btn btn-outline-secondary toggle-pwd-btn" type="button" data-target="securityCurrentPassword" title="Show/Hide">
+                            <i class="bi bi-eye"></i>
+                          </button>
+                        </div>
+                        <small class="text-muted" style="font-size: 0.72rem;">Default demo password is <code>Recruiter@123</code></small>
+                      </div>
+
+                      <!-- New Password -->
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark">New Password <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                          <input type="password" class="form-control" id="securityNewPassword" placeholder="Minimum 8 characters" required>
+                          <button class="btn btn-outline-secondary toggle-pwd-btn" type="button" data-target="securityNewPassword" title="Show/Hide">
+                            <i class="bi bi-eye"></i>
+                          </button>
+                        </div>
+                        <!-- Password Strength Meter -->
+                        <div class="mt-2">
+                          <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small text-muted" style="font-size: 0.72rem;">Password Strength:</span>
+                            <span class="small fw-bold" id="pwdStrengthLabel" style="font-size: 0.72rem; color: #94a3b8;">Enter password</span>
+                          </div>
+                          <div class="progress" style="height: 6px;">
+                            <div class="progress-bar" id="pwdStrengthBar" role="progressbar" style="width: 0%; background-color: #e2e8f0;"></div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Confirm Password -->
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark">Confirm New Password <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                          <input type="password" class="form-control" id="securityConfirmPassword" placeholder="Re-enter new password" required>
+                          <button class="btn btn-outline-secondary toggle-pwd-btn" type="button" data-target="securityConfirmPassword" title="Show/Hide">
+                            <i class="bi bi-eye"></i>
+                          </button>
+                        </div>
+                        <small class="text-muted d-block mt-1" id="pwdMatchNotice" style="font-size: 0.72rem;">Must match new password.</small>
+                      </div>
+
+                      <div class="col-12">
+                        <button type="submit" class="btn btn-primary-custom" id="submitChangePasswordBtn">
+                          <i class="bi bi-shield-check me-1"></i> Update Password
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+
+                  <hr class="my-4">
+
+                  <!-- 2FA & Session Controls -->
+                  <h6 class="fw-bold text-dark mb-3"><i class="bi bi-shield-lock-fill text-info me-2"></i>Multi-Factor Authentication &amp; Sessions</h6>
+                  
+                  <div class="p-3 bg-light rounded-3 border mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="fw-semibold text-dark small">Two-Factor Authentication (2FA) via Work Email</div>
+                      <small class="text-muted">Requires an OTP verification code sent to <code>recruiter@cloudscale.io</code> on new browser sign-ins.</small>
+                    </div>
+                    <div class="form-check form-switch fs-5">
+                      <input class="form-check-input" type="checkbox" id="security2FASwitch" checked>
+                    </div>
+                  </div>
+
+                  <div class="p-3 bg-light rounded-3 border d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                      <div class="fw-semibold text-dark small">Active Browser Sessions</div>
+                      <small class="text-muted">Currently active on 1 desktop browser (Current Windows Session • Bengaluru, India).</small>
+                    </div>
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="logoutAllDevicesBtn">
+                      <i class="bi bi-box-arrow-right me-1"></i> Logout All Devices
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PANE 4: Notification Preferences -->
+              <div class="settings-tab-pane d-none" id="settingsPaneNotifications">
+                <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+                  <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-4">
+                    <div>
+                      <h5 class="fw-bold text-dark mb-1">ATS &amp; Recruitment Notification Preferences</h5>
+                      <p class="text-muted small mb-0">Customize alert channels for candidate applications, interview milestones, and hiring offers.</p>
+                    </div>
+                    <button type="button" class="btn btn-primary-custom" id="saveNotificationPrefsBtn">
+                      <i class="bi bi-check2 me-1"></i> Save Preferences
+                    </button>
+                  </div>
+
+                  <form id="notificationPreferencesForm">
+                    <div class="table-responsive">
+                      <table class="table align-middle">
+                        <thead class="table-light small">
+                          <tr>
+                            <th>Event Category</th>
+                            <th class="text-center" style="width: 140px;">Work Email</th>
+                            <th class="text-center" style="width: 140px;">In-App Alerts</th>
+                          </tr>
+                        </thead>
+                        <tbody class="small">
+                          <tr>
+                            <td>
+                              <div class="fw-bold text-dark">New Candidate Applications</div>
+                              <div class="text-muted" style="font-size: 0.75rem;">Receive notification when an applicant matches &ge;85% for an open internship</div>
+                            </td>
+                            <td class="text-center">
+                              <div class="form-check form-switch d-inline-block">
+                                <input class="form-check-input" type="checkbox" id="notifEmailNewApplicant" checked>
+                              </div>
+                            </td>
+                            <td class="text-center">
+                              <div class="form-check form-switch d-inline-block">
+                                <input class="form-check-input" type="checkbox" id="notifInAppNewApplicant" checked>
+                              </div>
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td>
+                              <div class="fw-bold text-dark">Interview Reminders &amp; Confirmations</div>
+                              <div class="text-muted" style="font-size: 0.75rem;">1-hour alerts before technical evaluation rounds and calendar confirmations</div>
+                            </td>
+                            <td class="text-center">
+                              <div class="form-check form-switch d-inline-block">
+                                <input class="form-check-input" type="checkbox" id="notifEmailInterviewReminders" checked>
+                              </div>
+                            </td>
+                            <td class="text-center">
+                              <div class="form-check form-switch d-inline-block">
+                                <input class="form-check-input" type="checkbox" id="notifInAppInterviewReminders" checked>
+                              </div>
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td>
+                              <div class="fw-bold text-dark">Candidate Direct Messages</div>
+                              <div class="text-muted" style="font-size: 0.75rem;">Instant notice when a candidate replies to recruiter messaging threads</div>
+                            </td>
+                            <td class="text-center">
+                              <div class="form-check form-switch d-inline-block">
+                                <input class="form-check-input" type="checkbox" id="notifEmailCandidateMessages" checked>
+                              </div>
+                            </td>
+                            <td class="text-center">
+                              <div class="form-check form-switch d-inline-block">
+                                <input class="form-check-input" type="checkbox" id="notifInAppCandidateMessages" checked>
+                              </div>
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td>
+                              <div class="fw-bold text-dark">Offer Acceptance &amp; Decisions</div>
+                              <div class="text-muted" style="font-size: 0.75rem;">Immediate alerts when formal internship offer letters are accepted or rejected</div>
+                            </td>
+                            <td class="text-center">
+                              <div class="form-check form-switch d-inline-block">
+                                <input class="form-check-input" type="checkbox" id="notifEmailOfferAccepted" checked>
+                              </div>
+                            </td>
+                            <td class="text-center">
+                              <div class="form-check form-switch d-inline-block">
+                                <input class="form-check-input" type="checkbox" id="notifInAppOfferAccepted" checked>
+                              </div>
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td>
+                              <div class="fw-bold text-dark">Internship Cohort Status Updates</div>
+                              <div class="text-muted" style="font-size: 0.75rem;">Weekly hiring pipeline digests and campus drive progress reports</div>
+                            </td>
+                            <td class="text-center">
+                              <div class="form-check form-switch d-inline-block">
+                                <input class="form-check-input" type="checkbox" id="notifEmailAppUpdates">
+                              </div>
+                            </td>
+                            <td class="text-center">
+                              <div class="form-check form-switch d-inline-block">
+                                <input class="form-check-input" type="checkbox" id="notifInAppAppUpdates" checked>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <!-- PANE 5: Team Management -->
+              <div class="settings-tab-pane d-none" id="settingsPaneTeam">
+                <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+                  <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-4 flex-wrap gap-2">
+                    <div>
+                      <h5 class="fw-bold text-dark mb-1">Recruitment Team Members</h5>
+                      <p class="text-muted small mb-0">Manage recruiter teammates and role-based access permissions.</p>
+                    </div>
+                    <button type="button" class="btn btn-primary-custom" id="openAddTeamMemberModalBtn">
+                      <i class="bi bi-person-plus-fill me-1"></i> Add Team Member
+                    </button>
+                  </div>
+
+                  <!-- Role Permission Matrix Cards -->
+                  <div class="row g-2 mb-4">
+                    <div class="col-12 col-md-4">
+                      <div class="p-3 bg-light rounded-3 border h-100">
+                        <span class="badge bg-soft-purple text-purple mb-1">Role: Admin</span>
+                        <div class="fw-bold small text-dark mb-1">Full Access</div>
+                        <small class="text-muted d-block" style="font-size: 0.72rem;">Manage company settings, add/remove team, post jobs, issue formal offers.</small>
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <div class="p-3 bg-light rounded-3 border h-100">
+                        <span class="badge bg-soft-primary text-primary mb-1">Role: HR Manager</span>
+                        <div class="fw-bold small text-dark mb-1">Hiring Ops</div>
+                        <small class="text-muted d-block" style="font-size: 0.72rem;">Review candidates, conduct &amp; schedule interviews, draft offers, messaging.</small>
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <div class="p-3 bg-light rounded-3 border h-100">
+                        <span class="badge bg-soft-cyan text-info mb-1">Role: Recruiter</span>
+                        <div class="fw-bold small text-dark mb-1">Candidate Sourcing</div>
+                        <small class="text-muted d-block" style="font-size: 0.72rem;">Review applications, chat with candidates, submit interview evaluations.</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Team Table -->
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                      <thead class="table-light small">
+                        <tr>
+                          <th>Team Member</th>
+                          <th>Role</th>
+                          <th>Permissions</th>
+                          <th>Status</th>
+                          <th class="text-end">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="teamMembersTableBody" class="small">
+                        <!-- Populated dynamically -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PANE 6: Integrations -->
+              <div class="settings-tab-pane d-none" id="settingsPaneIntegrations">
+                <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+                  <div class="pb-3 border-bottom mb-4">
+                    <h5 class="fw-bold text-dark mb-1">Ecosystem &amp; Cloud Integrations</h5>
+                    <p class="text-muted small mb-0">Connect corporate calendar, video conferencing, and developer platforms.</p>
+                  </div>
+
+                  <div class="row g-3" id="integrationsGrid">
+                    <!-- 1. Google Calendar -->
+                    <div class="col-12 col-md-6">
+                      <div class="p-3.5 border rounded-3 bg-light h-100 d-flex flex-column justify-content-between">
+                        <div>
+                          <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                              <div class="rounded-3 bg-white border p-2 text-danger shadow-sm">
+                                <i class="bi bi-calendar3 fs-5"></i>
+                              </div>
+                              <div>
+                                <h6 class="fw-bold text-dark mb-0">Google Calendar</h6>
+                                <small class="text-muted" style="font-size: 0.72rem;">Interview scheduling sync</small>
+                              </div>
+                            </div>
+                            <span class="badge bg-soft-emerald text-success px-2 py-1 rounded-pill small" id="statusGCalBadge">
+                              <i class="bi bi-check-circle-fill me-1"></i>Connected
+                            </span>
+                          </div>
+                          <p class="small text-muted mb-3" style="font-size: 0.78rem;">
+                            Syncs confirmed candidate interviews directly to recruiter Google Calendar with automated time zone conversion.
+                          </p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                          <small class="text-muted" id="accountGCalText" style="font-size: 0.72rem;">recruiter@cloudscale.io</small>
+                          <button type="button" class="btn btn-sm btn-outline-custom toggle-integration-btn" data-key="googleCalendar" id="toggleGCalBtn">
+                            Disconnect
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 2. Google Meet -->
+                    <div class="col-12 col-md-6">
+                      <div class="p-3.5 border rounded-3 bg-light h-100 d-flex flex-column justify-content-between">
+                        <div>
+                          <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                              <div class="rounded-3 bg-white border p-2 text-success shadow-sm">
+                                <i class="bi bi-camera-video-fill fs-5"></i>
+                              </div>
+                              <div>
+                                <h6 class="fw-bold text-dark mb-0">Google Meet</h6>
+                                <small class="text-muted" style="font-size: 0.72rem;">Video conference bridge</small>
+                              </div>
+                            </div>
+                            <span class="badge bg-soft-emerald text-success px-2 py-1 rounded-pill small" id="statusGMeetBadge">
+                              <i class="bi bi-check-circle-fill me-1"></i>Connected
+                            </span>
+                          </div>
+                          <p class="small text-muted mb-3" style="font-size: 0.78rem;">
+                            Auto-generates Google Meet video evaluation links upon confirming technical interview slots.
+                          </p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                          <small class="text-muted" id="accountGMeetText" style="font-size: 0.72rem;">Enterprise Dedicated Bridge</small>
+                          <button type="button" class="btn btn-sm btn-outline-custom toggle-integration-btn" data-key="googleMeet" id="toggleGMeetBtn">
+                            Disconnect
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 3. Work Email Service (SMTP) -->
+                    <div class="col-12 col-md-6">
+                      <div class="p-3.5 border rounded-3 bg-light h-100 d-flex flex-column justify-content-between">
+                        <div>
+                          <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                              <div class="rounded-3 bg-white border p-2 text-primary shadow-sm">
+                                <i class="bi bi-envelope-at-fill fs-5"></i>
+                              </div>
+                              <div>
+                                <h6 class="fw-bold text-dark mb-0">Corporate Work Email</h6>
+                                <small class="text-muted" style="font-size: 0.72rem;">SMTP / Exchange Service</small>
+                              </div>
+                            </div>
+                            <span class="badge bg-soft-emerald text-success px-2 py-1 rounded-pill small" id="statusEmailBadge">
+                              <i class="bi bi-check-circle-fill me-1"></i>Connected
+                            </span>
+                          </div>
+                          <p class="small text-muted mb-3" style="font-size: 0.78rem;">
+                            Dispatches official offer letters, interview invitations, and status notices directly from your corporate domain.
+                          </p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                          <small class="text-muted" id="accountEmailText" style="font-size: 0.72rem;">recruiter@cloudscale.io</small>
+                          <button type="button" class="btn btn-sm btn-outline-custom toggle-integration-btn" data-key="emailIntegration" id="toggleEmailBtn">
+                            Disconnect
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 4. GitHub Enterprise -->
+                    <div class="col-12 col-md-6">
+                      <div class="p-3.5 border rounded-3 bg-light h-100 d-flex flex-column justify-content-between">
+                        <div>
+                          <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                              <div class="rounded-3 bg-white border p-2 text-dark shadow-sm">
+                                <i class="bi bi-github fs-5"></i>
+                              </div>
+                              <div>
+                                <h6 class="fw-bold text-dark mb-0">GitHub Enterprise</h6>
+                                <small class="text-muted" style="font-size: 0.72rem;">Candidate code inspection</small>
+                              </div>
+                            </div>
+                            <span class="badge bg-light text-muted border px-2 py-1 rounded-pill small" id="statusGithubBadge">
+                              <i class="bi bi-dash-circle me-1"></i>Not Connected
+                            </span>
+                          </div>
+                          <p class="small text-muted mb-3" style="font-size: 0.78rem;">
+                            Inspect candidate public repositories, pull request history, and verified open-source contributions directly in the ATS.
+                          </p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                          <small class="text-muted" id="accountGithubText" style="font-size: 0.72rem;">Not Connected</small>
+                          <button type="button" class="btn btn-sm btn-primary-custom toggle-integration-btn" data-key="githubIntegration" id="toggleGithubBtn">
+                            Connect
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PANE 7: Privacy & Data Management -->
+              <div class="settings-tab-pane d-none" id="settingsPanePrivacy">
+                <div class="card border shadow-sm rounded-4 p-4 bg-white mb-4">
+                  <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-4">
+                    <div>
+                      <h5 class="fw-bold text-dark mb-1">Privacy Policies &amp; Data Governance</h5>
+                      <p class="text-muted small mb-0">Configure data privacy standards, download organizational records, and account lifecycle controls.</p>
+                    </div>
+                    <button type="button" class="btn btn-primary-custom" id="savePrivacySettingsBtn">
+                      <i class="bi bi-shield-check me-1"></i> Save Privacy
+                    </button>
+                  </div>
+
+                  <!-- Privacy Toggles -->
+                  <div class="mb-4">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-eye-slash-fill text-primary me-2"></i>Data Visibility Standards</h6>
+
+                    <div class="p-3 bg-light rounded-3 border mb-2.5 d-flex justify-content-between align-items-center">
+                      <div>
+                        <div class="fw-semibold text-dark small">Enterprise Public Directory Listing</div>
+                        <small class="text-muted">Allow students on SkillBridge to discover CloudScale Solutions on the employer directory.</small>
+                      </div>
+                      <div class="form-check form-switch fs-5">
+                        <input class="form-check-input" type="checkbox" id="privacyPublicDirectorySwitch" checked>
+                      </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 border mb-2.5 d-flex justify-content-between align-items-center">
+                      <div>
+                        <div class="fw-semibold text-dark small">Share Assessment Fit Reports with Partner Colleges</div>
+                        <small class="text-muted">Allows verified college placement cells to track cohort recruitment progress.</small>
+                      </div>
+                      <div class="form-check form-switch fs-5">
+                        <input class="form-check-input" type="checkbox" id="privacyShareAssessmentsSwitch" checked>
+                      </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 border mb-2.5 d-flex justify-content-between align-items-center">
+                      <div>
+                        <div class="fw-semibold text-dark small">Allow Candidate Direct Inquiries</div>
+                        <small class="text-muted">Shortlisted candidates can send questions regarding active internship requirements.</small>
+                      </div>
+                      <div class="form-check form-switch fs-5">
+                        <input class="form-check-input" type="checkbox" id="privacyAllowInquiriesSwitch" checked>
+                      </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 border d-flex justify-content-between align-items-center">
+                      <div>
+                        <div class="fw-semibold text-dark small">Applicant Data Retention Period</div>
+                        <small class="text-muted">Automated archival deadline for student applications following cohort completion.</small>
+                      </div>
+                      <select class="form-select form-select-sm" id="privacyDataRetentionSelect" style="width: 140px;">
+                        <option value="6 Months">6 Months</option>
+                        <option value="1 Year" selected>1 Year</option>
+                        <option value="2 Years">2 Years</option>
+                        <option value="Indefinite">Indefinite</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <hr class="my-4">
+
+                  <!-- Data Export -->
+                  <div class="mb-4">
+                    <h6 class="fw-bold text-dark mb-2"><i class="bi bi-cloud-arrow-down-fill text-success me-2"></i>Download Organizational Records</h6>
+                    <p class="small text-muted mb-3">Download a structured archive of your company profile, active internship listings, candidate applications, interview logs, and offer letters.</p>
+                    <button type="button" class="btn btn-outline-custom" id="downloadCompanyDataBtn">
+                      <i class="bi bi-file-earmark-arrow-down me-1"></i> Export Company Data (JSON)
+                    </button>
+                  </div>
+
+                  <hr class="my-4">
+
+                  <!-- Danger Zone -->
+                  <div>
+                    <h6 class="fw-bold text-danger mb-2"><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Danger Zone</h6>
+                    
+                    <div class="p-3 rounded-3 border border-danger-subtle bg-soft-rose mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                      <div>
+                        <div class="fw-bold text-danger small">Reset Demo Workspace Data</div>
+                        <small class="text-muted">Restores default demo candidates, interviews, and offers.</small>
+                      </div>
+                      <button type="button" class="btn btn-outline-danger btn-sm" id="resetDemoDataBtn">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset All Data
+                      </button>
+                    </div>
+
+                    <div class="p-3 rounded-3 border border-danger-subtle bg-soft-rose d-flex justify-content-between align-items-center flex-wrap gap-2">
+                      <div>
+                        <div class="fw-bold text-danger small">Delete Recruiter Account</div>
+                        <small class="text-muted">Permanently deletes recruiter profile, closes active listings, and terminates session.</small>
+                      </div>
+                      <button type="button" class="btn btn-danger btn-sm" id="deleteAccountBtn">
+                        <i class="bi bi-trash3-fill me-1"></i> Delete Account
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MODALS
+       ====================================================================== -->
+
+  <!-- 1. Candidate Full Profile Modal -->
+  <div class="modal fade" id="candidateProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header border-bottom pb-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
+              style="width: 44px; height: 44px; font-size: 1.1rem;" id="modalProfileAvatar">YS</div>
+            <div>
+              <h5 class="modal-title fw-bold mb-0 text-dark" id="modalProfileName">Candidate Name</h5>
+              <div class="text-muted small" id="modalProfileRole">Role Title &bull; College Info</div>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-md-3">
+              <div class="p-2.5 bg-light rounded-3">
+                <div class="text-muted small">AI Match Fit</div>
+                <div class="fw-bold fs-5 text-primary" id="modalProfileFitScore">96%</div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <div class="p-2.5 bg-light rounded-3">
+                <div class="text-muted small">Coding Grade</div>
+                <div class="fw-bold fs-5 text-success" id="modalProfileGrade">A+ (94%)</div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <div class="p-2.5 bg-light rounded-3">
+                <div class="text-muted small">Current Status</div>
+                <div class="fw-bold fs-6" id="modalProfileStatusBadge">Shortlisted</div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <div class="p-2.5 bg-light rounded-3">
+                <div class="text-muted small">Applied Date</div>
+                <div class="fw-bold fs-6 text-dark" id="modalProfileAppliedDate">Nov 18, 2026</div>
+              </div>
+            </div>
+          </div>
+
+          <h6 class="fw-bold text-dark mb-2">Verified Skill Assessment Scores</h6>
+          <div class="row g-2 mb-4" id="modalProfileSkillsBreakdown">
+            <!-- Rendered by JS -->
+          </div>
+
+          <h6 class="fw-bold text-dark mb-2">Academic &amp; Contact Information</h6>
+          <div class="row g-2 small text-muted mb-3">
+            <div class="col-sm-6"><strong>Degree:</strong> <span id="modalProfileDegree">B.E. Computer Science</span></div>
+            <div class="col-sm-6"><strong>Institution:</strong> <span id="modalProfileCollege">PSG College of Technology</span></div>
+            <div class="col-sm-6"><strong>Email:</strong> <span id="modalProfileEmail">yazh.s@student.edu</span></div>
+            <div class="col-sm-6"><strong>Phone:</strong> <span id="modalProfilePhone">+91 98765 43210</span></div>
+          </div>
+        </div>
+        <div class="modal-footer border-top pt-3">
+          <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-outline-custom" id="modalProfileViewResumeBtn">
+            <i class="bi bi-file-earmark-pdf me-1"></i> View Resume
+          </button>
+          <button type="button" class="btn btn-outline-custom text-primary" id="modalProfileMessageBtn">
+            <i class="bi bi-chat-dots-fill me-1"></i> Message Candidate
+          </button>
+          <button type="button" class="btn btn-primary-custom" id="modalProfileScheduleBtn">
+            <i class="bi bi-calendar2-plus me-1"></i> Schedule Interview
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Candidate Resume Viewer Modal -->
+  <div class="modal fade" id="candidateResumeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header border-bottom">
+          <div>
+            <h5 class="modal-title fw-bold mb-0 text-dark" id="resumeModalCandidateName">Candidate Resume</h5>
+            <small class="text-muted" id="resumeModalAppliedRole">Full Stack Cloud Engineer Intern</small>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4 bg-light">
+          <div class="shadow-sm bg-white p-4 rounded-3 border">
+            <div class="d-flex justify-content-between border-bottom pb-3 mb-3">
+              <div>
+                <h4 class="fw-bold text-dark mb-0" id="resumeDocName">Yazh S</h4>
+                <div class="text-primary fw-semibold small">Full Stack Software Engineer &bull; Cloud Architecture</div>
+                <div class="text-muted small">yazh.s@student.edu &bull; +91 98765 43210 &bull; github.com/yazh-demo</div>
+              </div>
+              <div class="text-end">
+                <span class="badge bg-soft-emerald text-success px-3 py-1 rounded-pill">Verified Assessment Profile</span>
+              </div>
+            </div>
+
+            <h6 class="fw-bold text-dark border-bottom pb-1 mb-2">EDUCATION</h6>
+            <p class="small mb-3"><strong>B.E. Computer Science and Engineering</strong> &bull; CGPA: 9.2/10<br><span class="text-muted">PSG College of Technology &bull; 2022 - 2026</span></p>
+
+            <h6 class="fw-bold text-dark border-bottom pb-1 mb-2">TECHNICAL SKILLS</h6>
+            <p class="small mb-3">
+              <strong>Languages &amp; Frameworks:</strong> Java, Spring Boot, Python, TypeScript, React.js, Node.js<br>
+              <strong>Cloud &amp; Infrastructure:</strong> Docker, Kubernetes, AWS (S3, EC2, RDS), GCP Cloud Run, Terraform<br>
+              <strong>Databases:</strong> MySQL, PostgreSQL, MongoDB, Redis
+            </p>
+
+            <h6 class="fw-bold text-dark border-bottom pb-1 mb-2">PROJECTS &amp; INTERNSHIPS</h6>
+            <div class="small mb-2">
+              <strong>Distributed Microservices Telemetry Engine</strong><br>
+              <span class="text-muted">Built high-throughput logging pipeline processing 10,000 req/sec using Java Spring Boot and Kafka.</span>
+            </div>
+            <div class="small">
+              <strong>Cloud Infrastructure Cost Optimizer</strong><br>
+              <span class="text-muted">Developed automated AWS resource cleanup service reducing idle compute expenditure by 28%.</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top">
+          <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary-custom" id="downloadResumeBtn">
+            <i class="bi bi-download me-1"></i> Download PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Schedule Interview Modal -->
+  <div class="modal fade" id="scheduleInterviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header border-bottom">
+          <div>
+            <h5 class="modal-title fw-bold mb-0 text-dark">Schedule Technical Interview</h5>
+            <small class="text-muted">Select candidate and assign evaluation round</small>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="scheduleInterviewForm">
+          <div class="modal-body p-4">
+            <input type="hidden" id="scheduleCandidateId" value="">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Candidate</label>
+              <select class="form-select" id="scheduleCandidateSelect" required>
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-semibold text-dark">Date</label>
+                <input type="date" class="form-control" id="scheduleDate" value="2026-11-26" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-semibold text-dark">Time (IST)</label>
+                <input type="time" class="form-control" id="scheduleTime" value="14:00" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Interview Round</label>
+              <select class="form-select" id="scheduleRound">
+                <option value="Round 1: Core Coding &amp; Data Structures" selected>Round 1: Core Coding &amp; Data Structures</option>
+                <option value="Round 2: System Architecture &amp; Cloud">Round 2: System Architecture &amp; Cloud</option>
+                <option value="Round 3: Hiring Manager &amp; Culture Fit">Round 3: Hiring Manager &amp; Culture Fit</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Google Meet Link</label>
+              <input type="url" class="form-control" id="scheduleMeetLink" value="https://meet.google.com/sb-eval-recruiter" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small fw-semibold text-dark">Assigned Lead Interviewer</label>
+              <input type="text" class="form-control" id="scheduleInterviewer" value="Priya Sharma (Principal Architect)">
+            </div>
+          </div>
+          <div class="modal-footer border-top">
+            <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary-custom">
+              <i class="bi bi-calendar2-check-fill me-1"></i> Confirm &amp; Send Invite
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Candidate Status Update Modal -->
+  <div class="modal fade" id="candidateStatusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header border-bottom">
+          <h5 class="modal-title fw-bold mb-0 text-dark">Update Candidate Status</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="candidateStatusUpdateForm">
+          <div class="modal-body p-4">
+            <input type="hidden" id="statusModalAppId" value="">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Candidate</label>
+              <input type="text" class="form-control bg-light" id="statusModalCandidateName" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">New Status</label>
+              <select class="form-select" id="statusModalNewStatus" required>
+                <option value="Applied">Applied (Blue)</option>
+                <option value="Under Review">Under Review (Orange)</option>
+                <option value="Shortlisted">Shortlisted (Purple)</option>
+                <option value="Interview Scheduled">Interview Scheduled (Cyan)</option>
+                <option value="Selected">Selected (Green)</option>
+                <option value="Rejected">Rejected (Red)</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small fw-semibold text-dark">Internal Recruiter Notes</label>
+              <textarea class="form-control" id="statusModalNotes" rows="2" placeholder="Notes for interviewers and HR records..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer border-top">
+            <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary-custom">Save Status</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Reschedule Interview Modal -->
+  <div class="modal fade" id="rescheduleInterviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header border-bottom">
+          <div>
+            <h5 class="modal-title fw-bold mb-0 text-dark">Reschedule Technical Interview</h5>
+            <small class="text-muted">Update evaluation session date and time</small>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="rescheduleInterviewForm">
+          <div class="modal-body p-4">
+            <input type="hidden" id="rescheduleInterviewId" value="">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Candidate</label>
+              <input type="text" class="form-control bg-light" id="rescheduleCandidateName" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Interview Round</label>
+              <input type="text" class="form-control bg-light" id="rescheduleRoundDisplay" readonly>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-semibold text-dark">New Date</label>
+                <input type="date" class="form-control" id="rescheduleDateInput" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-semibold text-dark">New Time (IST)</label>
+                <input type="time" class="form-control" id="rescheduleTimeInput" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Google Meet Link</label>
+              <input type="url" class="form-control" id="rescheduleMeetLinkInput" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small fw-semibold text-dark">Reschedule Reason (Sent to Candidate)</label>
+              <textarea class="form-control" id="rescheduleReasonInput" rows="2" placeholder="e.g. Interviewer conflict, requested by candidate..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer border-top">
+            <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary-custom">
+              <i class="bi bi-calendar-check me-1"></i> Update &amp; Notify Candidate
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Interview Feedback Modal -->
+  <div class="modal fade" id="interviewFeedbackModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header border-bottom">
+          <div>
+            <h5 class="modal-title fw-bold mb-0 text-dark">Record Technical Interview Feedback</h5>
+            <small class="text-muted" id="feedbackModalSubtitle">Post-round evaluation scorecard</small>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="interviewFeedbackForm">
+          <div class="modal-body p-4">
+            <input type="hidden" id="feedbackInterviewId" value="">
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold text-dark">Candidate</label>
+                <input type="text" class="form-control bg-light" id="feedbackCandidateName" readonly>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold text-dark">Interview Round</label>
+                <input type="text" class="form-control bg-light" id="feedbackRound" readonly>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold text-dark">Technical &amp; Coding Score (1-100)</label>
+                <input type="number" class="form-control" id="feedbackTechnicalScore" min="1" max="100" value="92" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold text-dark">System Architecture Score (1-100)</label>
+                <input type="number" class="form-control" id="feedbackSystemScore" min="1" max="100" value="88" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Hiring Recommendation <span class="text-danger">*</span></label>
+              <select class="form-select" id="feedbackRecommendationSelect" required>
+                <option value="Proceed to Next Round">Proceed to Next Technical Round</option>
+                <option value="Make Offer" selected>Strong Hire - Release Offer Letter</option>
+                <option value="Keep on Hold">Keep on Hold (Backup Pool)</option>
+                <option value="Reject">Reject Candidate</option>
+              </select>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label small fw-semibold text-dark">Detailed Interviewer Feedback &amp; Scorecard Summary</label>
+              <textarea class="form-control" id="feedbackDetailedNotes" rows="3" placeholder="Provide feedback on problem-solving, code clarity, system design trade-offs, and communication..." required>Candidate demonstrated solid grasp of concurrent programming and clean microservice boundaries. Handled edge cases effortlessly.</textarea>
+            </div>
+          </div>
+          <div class="modal-footer border-top">
+            <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary-custom">
+              <i class="bi bi-check2-circle me-1"></i> Save Evaluation Scorecard
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Offer Letter Preview & Download Modal -->
+  <div class="modal fade" id="offerLetterPreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header border-bottom">
+          <div>
+            <h5 class="modal-title fw-bold mb-0 text-dark">
+              <i class="bi bi-file-earmark-check-fill text-primary me-2"></i>Internship Offer Letter
+            </h5>
+            <small class="text-muted" id="modalOfferPreviewSubtitle">Official SkillBridge Corporate Offer Letterhead</small>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4 bg-light">
+          <!-- Rendered Letter Document -->
+          <div id="offerLetterPreviewContainer" class="offer-letter-doc">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+        <div class="modal-footer border-top bg-white">
+          <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-outline-custom" id="modalPreviewPrintBtn">
+            <i class="bi bi-printer me-1"></i> Print
+          </button>
+          <button type="button" class="btn btn-outline-custom" id="modalPreviewDownloadPdfBtn">
+            <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> Download PDF
+          </button>
+          <button type="button" class="btn btn-primary-custom" id="modalPreviewReleaseBtn" style="display: none;">
+            <i class="bi bi-send-fill me-1"></i> Release Offer Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Record Candidate Response Simulation Modal -->
+  <div class="modal fade" id="recordCandidateResponseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header border-bottom">
+          <h5 class="modal-title fw-bold mb-0 text-dark">Track Candidate Response</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="recordCandidateResponseForm">
+          <div class="modal-body p-4">
+            <input type="hidden" id="recordResponseOfferId" value="">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Candidate</label>
+              <input type="text" class="form-control bg-light" id="recordResponseCandidateName" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Internship Role</label>
+              <input type="text" class="form-control bg-light" id="recordResponseRole" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Candidate Response Action <span class="text-danger">*</span></label>
+              <select class="form-select" id="recordResponseActionSelect" required>
+                <option value="Accepted">Accepted - Candidate officially accepts offer</option>
+                <option value="Rejected">Rejected - Candidate declined offer</option>
+                <option value="Pending">Pending - Awaiting candidate response</option>
+                <option value="Viewed">Viewed - Candidate viewed offer letter</option>
+                <option value="Expired">Expired - Mark offer as expired</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small fw-semibold text-dark">Response Notes &amp; Communication Details</label>
+              <textarea class="form-control" id="recordResponseNotes" rows="2" placeholder="e.g. Confirmed acceptance via portal. Joining date confirmed."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer border-top">
+            <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary-custom">
+              <i class="bi bi-check2-circle me-1"></i> Update Offer Status
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Team Member Add / Edit Modal -->
+  <div class="modal fade" id="teamMemberModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header border-bottom">
+          <div>
+            <h5 class="modal-title fw-bold mb-0 text-dark" id="teamMemberModalTitle">Add Recruitment Team Member</h5>
+            <small class="text-muted">Grant recruiter access and assign role permissions</small>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="teamMemberForm">
+          <div class="modal-body p-4">
+            <input type="hidden" id="inputTeamMemberId" value="">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Full Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="inputTeamMemberName" placeholder="e.g. Vikramaditya Sen" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Official Work Email <span class="text-danger">*</span></label>
+              <input type="email" class="form-control" id="inputTeamMemberEmail" placeholder="name@cloudscale.io" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Job Designation</label>
+              <input type="text" class="form-control" id="inputTeamMemberDesignation" placeholder="e.g. Technical Talent Lead">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Assigned Role &amp; Access Level <span class="text-danger">*</span></label>
+              <select class="form-select" id="inputTeamMemberRole" required>
+                <option value="Admin">Admin - Full access across settings, team &amp; offers</option>
+                <option value="HR Manager" selected>HR Manager - Review candidates, schedule interviews &amp; draft offers</option>
+                <option value="Recruiter">Recruiter - Candidate sourcing, reviews &amp; messaging</option>
+              </select>
+            </div>
+            <div class="p-3 bg-light rounded-3 border small" id="teamRoleDescriptionBox">
+              <i class="bi bi-info-circle text-primary me-1"></i>
+              <span id="teamRoleDescriptionText">HR Managers can screen applicants, conduct technical rounds, and issue offer drafts.</span>
+            </div>
+          </div>
+          <div class="modal-footer border-top">
+            <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary-custom" id="saveTeamMemberSubmitBtn">
+              <i class="bi bi-person-check-fill me-1"></i> Save Team Member
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. Delete Recruiter Account Confirmation Modal -->
+  <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header border-bottom bg-danger text-white rounded-top-4">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <h5 class="modal-title fw-bold mb-0">Permanently Delete Account</h5>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="text-dark small mb-3">
+            This action is <strong>irreversible</strong>. Deleting your recruiter account will:
+          </p>
+          <ul class="small text-muted mb-3">
+            <li>Permanently close all active internship cohorts for CloudScale Solutions.</li>
+            <li>Void any unaccepted candidate offer letters.</li>
+            <li>Revoke recruiter access credentials across all devices.</li>
+          </ul>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-danger">Type <span class="badge bg-danger">DELETE</span> to confirm:</label>
+            <input type="text" class="form-control" id="deleteAccountConfirmInput" placeholder="Type DELETE here">
+          </div>
+        </div>
+        <div class="modal-footer border-top">
+          <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteAccountBtn" disabled>
+            <i class="bi bi-trash3-fill me-1"></i> Delete My Account
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5.3 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Recruiter Dashboard JavaScript Engine -->
+  <script src="recruiter-dashboard.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="SkillBridge for Employers - Hire pre-assessed student engineers and interns. Post internships, view verified coding skills, and streamline your campus recruitment.">
+  <title>SkillBridge for Employers | Hire Top Pre-Assessed Student Talent</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* Hero section styling for Recruiter Portal */
+    .recruiter-hero-section {
+      background: radial-gradient(circle at 85% 20%, rgba(5, 150, 105, 0.08) 0%, transparent 45%),
+                  radial-gradient(circle at 10% 80%, rgba(79, 70, 229, 0.06) 0%, transparent 45%),
+                  #ffffff;
+      padding-top: 8rem;
+      padding-bottom: 5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .hero-stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      border-radius: 2rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .benefit-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem 2rem;
+      height: 100%;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .benefit-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px -10px rgba(15, 23, 42, 0.08);
+      border-color: #cbd5e1;
+    }
+
+    .benefit-icon-wrapper {
+      width: 60px;
+      height: 60px;
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .step-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      padding: 1.75rem 1.5rem;
+      position: relative;
+      height: 100%;
+    }
+
+    .step-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #059669;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .cta-employer-banner {
+      background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
+      border-radius: 1.5rem;
+      color: #ffffff;
+      padding: 3.5rem 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-employer-banner::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .recruiter-pill-badge {
+      background-color: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+      font-size: 0.725rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      border-radius: 1rem;
+    }
+  </style>
+  <!-- SkillBridge Platform API Configuration -->
+  <script src="js/config.js"></script>
+</head>
+
+<body>
+
+  <!-- ========================================================================
+       Navigation Bar for Recruiter Portal
+       ======================================================================== -->
+  <nav class="navbar navbar-expand-lg fixed-top custom-navbar" id="recruiterNavbar">
+    <div class="container">
+      <!-- Brand Logo with Recruiter Badge -->
+      <a class="brand-logo d-flex align-items-center" href="recruiter-home.html">
+        <div class="brand-icon">
+          <i class="bi bi-mortarboard-fill"></i>
+        </div>
+        <span class="d-flex align-items-center">
+          Skill<span class="text-primary">Bridge</span>
+          <span class="recruiter-pill-badge ms-2">For Employers</span>
+        </span>
+      </a>
+
+      <!-- Mobile Hamburger Toggle -->
+      <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
+        data-bs-target="#recruiterNavbarContent" aria-controls="recruiterNavbarContent" aria-expanded="false"
+        aria-label="Toggle navigation">
+        <i class="bi bi-list fs-2 text-dark"></i>
+      </button>
+
+      <!-- Navbar Links -->
+      <div class="collapse navbar-collapse" id="recruiterNavbarContent">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-1">
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom active" href="recruiter-home.html">Overview</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom" href="#benefits">Why SkillBridge</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom" href="#how-it-works">How It Works</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom" href="#verified-skills">Skill Domains</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom text-primary" href="index.html">
+              <i class="bi bi-person me-1"></i> Student Portal
+            </a>
+          </li>
+        </ul>
+
+        <!-- Action / Auth Buttons -->
+        <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+          <a href="company-login.html" class="btn btn-outline-custom">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Recruiter Sign In
+          </a>
+          <a href="company-login.html" class="btn btn-primary-custom" style="background: #059669; border-color: #059669;">
+            <i class="bi bi-briefcase-fill me-1"></i> Post Internships
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ========================================================================
+       Hero Section
+       ======================================================================== -->
+  <section class="recruiter-hero-section">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-7">
+          <div class="hero-stat-pill">
+            <i class="bi bi-shield-check-fill text-success"></i>
+            <span>Verified Campus Talent &bull; Pre-Assessed Skills</span>
+          </div>
+          <h1 class="display-4 fw-extrabold text-dark mb-3" style="line-height: 1.15;">
+            Hire High-Caliber Student Developers, <span class="text-success" style="color: #059669 !important;">Without the Resume Noise</span>
+          </h1>
+          <p class="lead text-muted mb-4" style="max-width: 600px;">
+            Connect with pre-assessed engineering students. Review verified coding scores in Java, Python, Spring Boot, MySQL, and Modern Web to hire interns who deliver impact from day one.
+          </p>
+
+          <div class="d-flex flex-wrap gap-3 mb-4">
+            <a href="company-login.html" class="btn btn-lg text-white px-4 py-3 fw-bold rounded-3 d-inline-flex align-items-center gap-2"
+              style="background-color: #059669; border: none; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);">
+              <i class="bi bi-plus-circle-fill"></i>
+              <span>Post an Internship</span>
+            </a>
+            <a href="company-login.html" class="btn btn-lg btn-outline-dark px-4 py-3 fw-semibold rounded-3 d-inline-flex align-items-center gap-2">
+              <i class="bi bi-box-arrow-in-right"></i>
+              <span>Recruiter Sign In</span>
+            </a>
+            <a href="role-selection.html" class="btn btn-lg btn-light px-3 py-3 text-muted rounded-3" title="Switch Portal">
+              <i class="bi bi-arrow-left-right"></i>
+            </a>
+          </div>
+
+          <!-- Trust Badges -->
+          <div class="d-flex flex-wrap align-items-center gap-4 pt-2 text-muted small">
+            <div><i class="bi bi-check-circle-fill text-success me-1"></i> 100% Genuine Students</div>
+            <div><i class="bi bi-check-circle-fill text-success me-1"></i> Automated Skill Scoring</div>
+            <div><i class="bi bi-check-circle-fill text-success me-1"></i> Zero Placement Fees</div>
+          </div>
+        </div>
+
+        <!-- Hero Side Graphic / Snapshot Card -->
+        <div class="col-lg-5">
+          <div class="card border shadow-lg rounded-4 p-4 bg-white position-relative">
+            <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-soft-emerald p-2 rounded-3"><i class="bi bi-kanban fs-5"></i></span>
+                <div>
+                  <h6 class="mb-0 fw-bold">Live Applicant Pipeline</h6>
+                  <small class="text-muted">Spring Boot & Full Stack Interns</small>
+                </div>
+              </div>
+              <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Active</span>
+            </div>
+
+            <!-- Simulated Pipeline Cards -->
+            <div class="d-flex flex-column gap-3 mb-3">
+              <div class="p-3 bg-light rounded-3 border d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="fw-bold small">Yazh S &bull; Anna University</div>
+                  <div class="text-muted" style="font-size: 0.8rem;">B.E. CSE &bull; 8.85 CGPA</div>
+                  <div class="mt-1">
+                    <span class="badge bg-soft-primary" style="font-size: 0.7rem;">Java: 90%</span>
+                    <span class="badge bg-soft-cyan" style="font-size: 0.7rem;">Spring Boot: 90%</span>
+                  </div>
+                </div>
+                <span class="badge bg-primary text-white px-2 py-1" style="font-size: 0.75rem;">Shortlisted</span>
+              </div>
+
+              <div class="p-3 bg-light rounded-3 border d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="fw-bold small">Rahul K &bull; IIT Madras</div>
+                  <div class="text-muted" style="font-size: 0.8rem;">B.Tech IT &bull; 8.90 CGPA</div>
+                  <div class="mt-1">
+                    <span class="badge bg-soft-emerald" style="font-size: 0.7rem;">Python: 92%</span>
+                    <span class="badge bg-soft-amber" style="font-size: 0.7rem;">MySQL: 88%</span>
+                  </div>
+                </div>
+                <span class="badge bg-warning text-dark px-2 py-1" style="font-size: 0.75rem;">Under Review</span>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-3 border bg-soft-emerald text-center">
+              <div class="fw-bold text-success small mb-1"><i class="bi bi-speedometer2 me-1"></i> Match Accuracy: 95%</div>
+              <div class="text-muted" style="font-size: 0.75rem;">Filter applicants by exact technical score and university batch</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Benefits for Employers
+       ======================================================================== -->
+  <section class="py-5 bg-light" id="benefits">
+    <div class="container py-4">
+      <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="badge bg-soft-emerald px-3 py-2 rounded-pill fw-semibold mb-2">Employer Advantage</span>
+        <h2 class="display-6 fw-bold text-dark">Why Top Engineering Teams Choose SkillBridge</h2>
+        <p class="text-muted">Transform your campus hiring from tedious resume skimming into confident, data-driven decisions.</p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Benefit 1 -->
+        <div class="col-md-6 col-lg-3">
+          <div class="benefit-card">
+            <div class="benefit-icon-wrapper bg-soft-emerald text-success">
+              <i class="bi bi-patch-check-fill"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">Verified Skill Scores</h5>
+            <p class="text-muted small mb-0">
+              Every applicant completes standardized technical benchmarks in Java, Python, Spring Boot, or Web Tech before applying.
+            </p>
+          </div>
+        </div>
+
+        <!-- Benefit 2 -->
+        <div class="col-md-6 col-lg-3">
+          <div class="benefit-card">
+            <div class="benefit-icon-wrapper bg-soft-primary text-primary">
+              <i class="bi bi-funnel-fill"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">Zero Resume Spam</h5>
+            <p class="text-muted small mb-0">
+              Only students who meet your required GPA, department, and skill thresholds are eligible to submit applications.
+            </p>
+          </div>
+        </div>
+
+        <!-- Benefit 3 -->
+        <div class="col-md-6 col-lg-3">
+          <div class="benefit-card">
+            <div class="benefit-icon-wrapper bg-soft-cyan text-info">
+              <i class="bi bi-kanban-fill"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">Applicant Dashboard</h5>
+            <p class="text-muted small mb-0">
+              Track candidate pipelines in one place. Update statuses to Shortlisted, Interviewed, or Selected with a single click.
+            </p>
+          </div>
+        </div>
+
+        <!-- Benefit 4 -->
+        <div class="col-md-6 col-lg-3">
+          <div class="benefit-card">
+            <div class="benefit-icon-wrapper bg-soft-amber text-warning">
+              <i class="bi bi-clock-history"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">70% Faster Hiring</h5>
+            <p class="text-muted small mb-0">
+              Eliminate preliminary phone screens. Move directly to technical interviews with candidates already tested on your stack.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       How It Works for Recruiters
+       ======================================================================== -->
+  <section class="py-5 bg-white" id="how-it-works">
+    <div class="container py-4">
+      <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="badge bg-soft-primary px-3 py-2 rounded-pill fw-semibold mb-2">Simple Process</span>
+        <h2 class="display-6 fw-bold text-dark">How to Hire on SkillBridge</h2>
+        <p class="text-muted">Start meeting pre-vetted interns in four seamless steps.</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <h5 class="fw-bold mb-2">Register Company</h5>
+            <p class="text-muted small mb-0">Set up your company profile with domain, size, and branding in under two minutes.</p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <h5 class="fw-bold mb-2">Post Internships</h5>
+            <p class="text-muted small mb-0">Specify required skills, duration, monthly stipend, and location (Remote, Hybrid, or On-site).</p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <h5 class="fw-bold mb-2">Review Candidates</h5>
+            <p class="text-muted small mb-0">Inspect student profiles, CGPA, GitHub repositories, and verified technical assessment results.</p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+          <div class="step-card">
+            <div class="step-number">4</div>
+            <h5 class="fw-bold mb-2">Shortlist & Hire</h5>
+            <p class="text-muted small mb-0">Shortlist candidates, schedule interviews, and finalize your top engineering interns.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Verified Skill Domains Section
+       ======================================================================== -->
+  <section class="py-5 bg-light" id="verified-skills">
+    <div class="container py-4">
+      <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="badge bg-soft-emerald px-3 py-2 rounded-pill fw-semibold mb-2">Technical Rigor</span>
+        <h2 class="display-6 fw-bold text-dark">Pre-Assessed Skill Domains</h2>
+        <p class="text-muted">Our automated assessments evaluate hands-on coding ability, problem solving, and best practices.</p>
+      </div>
+
+      <div class="row g-4 justify-content-center">
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="p-3 bg-white rounded-3 border text-center shadow-xs">
+            <i class="bi bi-cup-hot-fill fs-2 text-danger mb-2 d-block"></i>
+            <h6 class="fw-bold mb-1">Java Core</h6>
+            <small class="text-muted">OOP & Collections</small>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="p-3 bg-white rounded-3 border text-center shadow-xs">
+            <i class="bi bi-gear-wide-connected fs-2 text-success mb-2 d-block"></i>
+            <h6 class="fw-bold mb-1">Spring Boot</h6>
+            <small class="text-muted">REST & JPA</small>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="p-3 bg-white rounded-3 border text-center shadow-xs">
+            <i class="bi bi-filetype-py fs-2 text-primary mb-2 d-block"></i>
+            <h6 class="fw-bold mb-1">Python</h6>
+            <small class="text-muted">Data & Backend</small>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="p-3 bg-white rounded-3 border text-center shadow-xs">
+            <i class="bi bi-database-fill fs-2 text-warning mb-2 d-block"></i>
+            <h6 class="fw-bold mb-1">MySQL</h6>
+            <small class="text-muted">Relational Schemas</small>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="p-3 bg-white rounded-3 border text-center shadow-xs">
+            <i class="bi bi-filetype-js fs-2 text-warning mb-2 d-block"></i>
+            <h6 class="fw-bold mb-1">JavaScript</h6>
+            <small class="text-muted">ES6+ & Web APIs</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Call To Action (CTA) Banner
+       ======================================================================== -->
+  <section class="py-5 bg-white">
+    <div class="container py-3">
+      <div class="cta-employer-banner">
+        <div class="row align-items-center position-relative" style="z-index: 1;">
+          <div class="col-lg-8 mb-4 mb-lg-0">
+            <h2 class="display-6 fw-bold mb-3">Ready to Hire Exceptional Engineering Interns?</h2>
+            <p class="lead mb-0 text-white-50">
+              Create your recruiter account today and gain immediate access to verified student talent from accredited colleges.
+            </p>
+          </div>
+          <div class="col-lg-4 text-lg-end">
+            <div class="d-flex flex-column flex-sm-row flex-lg-column gap-3 justify-content-lg-end">
+              <a href="company-register.html" class="btn btn-lg btn-light text-dark fw-bold px-4 py-3 rounded-3">
+                <i class="bi bi-building-add me-1"></i> Register Company
+              </a>
+              <a href="company-login.html" class="btn btn-lg btn-outline-light fw-semibold px-4 py-3 rounded-3">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to Portal
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Footer
+       ======================================================================== -->
+  <footer class="py-4 border-top bg-light text-muted small">
+    <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+      <div class="d-flex align-items-center gap-2">
+        <div class="brand-icon" style="width: 28px; height: 28px; font-size: 0.9rem;">
+          <i class="bi bi-mortarboard-fill"></i>
+        </div>
+        <span class="fw-bold text-dark">SkillBridge for Employers</span>
+        <span>&copy; 2026 SkillBridge Technologies Inc.</span>
+      </div>
+      <div class="d-flex gap-3">
+        <a href="role-selection.html" class="text-muted text-decoration-none">Role Selection</a>
+        <span>&bull;</span>
+        <a href="index.html" class="text-muted text-decoration-none">Student Portal</a>
+        <span>&bull;</span>
+        <a href="company-login.html" class="text-muted text-decoration-none">Recruiter Sign In</a>
+        <span>&bull;</span>
+        <a href="company-register.html" class="text-muted text-decoration-none">Employer Register</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+</body>
+
+</html>

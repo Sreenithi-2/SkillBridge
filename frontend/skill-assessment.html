@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="SkillBridge Technical Skill Assessment - Evaluate your expertise in Java, Spring Boot, MySQL, Python, JavaScript, HTML/CSS, and Data Structures with real-time timed MCQs and comprehensive diagnostic reports.">
+  <title>Skill Assessment | SkillBridge</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <script>
+    (function () {
+      function getSession(key) {
+        try {
+          var val = localStorage.getItem(key) || sessionStorage.getItem(key);
+          if (!val) return null;
+          var parsed = JSON.parse(val);
+          return (parsed && typeof parsed === 'object') ? parsed : null;
+        } catch (e) {
+          return null;
+        }
+      }
+      function isValidStudent(sess) {
+        if (!sess) return false;
+        var role = (sess.role || sess.authRole || '').toString().toLowerCase();
+        var id = sess.id || sess.studentId || sess.student_id;
+        if (!id || (typeof id === 'string' && !id.trim())) return false;
+        if (role === 'recruiter' || role === 'role_recruiter' || role === 'company') return false;
+        if (sess.companyId || sess.company_id || sess.officialEmail) return false;
+        if (role === 'student' || role === 'role_student' || (!role && (sess.fullName || sess.full_name || sess.email))) return true;
+        return false;
+      }
+      var studSess = getSession('skillbridge_student_session') || getSession('skillbridge_registered_student');
+      if (!isValidStudent(studSess)) {
+        console.warn('[SkillBridge Guard] No authenticated student session on Assessment. Redirecting to login.html');
+        window.location.replace('login.html');
+      }
+    })();
+  </script>
+  <!-- SkillBridge Platform API Configuration -->
+  <script src="js/config.js"></script>
+</head>
+
+<body class="bg-body">
+
+  <div class="dashboard-container">
+
+    <!-- ========================================================================
+         Mobile Sidebar Backdrop
+         ======================================================================== -->
+    <div class="dashboard-sidebar-backdrop" id="dashboardSidebarBackdrop"></div>
+
+    <!-- ========================================================================
+         Fixed Left Sidebar
+         ======================================================================== -->
+    <aside class="dashboard-sidebar" id="dashboardSidebar">
+      <!-- Sidebar Brand Header -->
+      <div class="dashboard-sidebar-header">
+        <a class="brand-logo text-decoration-none" href="index.html">
+          <div class="brand-icon">
+            <i class="bi bi-mortarboard-fill"></i>
+          </div>
+          <span>Skill<span class="text-primary">Bridge</span></span>
+        </a>
+        <button type="button" class="btn btn-sm btn-light border d-lg-none" id="mobileSidebarClose"
+          aria-label="Close Sidebar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <!-- Sidebar Navigation Menu -->
+      <ul class="dashboard-nav-list">
+        <!-- 1. Overview -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="student-dashboard.html#overviewSection" data-title="Dashboard Overview">
+            <i class="bi bi-grid-fill"></i>
+            <span>Overview</span>
+          </a>
+        </li>
+
+        <!-- 2. My Profile -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="profile.html" data-title="Candidate Profile">
+            <i class="bi bi-person-circle"></i>
+            <span>My Profile</span>
+          </a>
+        </li>
+
+        <!-- 3. Skill Assessment (Active Page) -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link active" href="skill-assessment.html" data-title="Technical Skill Assessments">
+            <i class="bi bi-patch-check-fill"></i>
+            <span>Skill Assessment</span>
+            <span class="badge bg-primary text-white px-2 py-0-5 rounded-pill ms-auto">Active</span>
+          </a>
+        </li>
+
+        <!-- 4. My Skills -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="student-dashboard.html#skillsSection" data-title="Technical Skill Inventory">
+            <i class="bi bi-cpu-fill"></i>
+            <span>My Skills</span>
+          </a>
+        </li>
+
+        <!-- 5. Recommended Internships -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="student-dashboard.html#internshipsSection" data-title="Recommended Internships">
+            <i class="bi bi-briefcase-fill"></i>
+            <span>Recommended Internships</span>
+            <span class="badge bg-soft-primary text-primary px-2 py-0-5 rounded-pill ms-auto">6</span>
+          </a>
+        </li>
+
+        <!-- 6. My Applications -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="student-dashboard.html#applicationsSection" data-title="Application Tracking">
+            <i class="bi bi-send-check-fill"></i>
+            <span>My Applications</span>
+            <span class="badge bg-soft-primary text-primary px-2 py-0-5 rounded-pill ms-auto">5</span>
+          </a>
+        </li>
+
+        <!-- 7. Resume Management -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="profile.html#resumeCard" data-title="Resume & Documents">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>Resume Management</span>
+          </a>
+        </li>
+
+        <!-- 8. Settings -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="student-dashboard.html#settingsSection" data-title="Account Settings">
+            <i class="bi bi-gear-fill"></i>
+            <span>Settings</span>
+          </a>
+        </li>
+
+        <li class="dashboard-nav-item pt-3 border-top mt-2">
+          <!-- 9. Logout -->
+          <a class="dashboard-nav-link text-danger dashboard-logout-trigger" role="button">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Sidebar User Profile Mini-Card -->
+      <div class="dashboard-sidebar-footer">
+        <div class="d-flex align-items-center gap-2">
+          <div
+            class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold user-avatar-initials flex-shrink-0"
+            id="sidebarAvatarInitials"
+            style="width: 38px; height: 38px; font-size: 0.85rem;">
+            YS
+          </div>
+          <img src="" alt="Profile Photo" class="sidebar-user-avatar-img d-none flex-shrink-0" id="sidebarAvatarImg" style="width: 38px; height: 38px;">
+          <div class="overflow-hidden">
+            <div class="fw-bold small text-dark text-truncate user-full-name">Yazh S</div>
+            <small class="text-muted text-truncate d-block" style="font-size: 0.72rem;">B.E. Final Year</small>
+          </div>
+          <button class="btn btn-sm btn-link text-muted ms-auto p-0 dashboard-logout-trigger" title="Log Out">
+            <i class="bi bi-box-arrow-right fs-6"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ========================================================================
+         Main Content Area
+         ======================================================================== -->
+    <div class="dashboard-main">
+
+      <!-- Top Sticky Dashboard Bar -->
+      <header class="dashboard-topbar d-flex justify-content-between align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <!-- Mobile Sidebar Toggle Hamburger -->
+          <button class="btn btn-sm btn-light border d-lg-none" id="mobileSidebarToggle" aria-label="Open Sidebar Menu">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+
+          <div>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a href="index.html" class="text-decoration-none text-muted">SkillBridge</a></li>
+                <li class="breadcrumb-item"><a href="student-dashboard.html" class="text-decoration-none text-muted">Student Portal</a></li>
+                <li class="breadcrumb-item active text-primary fw-semibold">Skill Assessment</li>
+              </ol>
+            </nav>
+            <h5 class="fw-bold text-dark mb-0 d-none d-sm-block">Technical Skill Assessment</h5>
+          </div>
+        </div>
+
+        <!-- Top Right Actions & Student Profile Dropdown -->
+        <div class="d-flex align-items-center gap-2 gap-sm-3">
+          <!-- Demo Assessment Badge -->
+          <span class="badge bg-soft-primary text-primary px-3 py-1 rounded-pill d-none d-md-inline-flex align-items-center gap-1 border border-primary-subtle small">
+            <i class="bi bi-patch-check-fill"></i> AI Evaluation Engine (Demo)
+          </span>
+
+          <!-- Return to Dashboard Button -->
+          <a href="student-dashboard.html" class="btn btn-outline-custom btn-sm px-3 d-none d-sm-inline-flex align-items-center gap-1">
+            <i class="bi bi-grid-fill"></i>
+            <span>Dashboard</span>
+          </a>
+
+          <!-- User Profile Dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-light border rounded-pill d-flex align-items-center gap-2 py-1 px-2"
+              type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <div
+                class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold user-avatar-initials"
+                id="topbarAvatarInitials"
+                style="width: 30px; height: 30px; font-size: 0.75rem;">
+                YS
+              </div>
+              <img src="" alt="Profile Photo" class="topbar-user-avatar-img d-none" id="topbarAvatarImg" style="width: 30px; height: 30px;">
+              <span class="fw-semibold small text-dark d-none d-sm-inline user-full-name">Yazh S</span>
+              <i class="bi bi-chevron-down text-muted small me-1"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border p-2">
+              <li class="px-2 py-1">
+                <div class="fw-bold small text-dark user-full-name">Yazh S</div>
+                <small class="text-muted">B.E. Final Year</small>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <a class="dropdown-item small rounded-2" href="profile.html">
+                  <i class="bi bi-person me-2"></i> View Profile
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item small rounded-2" href="student-dashboard.html">
+                  <i class="bi bi-grid me-2"></i> Dashboard Overview
+                </a>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <a class="dropdown-item small rounded-2 text-danger dashboard-logout-trigger" href="#">
+                  <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dashboard Scrollable Body -->
+      <div class="dashboard-body">
+
+        <!-- ====================================================================
+             SCREEN 1: ASSESSMENT CATALOG & PAST ATTEMPTS OVERVIEW
+             ==================================================================== -->
+        <section id="overviewScreenSection">
+          <!-- Overview Hero Banner -->
+          <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 text-white"
+            style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%); position: relative; overflow: hidden;">
+            <div class="position-absolute end-0 top-0 bottom-0 opacity-10 d-none d-md-flex align-items-center pe-5 pointer-events-none">
+              <i class="bi bi-patch-check" style="font-size: 14rem;"></i>
+            </div>
+            <div class="position-relative" style="max-width: 680px; z-index: 1;">
+              <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white bg-opacity-15 backdrop-blur text-white text-xs fw-semibold mb-3">
+                <i class="bi bi-cpu-fill text-warning"></i> Standardized Skill Certification
+              </div>
+              <h2 class="display-6 fw-bold mb-2">Test Your Skills. Unlock Verified Internships.</h2>
+              <p class="text-white-50 mb-4 fs-6">
+                Complete 10-minute adaptive evaluations in Java, Spring Boot, MySQL, Python, JavaScript, HTML/CSS, and Data Structures.
+                Earn verified demo credentials to boost your candidate match score by up to 35%.
+              </p>
+              <div class="d-flex flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-2 bg-white bg-opacity-10 px-3 py-2 rounded-3 border border-white-15">
+                  <i class="bi bi-patch-check-fill text-emerald"></i>
+                  <span class="small fw-semibold">10 Real Technical MCQs Each</span>
+                </div>
+                <div class="d-flex align-items-center gap-2 bg-white bg-opacity-10 px-3 py-2 rounded-3 border border-white-15">
+                  <i class="bi bi-stopwatch-fill text-warning"></i>
+                  <span class="small fw-semibold">10-Minute Timed Runner</span>
+                </div>
+                <div class="d-flex align-items-center gap-2 bg-white bg-opacity-10 px-3 py-2 rounded-3 border border-white-15">
+                  <i class="bi bi-bar-chart-line-fill text-info"></i>
+                  <span class="small fw-semibold">Real Score & Answer Evaluation</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Catalog Header -->
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div>
+              <h4 class="fw-bold text-dark mb-1">Available Technical Assessments</h4>
+              <p class="text-muted small mb-0">Select an assessment to evaluate your knowledge and view actionable feedback.</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-soft-primary text-primary px-3 py-2 rounded-pill small">
+                <i class="bi bi-collection me-1"></i> 7 Technologies Available
+              </span>
+            </div>
+          </div>
+
+          <!-- Assessment Cards Grid (Rendered by JS) -->
+          <div class="row g-3 mb-5" id="assessmentCardsContainer">
+            <!-- Dynamically populated from AssessmentData.assessments in assessment.js -->
+          </div>
+
+          <!-- Past Attempts & Performance History -->
+          <div class="card border shadow-xs rounded-4 bg-white p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+              <div>
+                <h5 class="fw-bold text-dark mb-1">
+                  <i class="bi bi-clock-history text-primary me-2"></i>Assessment History & Performance
+                </h5>
+                <p class="text-muted small mb-0">Your verified assessment results and accuracy scores stored locally.</p>
+              </div>
+              <span class="badge bg-light text-muted border px-3 py-2 rounded-pill small" id="historyTotalTestsCount">
+                0 Assessments Taken
+              </span>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table align-middle table-hover mb-0">
+                <thead class="table-light text-muted small text-uppercase">
+                  <tr>
+                    <th scope="col" style="font-size: 0.75rem;">Technology / Test</th>
+                    <th scope="col" style="font-size: 0.75rem;">Score & Accuracy</th>
+                    <th scope="col" style="font-size: 0.75rem;">Proficiency Tier</th>
+                    <th scope="col" style="font-size: 0.75rem;">Time Taken</th>
+                    <th scope="col" style="font-size: 0.75rem;">Completed Date</th>
+                    <th scope="col" class="text-end" style="font-size: 0.75rem;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="assessmentHistoryTableBody">
+                  <!-- Populated dynamically by assessment.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             SCREEN 2: LIVE QUIZ RUNNER (HIDDEN INITIALLY)
+             ==================================================================== -->
+        <section id="quizRunnerSection" class="d-none">
+          <!-- Quiz Top Action Header -->
+          <div class="card border shadow-xs rounded-4 bg-white p-4 mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+              <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <span class="badge bg-primary px-2 py-1 rounded-pill small" id="runnerQuizCategory">Backend</span>
+                  <span class="badge bg-soft-amber text-warning px-2 py-1 rounded-pill small" id="runnerQuizDifficulty">Intermediate</span>
+                  <span class="text-muted small">&bull; Single Choice Evaluation</span>
+                </div>
+                <h4 class="fw-bold text-dark mb-0" id="runnerQuizTitle">Java Core & OOP</h4>
+              </div>
+
+              <!-- Live Timer & Exit -->
+              <div class="d-flex align-items-center gap-3">
+                <div class="timer-box" id="quizTimerDisplay">
+                  <i class="bi bi-clock-history me-1"></i> 10:00
+                </div>
+                <button type="button" class="btn btn-outline-danger btn-sm px-3" id="quizExitBtn">
+                  <i class="bi bi-x-circle me-1"></i> Exit
+                </button>
+              </div>
+            </div>
+
+            <!-- Quiz Progress Bar -->
+            <div class="mt-3">
+              <div class="d-flex justify-content-between text-muted small mb-1" style="font-size: 0.75rem;">
+                <span>Assessment Completion Progress</span>
+                <span class="fw-semibold text-primary" id="navAnsweredCount">0 Answered</span>
+              </div>
+              <div class="progress" style="height: 6px;">
+                <div class="progress-bar bg-primary" id="quizProgressBar" role="progressbar" style="width: 0%;"
+                  aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Quiz Content Layout -->
+          <div class="row g-4">
+            <!-- Left 8 Columns: Active Question Area -->
+            <div class="col-12 col-lg-8">
+              <div class="card border shadow-xs rounded-4 bg-white p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <span class="badge bg-soft-primary text-primary px-3 py-1 rounded-pill fw-semibold" id="runnerQuestionNumberBadge">
+                    Question 1 of 10
+                  </span>
+                  <button type="button" class="btn btn-sm btn-link text-muted text-decoration-none p-0" id="quizClearChoiceBtn">
+                    <i class="bi bi-eraser me-1"></i>Clear Selection
+                  </button>
+                </div>
+
+                <!-- Question Text -->
+                <h5 class="fw-bold text-dark mb-4 lh-base" id="runnerQuestionText">
+                  Loading question text...
+                </h5>
+
+                <!-- 4 Options Container -->
+                <div class="d-flex flex-column gap-3 mb-4" id="runnerOptionsContainer">
+                  <!-- Dynamically rendered options by assessment.js -->
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="d-flex justify-content-between align-items-center pt-4 border-top mt-2">
+                  <button type="button" class="btn btn-outline-custom px-4" id="quizPrevBtn">
+                    <i class="bi bi-arrow-left me-1"></i> Previous
+                  </button>
+                  <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-primary-custom px-4" id="quizNextBtn">
+                      Next Question <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right 4 Columns: Question Palette & Submission -->
+            <div class="col-12 col-lg-4">
+              <div class="card border shadow-xs rounded-4 bg-white p-4 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="fw-bold text-dark mb-0">Question Navigator</h6>
+                  <span class="badge bg-light text-muted border small" id="navUnansweredCount">10 Unanswered</span>
+                </div>
+
+                <!-- 1 to 10 Numbers Grid -->
+                <div class="question-nav-grid mb-3" id="questionNavigatorGrid">
+                  <!-- Populated dynamically by assessment.js -->
+                </div>
+
+                <div class="d-flex flex-column gap-2 pt-3 border-top small text-muted" style="font-size: 0.78rem;">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="rounded-1 d-inline-block shadow-xs" style="width: 14px; height: 14px; background-color: #4f46e5; border: 1.5px solid #4f46e5;">&nbsp;</span>
+                    <span class="text-dark fw-medium">Blue = Currently Active Question</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="rounded-1 d-inline-block shadow-xs" style="width: 14px; height: 14px; background-color: #10b981; border: 1.5px solid #10b981;">&nbsp;</span>
+                    <span class="text-dark fw-medium">Green = Answered Question</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="rounded-1 d-inline-block shadow-xs" style="width: 14px; height: 14px; background-color: #ffffff; border: 1.5px solid #4f46e5;">&nbsp;</span>
+                    <span class="text-dark fw-medium">White = Unanswered Question</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Final Submit Card -->
+              <div class="card border shadow-xs rounded-4 bg-white p-4 text-center">
+                <i class="bi bi-send-check text-primary fs-1 mb-2"></i>
+                <h6 class="fw-bold text-dark mb-1">Ready to finish?</h6>
+                <p class="text-muted small mb-3">Submit your answers to generate your real score, breakdown, and diagnostic feedback.</p>
+                <button type="button" class="btn btn-success w-100 py-2 fw-semibold" id="quizSubmitBtn">
+                  <i class="bi bi-check2-circle me-1"></i> Submit Assessment
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             SCREEN 3: ACCURATE EVALUATION & RESULTS REVIEW (HIDDEN INITIALLY)
+             ==================================================================== -->
+        <section id="resultsScreenSection" class="d-none">
+          <!-- Result Summary Banner -->
+          <div class="card border shadow-xs rounded-4 bg-white p-4 p-md-5 mb-4">
+            <div class="row align-items-center g-4">
+              <!-- Radial Dial / Score Indicator -->
+              <div class="col-12 col-md-4 text-center border-end-md">
+                <div class="result-score-circle mx-auto mb-3" id="resultScoreCircle" style="--score-pct: 0;">
+                  <span class="percentage" id="resultScorePercentage">0%</span>
+                  <span class="ratio text-muted small" id="resultScoreRatio">0 / 10</span>
+                </div>
+                <div id="resultPerformanceTierBadge" class="badge bg-primary px-3 py-1 rounded-pill mb-1">
+                  Proficiency: Evaluated (Demo Result)
+                </div>
+                <div class="text-muted small" style="font-size: 0.75rem;">Verified Evaluation Engine</div>
+              </div>
+
+              <!-- Score Details & Diagnostics -->
+              <div class="col-12 col-md-8">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                  <div>
+                    <span class="badge bg-soft-primary text-primary px-2 py-1 rounded-pill small mb-1">Performance Report</span>
+                    <h3 class="fw-bold text-dark mb-1" id="resultTechnologyTitle">Java Core & OOP Assessment</h3>
+                    <p class="text-muted small mb-0">Evaluation completed with verified answer key mapping.</p>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-custom btn-sm px-3" id="resultRetakeBtn">
+                      <i class="bi bi-arrow-clockwise me-1"></i> Retake Test
+                    </button>
+                    <button type="button" class="btn btn-primary-custom btn-sm px-3" id="resultReturnCatalogBtn">
+                      <i class="bi bi-grid-fill me-1"></i> Assessment Catalog
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="row g-2 mb-3">
+                  <div class="col-4">
+                    <div class="p-3 bg-light rounded-3 text-center border">
+                      <div class="text-success fw-bold fs-4" id="resultCorrectCount">0</div>
+                      <small class="text-muted" style="font-size: 0.75rem;">Correct Answers</small>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="p-3 bg-light rounded-3 text-center border">
+                      <div class="text-danger fw-bold fs-4" id="resultIncorrectCount">0</div>
+                      <small class="text-muted" style="font-size: 0.75rem;">Incorrect / Skipped</small>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="p-3 bg-light rounded-3 text-center border">
+                      <div class="text-primary fw-bold fs-4" id="resultTimeTaken">00:00</div>
+                      <small class="text-muted" style="font-size: 0.75rem;">Time Elapsed</small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Strengths & Areas for Improvement -->
+                <div class="row g-3">
+                  <div class="col-12 col-lg-6">
+                    <div class="p-3 rounded-3 bg-soft-emerald border border-success-subtle h-100">
+                      <h6 class="fw-bold text-success mb-2 small">
+                        <i class="bi bi-shield-check me-1"></i>Demonstrated Strengths
+                      </h6>
+                      <ul class="list-unstyled mb-0 small text-dark" id="resultStrengthsContainer">
+                        <!-- Populated dynamically -->
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="col-12 col-lg-6">
+                    <div class="p-3 rounded-3 bg-soft-amber border border-warning-subtle h-100">
+                      <h6 class="fw-bold text-warning-emphasis mb-2 small">
+                        <i class="bi bi-lightning-charge me-1"></i>Recommended Next Steps
+                      </h6>
+                      <ul class="list-unstyled mb-0 small text-dark" id="resultImprovementsContainer">
+                        <!-- Populated dynamically -->
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Question-by-Question Detailed Review -->
+          <div class="card border shadow-xs rounded-4 bg-white p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h5 class="fw-bold text-dark mb-1">
+                  <i class="bi bi-journal-check text-primary me-2"></i>Detailed Question Review & Explanations
+                </h5>
+                <p class="text-muted small mb-0">Learn from each question with comprehensive technical rationale.</p>
+              </div>
+            </div>
+
+            <!-- Review Items Container -->
+            <div id="resultQuestionsReviewList">
+              <!-- Rendered dynamically by assessment.js -->
+            </div>
+          </div>
+        </section>
+
+      </div><!-- /.dashboard-body -->
+
+    </div><!-- /.dashboard-main -->
+
+  </div><!-- /.dashboard-container -->
+
+  <!-- ========================================================================
+       Submit Confirmation Modal
+       ======================================================================== -->
+  <div class="modal fade" id="submitConfirmationModal" tabindex="-1" aria-labelledby="submitConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold text-dark" id="submitConfirmationModalLabel">
+            <i class="bi bi-question-circle-fill text-primary me-2"></i>Submit Technical Assessment?
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body py-3">
+          <p class="text-muted mb-2">
+            Are you sure you want to finish and submit your answers for evaluation?
+          </p>
+          <div class="p-3 bg-light rounded-3 border mb-3" id="modalAnsweredStats">
+            Loading submission statistics...
+          </div>
+          <div class="alert alert-light border small text-muted mb-0">
+            <i class="bi bi-info-circle-fill text-primary me-1"></i>
+            Once submitted, your responses will be scored immediately and an in-depth breakdown with explanations will be displayed.
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-outline-custom px-4" data-bs-dismiss="modal">Resume Test</button>
+          <button type="button" class="btn btn-success px-4" id="confirmSubmitModalBtn">Yes, Submit Assessment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5.3 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Technical Assessment Engine -->
+  <script src="js/assessment.js"></script>
+
+</body>
+
+</html>

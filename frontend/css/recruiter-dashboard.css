@@ -1,0 +1,907 @@
+/* ==========================================================================
+   SkillBridge Recruiter Dashboard Stylesheet
+   Exact Visual Design System of SkillBridge Student Dashboard
+   Palette: Plus Jakarta Sans, Primary Indigo (#4f46e5), Cyan (#06b6d4), Emerald (#10b981), Amber (#f59e0b), White & Slate
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Legacy & Theme Aliases */
+  --sb-navy-900: #0f172a;
+  --sb-primary: #4f46e5;
+  --sb-purple: #7c3aed;
+
+  /* Primary & Accent Palette */
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-dark: #312e81;
+  --primary-light: #eef2ff;
+  --accent-cyan: #06b6d4;
+  --accent-cyan-light: #ecfeff;
+  --accent-emerald: #10b981;
+  --accent-emerald-light: #ecfdf5;
+  --accent-amber: #f59e0b;
+  --accent-amber-light: #fffbeb;
+  --accent-purple: #7c3aed;
+  --accent-purple-light: #f5f3ff;
+  --accent-rose: #f43f5e;
+  --accent-rose-light: #fff1f2;
+
+  /* Neutrals & Surfaces */
+  --dark: #0f172a;
+  --dark-surface: #1e293b;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  --bg-body: #f8fafc;
+  --bg-card: #ffffff;
+  --border-color: #e2e8f0;
+  --border-light: #f1f5f9;
+
+  /* Elevations & Shadows */
+  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 20px 25px -5px rgba(15, 23, 42, 0.09), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+  --shadow-glow: 0 10px 30px -10px rgba(79, 70, 229, 0.35);
+
+  /* Radius & Transitions */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-full: 9999px;
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Global Reset & Base
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+}
+
+body.bg-body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text-main);
+  background-color: var(--bg-body);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition);
+}
+
+/* Typography & Helpers */
+.text-gradient-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-purple) 50%, var(--accent-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-soft-primary { background-color: var(--primary-light) !important; color: var(--primary) !important; }
+.bg-soft-cyan    { background-color: var(--accent-cyan-light) !important; color: var(--accent-cyan) !important; }
+.bg-soft-emerald { background-color: var(--accent-emerald-light) !important; color: var(--accent-emerald) !important; }
+.bg-soft-amber   { background-color: var(--accent-amber-light) !important; color: var(--accent-amber) !important; }
+.bg-soft-purple  { background-color: var(--accent-purple-light) !important; color: var(--accent-purple) !important; }
+.bg-soft-rose    { background-color: var(--accent-rose-light) !important; color: var(--accent-rose) !important; }
+
+/* Buttons & Badges */
+.btn-primary-custom {
+  background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+  padding: 0.65rem 1.4rem;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.btn-primary-custom:hover {
+  background: linear-gradient(135deg, var(--primary-hover) 0%, #4f46e5 100%);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-outline-custom {
+  background-color: transparent;
+  color: var(--text-main);
+  border: 1.5px solid var(--border-color);
+  font-weight: 600;
+  padding: 0.65rem 1.35rem;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.btn-outline-custom:hover {
+  background-color: #ffffff;
+  color: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ==========================================================================
+   Dashboard Layout Structure
+   ========================================================================== */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-body);
+  position: relative;
+}
+
+/* Fixed Desktop Sidebar */
+.dashboard-sidebar {
+  width: 270px;
+  background-color: #ffffff;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1040;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dashboard-sidebar-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--dark);
+}
+
+.brand-icon {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-cyan) 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.15rem;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.28);
+}
+
+.dashboard-nav-list {
+  list-style: none;
+  padding: 1rem 0.75rem;
+  margin: 0;
+  flex-grow: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.dashboard-nav-item {
+  margin-bottom: 0.25rem;
+}
+
+.dashboard-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 1rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.92rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: var(--transition);
+  cursor: pointer;
+  border-left: 3px solid transparent;
+}
+
+.dashboard-nav-link:hover {
+  color: var(--primary);
+  background-color: #f1f5f9;
+}
+
+.dashboard-nav-link.active {
+  color: var(--primary);
+  background-color: var(--primary-light);
+  font-weight: 600;
+  border-left-color: var(--primary);
+}
+
+.dashboard-nav-link i {
+  font-size: 1.15rem;
+  width: 22px;
+  text-align: center;
+}
+
+.dashboard-nav-link .badge {
+  margin-left: auto;
+}
+
+.dashboard-sidebar-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border-color);
+  background-color: #fafbfd;
+}
+
+/* Sidebar Backdrop on Mobile */
+.dashboard-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 1035;
+  display: none;
+}
+
+.dashboard-sidebar-backdrop.show {
+  display: block;
+}
+
+/* ==========================================================================
+   Dashboard Main Content Area
+   ========================================================================== */
+.dashboard-main {
+  margin-left: 270px;
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-topbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.85rem 1.75rem;
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+}
+
+.dashboard-content {
+  padding: 1.75rem;
+  flex-grow: 1;
+}
+
+.dashboard-view-section {
+  display: none;
+}
+
+.dashboard-view-section.active {
+  display: block;
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   Stat KPI Cards (Identical to Student Dashboard)
+   ========================================================================== */
+.stat-kpi-card,
+.kpi-metric-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.35rem;
+  transition: var(--transition);
+  height: 100%;
+  box-shadow: var(--shadow-xs);
+}
+
+.stat-kpi-card:hover,
+.kpi-metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  border-color: #cbd5e1;
+}
+
+.stat-icon-wrapper {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Status Pills & Timeline Colors
+   ========================================================================== */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.status-pill::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-pill-applied {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+.status-pill-applied::before { background-color: var(--primary); }
+
+.status-pill-review {
+  background-color: var(--accent-amber-light);
+  color: #b45309;
+}
+.status-pill-review::before { background-color: var(--accent-amber); }
+
+.status-pill-shortlisted {
+  background-color: var(--accent-purple-light);
+  color: var(--accent-purple);
+}
+.status-pill-shortlisted::before { background-color: var(--accent-purple); }
+
+.status-pill-interview {
+  background-color: var(--accent-cyan-light);
+  color: #0891b2;
+}
+.status-pill-interview::before { background-color: var(--accent-cyan); }
+
+.status-pill-selected {
+  background-color: var(--accent-emerald-light);
+  color: #047857;
+}
+.status-pill-selected::before { background-color: var(--accent-emerald); }
+
+.status-pill-rejected {
+  background-color: var(--accent-rose-light);
+  color: #b91c1c;
+}
+.status-pill-rejected::before { background-color: var(--accent-rose); }
+
+/* AI Match Meter */
+.ai-match-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ai-match-bar {
+  flex-grow: 1;
+  max-width: 80px;
+  height: 6px;
+  background-color: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.ai-match-fill {
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--primary), var(--accent-purple));
+}
+
+.ai-match-percent {
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--dark);
+  min-width: 35px;
+}
+
+/* ==========================================================================
+   Analytics Charts (SVG Donut & Weekly Bars)
+   ========================================================================== */
+.chart-donut-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+  flex-wrap: wrap;
+}
+
+.donut-chart-svg-container {
+  width: 140px;
+  height: 140px;
+  position: relative;
+  flex-shrink: 0;
+  margin: 0 auto;
+}
+
+.donut-chart-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.donut-chart-center-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.donut-center-total {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--dark);
+  line-height: 1;
+}
+
+.donut-center-sub {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.donut-legend-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem 1rem;
+  flex-grow: 1;
+}
+
+.donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+}
+
+.donut-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.weekly-bar-chart-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 140px;
+  padding: 0.5rem 0.5rem 0;
+  gap: 0.75rem;
+}
+
+.weekly-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.weekly-bar-fill {
+  width: 100%;
+  max-width: 38px;
+  background: linear-gradient(180deg, var(--primary) 0%, rgba(79, 70, 229, 0.4) 100%);
+  border-radius: 6px 6px 0 0;
+  transition: height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 8px;
+}
+
+.weekly-bar-fill:hover {
+  background: linear-gradient(180deg, var(--accent-purple) 0%, rgba(124, 58, 237, 0.6) 100%);
+}
+
+.weekly-bar-val {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 4px;
+}
+
+.weekly-bar-day {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* ==========================================================================
+   Chat Messaging View (Enhanced Two-Panel Architecture)
+   ========================================================================== */
+.conversations-thread-list {
+  max-height: 570px;
+  overflow-y: auto;
+}
+
+.convo-thread-item {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  background-color: #ffffff;
+}
+
+.convo-thread-item:hover {
+  background-color: #f8fafc;
+}
+
+.convo-thread-item.active {
+  background-color: #f1f5f9;
+  border-left: 3px solid var(--primary);
+}
+
+.convo-thread-item.has-unread {
+  background-color: rgba(79, 70, 229, 0.04);
+}
+
+.convo-thread-item.has-unread .convo-candidate-name {
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.convo-thread-item.has-unread .convo-last-msg {
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.chat-bubble {
+  max-width: 75%;
+  padding: 0.75rem 1.1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  word-break: break-word;
+}
+
+.chat-bubble-candidate {
+  align-self: flex-start;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  color: var(--dark);
+  border-bottom-left-radius: 2px;
+}
+
+.chat-bubble-recruiter {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
+  color: #ffffff;
+  border-bottom-right-radius: 2px;
+}
+
+.chat-bubble-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  margin-top: 4px;
+}
+
+.chat-bubble-recruiter .chat-bubble-meta {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.chat-bubble-candidate .chat-bubble-meta {
+  color: var(--text-muted);
+}
+
+.chat-status-tick {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.chat-status-tick.read {
+  color: #67e8f9 !important; /* light cyan for read double-check on purple background */
+}
+
+.chat-template-chip {
+  transition: var(--transition);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chat-template-chip:hover {
+  background-color: var(--primary-light) !important;
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+.chat-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Responsive Breakpoints (Identical to Student Dashboard)
+   ========================================================================== */
+@media (max-width: 991.98px) {
+  .dashboard-sidebar {
+    transform: translateX(-100%);
+  }
+
+  .dashboard-sidebar.show {
+    transform: translateX(0);
+  }
+
+  .dashboard-main {
+    margin-left: 0;
+  }
+
+  .dashboard-content {
+    padding: 1.15rem;
+  }
+
+  .dashboard-topbar {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* ==========================================================================
+   Offers & Selection Module Styles
+   ========================================================================== */
+.status-pill-draft {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+.status-pill-draft::before { background-color: #94a3b8; }
+
+.status-pill-released {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+.status-pill-released::before { background-color: var(--primary); }
+
+.status-pill-viewed {
+  background-color: var(--accent-cyan-light);
+  color: #0891b2;
+}
+.status-pill-viewed::before { background-color: var(--accent-cyan); }
+
+.status-pill-accepted {
+  background-color: var(--accent-emerald-light);
+  color: #047857;
+}
+.status-pill-accepted::before { background-color: var(--accent-emerald); }
+
+.status-pill-expired {
+  background-color: var(--accent-amber-light);
+  color: #b45309;
+}
+.status-pill-expired::before { background-color: var(--accent-amber); }
+
+.status-pill-withdrawn {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  text-decoration: line-through;
+}
+.status-pill-withdrawn::before { background-color: #9ca3af; }
+
+/* Shortlisted Candidate Selection Card */
+.eligible-candidate-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  background-color: #ffffff;
+  transition: var(--transition);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.eligible-candidate-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+.eligible-candidate-card.has-offer {
+  background-color: #fafbfd;
+  border-style: dashed;
+}
+
+/* Formal Corporate Offer Letter Document */
+.offer-letter-doc {
+  background-color: #ffffff;
+  color: #1e293b;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  padding: 2.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  max-width: 820px;
+  margin: 0 auto;
+  box-shadow: var(--shadow-sm);
+}
+
+.offer-letterhead {
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.offer-terms-table {
+  width: 100%;
+  margin: 1.25rem 0;
+  border-collapse: collapse;
+}
+
+.offer-terms-table th,
+.offer-terms-table td {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #e2e8f0;
+  font-size: 0.88rem;
+}
+
+.offer-terms-table th {
+  background-color: #f8fafc;
+  font-weight: 600;
+  color: #334155;
+  width: 35%;
+}
+
+.offer-signatures {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px dashed #cbd5e1;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .offer-letter-doc, .offer-letter-doc * {
+    visibility: visible;
+  }
+  .offer-letter-doc {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20mm;
+    border: none;
+    box-shadow: none;
+  }
+}
+
+/* ==========================================================================
+   Recruiter Dashboard Settings Module Styles
+   ========================================================================== */
+.settings-tab-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: var(--transition);
+  border: 1px solid transparent;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-tab-link i {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.settings-tab-link:hover {
+  background-color: #f1f5f9;
+  color: var(--primary);
+}
+
+.settings-tab-link:hover i {
+  color: var(--primary);
+}
+
+.settings-tab-link.active {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(124, 58, 237, 0.08) 100%);
+  color: var(--primary);
+  font-weight: 600;
+  border-color: rgba(79, 70, 229, 0.2);
+}
+
+.settings-tab-link.active i {
+  color: var(--primary);
+}
+
+.toggle-pwd-btn {
+  border-color: #cbd5e1;
+  color: #64748b;
+}
+
+.toggle-pwd-btn:hover {
+  background-color: #f8fafc;
+  color: var(--primary);
+}
+
+/* Password Strength Indicator States */
+.pwd-strength-weak {
+  background-color: #ef4444 !important;
+  width: 25% !important;
+}
+
+.pwd-strength-fair {
+  background-color: #f59e0b !important;
+  width: 50% !important;
+}
+
+.pwd-strength-good {
+  background-color: #06b6d4 !important;
+  width: 75% !important;
+}
+
+.pwd-strength-strong {
+  background-color: #10b981 !important;
+  width: 100% !important;
+}
+
+/* Team Management Role Badges */
+.badge-role-admin {
+  background-color: #f5f3ff;
+  color: #7c3aed;
+  border: 1px solid #ddd6fe;
+}
+
+.badge-role-manager {
+  background-color: #eef2ff;
+  color: #4f46e5;
+  border: 1px solid #c7d2fe;
+}
+
+.badge-role-recruiter {
+  background-color: #ecfeff;
+  color: #0891b2;
+  border: 1px solid #a5f3fc;
+}
+
+/* Integration Card Transitions */
+.toggle-integration-btn {
+  min-width: 95px;
+}
+

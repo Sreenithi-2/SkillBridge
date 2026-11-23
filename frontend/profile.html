@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="SkillBridge Student Profile - Manage candidate personal details, academic background, technical skills, portfolio links, and resume document.">
+  <title>Student Profile | SkillBridge</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <script>
+    (function () {
+      function getSession(key) {
+        try {
+          var val = localStorage.getItem(key) || sessionStorage.getItem(key);
+          if (!val) return null;
+          var parsed = JSON.parse(val);
+          return (parsed && typeof parsed === 'object') ? parsed : null;
+        } catch (e) {
+          return null;
+        }
+      }
+      function isValidStudent(sess) {
+        if (!sess) return false;
+        var role = (sess.role || sess.authRole || '').toString().toLowerCase();
+        var id = sess.id || sess.studentId || sess.student_id;
+        if (!id || (typeof id === 'string' && !id.trim())) return false;
+        if (role === 'recruiter' || role === 'role_recruiter' || role === 'company') return false;
+        if (sess.companyId || sess.company_id || sess.officialEmail) return false;
+        if (role === 'student' || role === 'role_student' || (!role && (sess.fullName || sess.full_name || sess.email))) return true;
+        return false;
+      }
+      var studSess = getSession('skillbridge_student_session') || getSession('skillbridge_registered_student');
+      if (!isValidStudent(studSess)) {
+        console.warn('[SkillBridge Guard] No authenticated student session on Profile. Redirecting to login.html');
+        window.location.replace('login.html');
+      }
+    })();
+  </script>
+  <!-- SkillBridge Platform API Configuration -->
+  <script src="js/config.js"></script>
+</head>
+
+<body class="bg-body">
+
+  <div class="dashboard-container">
+
+    <!-- ========================================================================
+         Mobile Sidebar Backdrop
+         ======================================================================== -->
+    <div class="dashboard-sidebar-backdrop" id="dashboardSidebarBackdrop"></div>
+
+    <!-- ========================================================================
+         Fixed Left Sidebar
+         ======================================================================== -->
+    <aside class="dashboard-sidebar" id="dashboardSidebar">
+      <!-- Sidebar Brand Header -->
+      <div class="dashboard-sidebar-header">
+        <a class="brand-logo text-decoration-none" href="index.html">
+          <div class="brand-icon">
+            <i class="bi bi-mortarboard-fill"></i>
+          </div>
+          <span>Skill<span class="text-primary">Bridge</span></span>
+        </a>
+        <button type="button" class="btn btn-sm btn-light border d-lg-none" id="mobileSidebarClose"
+          aria-label="Close Sidebar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <!-- Sidebar Navigation Menu -->
+      <ul class="dashboard-nav-list">
+        <!-- 1. Overview -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="student-dashboard.html#overviewSection" data-title="Dashboard Overview">
+            <i class="bi bi-grid-fill"></i>
+            <span>Overview</span>
+          </a>
+        </li>
+
+        <!-- 2. My Profile (Active Page) -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link active" href="profile.html" data-title="Candidate Profile">
+            <i class="bi bi-person-circle"></i>
+            <span>My Profile</span>
+          </a>
+        </li>
+
+        <!-- 3. Skill Assessment -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="skill-assessment.html" data-title="AI Skill Assessments">
+            <i class="bi bi-patch-check-fill"></i>
+            <span>Skill Assessment</span>
+            <span class="badge bg-light text-muted border px-2 py-0-5 rounded-pill ms-auto">Tests</span>
+          </a>
+        </li>
+
+        <!-- 4. My Skills -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="student-dashboard.html#skillsSection" data-title="Technical Skill Inventory">
+            <i class="bi bi-cpu-fill"></i>
+            <span>My Skills</span>
+          </a>
+        </li>
+
+        <!-- 5. Recommended Internships -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="student-dashboard.html#internshipsSection" data-title="Recommended Internships">
+            <i class="bi bi-briefcase-fill"></i>
+            <span>Recommended Internships</span>
+            <span class="badge bg-primary text-white px-2 py-0-5 rounded-pill ms-auto">6</span>
+          </a>
+        </li>
+
+        <!-- 6. My Applications -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="student-dashboard.html#applicationsSection" data-title="Application Tracking">
+            <i class="bi bi-send-check-fill"></i>
+            <span>My Applications</span>
+          </a>
+        </li>
+
+        <!-- 7. Resume Management -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#resumeCard" data-title="Resume & Documents">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>Resume Management</span>
+          </a>
+        </li>
+
+        <!-- 8. Settings -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="student-dashboard.html#settingsSection" data-title="Account Settings">
+            <i class="bi bi-gear-fill"></i>
+            <span>Settings</span>
+          </a>
+        </li>
+
+        <li class="dashboard-nav-item pt-3 border-top mt-2">
+          <!-- 9. Logout -->
+          <a class="dashboard-nav-link text-danger dashboard-logout-trigger" role="button">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Sidebar User Profile Mini-Card -->
+      <div class="dashboard-sidebar-footer">
+        <div class="d-flex align-items-center gap-2">
+          <div
+            class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold user-avatar-initials flex-shrink-0"
+            id="sidebarAvatarInitials"
+            style="width: 38px; height: 38px; font-size: 0.85rem;">
+            YS
+          </div>
+          <img src="" alt="Profile Photo" class="sidebar-user-avatar-img d-none flex-shrink-0" id="sidebarAvatarImg" style="width: 38px; height: 38px;">
+          <div class="overflow-hidden">
+            <div class="fw-bold small text-dark text-truncate user-full-name">Yazh S</div>
+            <small class="text-muted text-truncate d-block" style="font-size: 0.72rem;">B.E. Final Year</small>
+          </div>
+          <button class="btn btn-sm btn-link text-muted ms-auto p-0 dashboard-logout-trigger" title="Log Out">
+            <i class="bi bi-box-arrow-right fs-6"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ========================================================================
+         Main Content Area
+         ======================================================================== -->
+    <div class="dashboard-main">
+
+      <!-- Top Sticky Dashboard Bar -->
+      <header class="dashboard-topbar d-flex justify-content-between align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <!-- Mobile Sidebar Toggle Hamburger -->
+          <button class="btn btn-sm btn-light border d-lg-none" id="mobileSidebarToggle" aria-label="Open Sidebar Menu">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+
+          <div>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a href="index.html" class="text-decoration-none text-muted">SkillBridge</a></li>
+                <li class="breadcrumb-item"><a href="student-dashboard.html" class="text-decoration-none text-muted">Student Portal</a></li>
+                <li class="breadcrumb-item active text-primary fw-semibold">My Profile</li>
+              </ol>
+            </nav>
+            <h5 class="fw-bold text-dark mb-0 d-none d-sm-block">Candidate Profile</h5>
+          </div>
+        </div>
+
+        <!-- Top Right Actions & Student Profile Dropdown -->
+        <div class="d-flex align-items-center gap-2 gap-sm-3">
+          <!-- Reset to Defaults Shortcut -->
+          <button type="button" class="btn btn-light border btn-sm px-3 d-none d-lg-inline-flex align-items-center gap-1" id="topResetProfileBtn" title="Reset profile back to demo defaults">
+            <i class="bi bi-arrow-counterclockwise"></i>
+            <span>Reset Demo</span>
+          </button>
+
+          <!-- Save Changes Top Shortcut Button -->
+          <button type="button" class="btn btn-primary-custom btn-sm px-3 d-none d-sm-inline-flex align-items-center gap-1" id="topSaveProfileBtn">
+            <i class="bi bi-check-lg"></i>
+            <span>Save Profile</span>
+          </button>
+
+          <!-- Return to Dashboard -->
+          <a href="student-dashboard.html" class="btn btn-outline-custom btn-sm px-3 d-none d-md-inline-flex align-items-center gap-1">
+            <i class="bi bi-grid-fill"></i>
+            <span>Dashboard</span>
+          </a>
+
+          <!-- User Profile Dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-light border rounded-pill d-flex align-items-center gap-2 py-1 px-2"
+              type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <div
+                class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold user-avatar-initials"
+                id="topbarAvatarInitials"
+                style="width: 30px; height: 30px; font-size: 0.75rem;">
+                YS
+              </div>
+              <img src="" alt="Profile Photo" class="topbar-user-avatar-img d-none" id="topbarAvatarImg" style="width: 30px; height: 30px;">
+              <span class="fw-semibold small text-dark d-none d-sm-inline user-full-name">Yazh S</span>
+              <i class="bi bi-chevron-down text-muted small me-1"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border p-2">
+              <li class="px-2 py-1">
+                <div class="fw-bold small text-dark user-full-name">Yazh S</div>
+                <small class="text-muted">B.E. Final Year</small>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <a class="dropdown-item small rounded-2 active bg-primary text-white" href="profile.html">
+                  <i class="bi bi-person me-2"></i> View Profile
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item small rounded-2" href="student-dashboard.html">
+                  <i class="bi bi-grid me-2"></i> Dashboard Overview
+                </a>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <a class="dropdown-item small rounded-2 text-danger dashboard-logout-trigger" href="#">
+                  <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dashboard Scrollable Body -->
+      <main class="dashboard-content">
+
+        <!-- ====================================================================
+             1. PROFILE HEADER CARD (AVATAR, BANNER, HEADLINE & QUICK ACTIONS)
+             ==================================================================== -->
+        <div class="card border shadow-sm rounded-4 bg-white mb-4 overflow-hidden profile-card-hover">
+          <!-- Top Navy-to-Royal Gradient Banner -->
+          <div class="profile-banner d-flex justify-content-end align-items-start p-3">
+            <span class="badge bg-white text-dark shadow-sm px-3 py-1 rounded-pill fw-semibold small">
+              <i class="bi bi-info-circle-fill text-primary me-1"></i> Student Candidate Profile (Demo Data)
+            </span>
+          </div>
+
+          <!-- Profile Info Bar -->
+          <div class="profile-info-header">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+              <div class="d-flex flex-column flex-sm-row align-items-sm-end gap-3">
+                <!-- Circular Avatar with Camera Edit Badge -->
+                <div class="profile-avatar-container">
+                  <div class="profile-avatar-img shadow" id="headerAvatarInitials">YS</div>
+                  <img src="" alt="Profile Photo" class="profile-avatar-img d-none shadow" id="headerAvatarImg">
+                  <div class="profile-avatar-edit-badge" id="editAvatarBadge" title="Upload New Profile Photo">
+                    <i class="bi bi-camera-fill"></i>
+                  </div>
+                  <input type="file" id="avatarFileInput" class="d-none" accept="image/png, image/jpeg, image/jpg, image/webp">
+                </div>
+
+                <!-- Name & Degree Details -->
+                <div>
+                  <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <h3 class="fw-bold text-dark mb-0" id="headerFullName">Yazh S</h3>
+                    <span class="badge bg-soft-emerald text-success px-2 py-1 rounded-pill small fw-semibold">
+                      <i class="bi bi-check-circle-fill me-1"></i> Available for Internships
+                    </span>
+                  </div>
+                  <p class="text-primary fw-medium mb-1 small" id="headerHeadline">
+                    Aspiring Full Stack Java & Cloud Developer
+                  </p>
+                  <div class="text-muted small d-flex flex-wrap gap-2 align-items-center">
+                    <span id="headerCollege"><i class="bi bi-mortarboard-fill me-1"></i> B.E. Computer Science &bull; Anna University</span>
+                    <span>&bull;</span>
+                    <span id="headerLocation"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Chennai, Tamil Nadu, India</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <button type="button" class="btn btn-outline-custom btn-sm px-3" id="editAvatarBtn">
+                  <i class="bi bi-camera me-1"></i> Change Photo
+                </button>
+                <button type="button" class="btn btn-outline-danger btn-sm px-3 d-none" id="removeAvatarBtn" title="Remove custom photo and restore initials">
+                  <i class="bi bi-trash3 me-1"></i> Remove Photo
+                </button>
+                <a href="#personalCard" class="btn btn-primary-custom btn-sm px-3">
+                  <i class="bi bi-pencil-square me-1"></i> Edit Details
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ====================================================================
+             2. DYNAMIC PROFILE COMPLETION & MISSING INFORMATION CARD
+             ==================================================================== -->
+        <div class="card border shadow-sm p-4 rounded-4 bg-white mb-4 profile-card-hover">
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+            <div>
+              <div class="d-flex align-items-center gap-2">
+                <h6 class="fw-bold text-dark mb-0">Profile Strength & Completeness</h6>
+                <span class="badge bg-soft-primary text-primary px-2 py-0-5 rounded-pill small">AI Candidate Score</span>
+              </div>
+              <small class="text-muted" id="profileCompletionTip">
+                Complete all academic and social links to reach <strong>100%</strong> candidate visibility.
+              </small>
+            </div>
+            <div class="text-md-end">
+              <span class="fs-4 fw-bold text-primary" id="profilePercentText">85%</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="progress mb-3" style="height: 10px; border-radius: 999px;">
+            <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" id="profileProgressBar"
+              role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+
+          <!-- Missing Information Alert & Clickable Action Pills -->
+          <div class="pt-2 border-top">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="small fw-bold text-dark"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Missing Information (Click any item to complete):</span>
+              <small class="text-muted" style="font-size: 0.75rem;">Increases hiring partner match rate</small>
+            </div>
+            <div id="missingInfoContainer">
+              <!-- Dynamically populated via profile.js -->
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ====================================================================
+             MASTER PROFILE FORM (PHOTO, PERSONAL, ACADEMIC, SKILLS, LINKS & RESUME)
+             ==================================================================== -->
+        <form id="studentProfileMasterForm" novalidate>
+
+          <!-- 3. DEDICATED PROFILE PHOTO UPLOAD CARD -->
+          <div class="card border shadow-sm p-4 rounded-4 bg-white mb-4 profile-card-hover" id="photoUploadCard">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+              <div>
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-camera-fill text-primary me-2"></i>Profile Photo Upload</h5>
+                <small class="text-muted">Upload a clear professional headshot to help recruiters recognize your profile.</small>
+              </div>
+              <span class="badge bg-light text-dark border">Candidate Photo</span>
+            </div>
+
+            <div class="d-flex flex-column flex-sm-row align-items-center gap-4">
+              <!-- Current Photo / Initials Preview Box -->
+              <div class="position-relative flex-shrink-0">
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                  id="sectionAvatarInitials"
+                  style="width: 90px; height: 90px; font-size: 2rem;">
+                  YS
+                </div>
+                <img src="" alt="Profile Photo" class="rounded-circle d-none shadow-sm object-fit-cover" id="sectionAvatarImg" style="width: 90px; height: 90px;">
+              </div>
+
+              <!-- Upload Actions & Instructions -->
+              <div class="flex-grow-1 text-center text-sm-start">
+                <div class="d-flex gap-2 justify-content-center justify-content-sm-start flex-wrap mb-2">
+                  <label for="avatarFileInput" class="btn btn-primary-custom btn-sm px-3 mb-0">
+                    <i class="bi bi-upload me-1"></i> Upload New Photo
+                  </label>
+                  <button type="button" class="btn btn-outline-danger btn-sm px-3 d-none" id="sectionRemoveAvatarBtn">
+                    <i class="bi bi-trash3 me-1"></i> Remove Photo
+                  </button>
+                </div>
+                <div class="text-muted small" style="font-size: 0.76rem;">
+                  <i class="bi bi-info-circle me-1"></i> Supported image formats: JPG, PNG, WEBP. Maximum file size: 2 MB. Square aspect ratio recommended.
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- 4. PERSONAL DETAILS CARD -->
+          <div class="card border shadow-sm p-4 rounded-4 bg-white mb-4 profile-card-hover" id="personalCard">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+              <div>
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-person-lines-fill text-primary me-2"></i>Personal Details</h5>
+                <small class="text-muted">Contact details, career summary, and workplace preferences.</small>
+              </div>
+              <span class="badge bg-light text-dark border">Basic Details</span>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label for="inputFullName" class="form-label small fw-bold text-dark">Full Name <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="inputFullName" required placeholder="e.g. Yazh S">
+                </div>
+                <div class="invalid-feedback">Please enter your full name (at least 3 characters).</div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label for="inputHeadline" class="form-label small fw-bold text-dark">Professional Headline</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0"><i class="bi bi-award text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="inputHeadline" placeholder="e.g. Aspiring Full Stack Java & Cloud Developer">
+                </div>
+                <small class="text-muted" style="font-size: 0.72rem;">Brief one-line summary of your engineering focus.</small>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label for="inputEmail" class="form-label small fw-bold text-dark">Email Address <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted"></i></span>
+                  <input type="email" class="form-control border-start-0" id="inputEmail" required placeholder="e.g. yazh.s@example.com">
+                </div>
+                <div class="invalid-feedback">Please enter a valid email address.</div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label for="inputMobile" class="form-label small fw-bold text-dark">Mobile Number <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0"><i class="bi bi-telephone text-muted"></i></span>
+                  <input type="tel" class="form-control border-start-0" id="inputMobile" required placeholder="e.g. 9876543210" maxlength="14">
+                </div>
+                <div class="invalid-feedback">Please enter a valid 10-digit mobile number.</div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label for="inputLocation" class="form-label small fw-bold text-dark">Current Location / City</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0"><i class="bi bi-geo-alt text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="inputLocation" placeholder="e.g. Chennai, Tamil Nadu, India">
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label for="selectWorkMode" class="form-label small fw-bold text-dark">Preferred Internship Work Mode</label>
+                <select class="form-select" id="selectWorkMode">
+                  <option value="Hybrid / Remote">Hybrid / Remote</option>
+                  <option value="Remote Only">Remote Only</option>
+                  <option value="Onsite (Office)">Onsite (Office)</option>
+                  <option value="Flexible / Any">Flexible / Any</option>
+                </select>
+              </div>
+
+              <!-- Professional Summary / Bio with Counter -->
+              <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <label for="inputBio" class="form-label small fw-bold text-dark mb-0">Professional Summary / Bio</label>
+                  <span id="bioCharCounter" class="small text-muted">0 / 500 characters</span>
+                </div>
+                <textarea class="form-control" id="inputBio" rows="4" maxlength="500"
+                  placeholder="e.g. Final-year Computer Science student passionate about full stack Java development, Spring Boot microservices, and database tuning. Seeking an internship opportunity to apply hands-on project experience in enterprise software."></textarea>
+                <small class="text-muted" style="font-size: 0.72rem;">Recommended length: 150 - 450 characters. Displayed on recruiter cards.</small>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- 5. ACADEMIC DETAILS CARD (WITH DROPDOWNS) -->
+          <div class="card border shadow-sm p-4 rounded-4 bg-white mb-4 profile-card-hover" id="academicCard">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+              <div>
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-mortarboard-fill text-primary me-2"></i>Academic Details</h5>
+                <small class="text-muted">Degree, institution, department, and academic standing.</small>
+              </div>
+              <span class="badge bg-light text-dark border">Education</span>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label for="inputCollege" class="form-label small fw-bold text-dark">College / University Name <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0"><i class="bi bi-building text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="inputCollege" required placeholder="e.g. Anna University / College of Engineering">
+                </div>
+                <div class="invalid-feedback">Please enter your institution name.</div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label for="selectDegree" class="form-label small fw-bold text-dark">Degree Program <span class="text-danger">*</span></label>
+                <select class="form-select" id="selectDegree" required>
+                  <option value="B.E. Computer Science & Engineering">B.E. Computer Science & Engineering</option>
+                  <option value="B.Tech Information Technology">B.Tech Information Technology</option>
+                  <option value="B.Tech Artificial Intelligence & Data Science">B.Tech Artificial Intelligence & Data Science</option>
+                  <option value="B.E. Electronics & Communication Engineering">B.E. Electronics & Communication Engineering</option>
+                  <option value="B.E. Electrical & Electronics Engineering">B.E. Electrical & Electronics Engineering</option>
+                  <option value="B.Sc Computer Science">B.Sc Computer Science</option>
+                  <option value="BCA (Bachelor of Computer Applications)">BCA (Bachelor of Computer Applications)</option>
+                  <option value="MCA (Master of Computer Applications)">MCA (Master of Computer Applications)</option>
+                  <option value="M.E. / M.Tech Computer Science">M.E. / M.Tech Computer Science</option>
+                  <option value="Other Degree">Other Degree</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label for="selectDepartment" class="form-label small fw-bold text-dark">Department / Major <span class="text-danger">*</span></label>
+                <select class="form-select" id="selectDepartment" required>
+                  <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+                  <option value="Information Technology">Information Technology</option>
+                  <option value="Artificial Intelligence & Data Science">Artificial Intelligence & Data Science</option>
+                  <option value="Electronics & Communication Engineering">Electronics & Communication Engineering</option>
+                  <option value="Electrical & Electronics Engineering">Electrical & Electronics Engineering</option>
+                  <option value="Data Science & Analytics">Data Science & Analytics</option>
+                  <option value="Other Department">Other Department</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label for="selectGradYear" class="form-label small fw-bold text-dark">Graduation Year <span class="text-danger">*</span></label>
+                <select class="form-select" id="selectGradYear" required>
+                  <option value="2024">2024</option>
+                  <option value="2025">2025</option>
+                  <option value="2026">2026</option>
+                  <option value="2027">2027</option>
+                  <option value="2028">2028</option>
+                  <option value="2029">2029</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label for="inputSemester" class="form-label small fw-bold text-dark">Semester / Academic Standing</label>
+                <input type="text" class="form-control" id="inputSemester" placeholder="e.g. 7th Semester (Final Year)">
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label for="inputCgpa" class="form-label small fw-bold text-dark">Current CGPA / Percentage <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0"><i class="bi bi-graph-up-arrow text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="inputCgpa" required placeholder="e.g. 8.8 (out of 10) or 88%">
+                </div>
+                <div class="invalid-feedback">Please enter a valid CGPA (0.0 to 10.0) or percentage.</div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label for="inputRollNo" class="form-label small fw-bold text-dark">Student Roll / Registration Number</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0"><i class="bi bi-hash text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="inputRollNo" placeholder="e.g. BE-CSE-2022-048">
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- 6. TECHNICAL SKILLS CARD (CATEGORIZED, EDITABLE WITH ADD/REMOVE, DEMO DISTINCTION) -->
+          <div class="card border shadow-sm p-4 rounded-4 bg-white mb-4 profile-card-hover" id="technicalCard">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3 pb-2 border-bottom">
+              <div>
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-cpu-fill text-primary me-2"></i>Technical Skills Inventory</h5>
+                <small class="text-muted">Categorized into Programming, Backend, Frontend, Database, and Tools.</small>
+              </div>
+              <div class="d-flex gap-2 align-items-center">
+                <span class="badge bg-primary text-white" id="totalSkillsCountBadge">13 Total</span>
+                <span class="badge bg-soft-primary text-primary border border-primary-subtle" id="demoScoresCountBadge">7 Demo Assessed</span>
+                <span class="badge bg-light text-muted border" id="declaredSkillsCountBadge">6 Self-Declared</span>
+              </div>
+            </div>
+
+            <!-- Legend Explanation clearly distinguishing Demo from Self-Declared -->
+            <div class="alert alert-light border py-2 px-3 small d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+              <div>
+                <span class="badge bg-soft-primary text-primary px-2 py-1 rounded-pill me-1"><i class="bi bi-award me-1"></i>Demo Score</span>
+                <span class="text-muted">Sample AI assessment score for platform demonstration.</span>
+              </div>
+              <div>
+                <span class="badge bg-light text-muted border px-2 py-1 rounded-pill me-1"><i class="bi bi-person me-1"></i>Self-Declared</span>
+                <span class="text-muted">Student-added skills (pending verification).</span>
+              </div>
+            </div>
+
+            <!-- Categorized Grid -->
+            <div class="row g-3 mb-4">
+              <!-- Programming -->
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold small text-dark"><i class="bi bi-code-square text-primary me-1"></i> Programming</span>
+                    <span class="badge bg-white text-muted border skill-category-badge">Languages</span>
+                  </div>
+                  <div class="d-flex flex-wrap gap-2" id="skillsContainer_Programming">
+                    <!-- Populated via JS -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Backend -->
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold small text-dark"><i class="bi bi-layers-fill text-success me-1"></i> Backend</span>
+                    <span class="badge bg-white text-muted border skill-category-badge">Frameworks & APIs</span>
+                  </div>
+                  <div class="d-flex flex-wrap gap-2" id="skillsContainer_Backend">
+                    <!-- Populated via JS -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Frontend -->
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold small text-dark"><i class="bi bi-window-sidebar text-danger me-1"></i> Frontend</span>
+                    <span class="badge bg-white text-muted border skill-category-badge">Web Tech</span>
+                  </div>
+                  <div class="d-flex flex-wrap gap-2" id="skillsContainer_Frontend">
+                    <!-- Populated via JS -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Database -->
+              <div class="col-12 col-md-6 col-lg-6">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold small text-dark"><i class="bi bi-database-fill text-info me-1"></i> Database</span>
+                    <span class="badge bg-white text-muted border skill-category-badge">SQL & NoSQL</span>
+                  </div>
+                  <div class="d-flex flex-wrap gap-2" id="skillsContainer_Database">
+                    <!-- Populated via JS -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tools -->
+              <div class="col-12 col-md-6 col-lg-6">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold small text-dark"><i class="bi bi-tools text-warning me-1"></i> Tools & DevOps</span>
+                    <span class="badge bg-white text-muted border skill-category-badge">Developer Tooling</span>
+                  </div>
+                  <div class="d-flex flex-wrap gap-2" id="skillsContainer_Tools">
+                    <!-- Populated via JS -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add Skill Section -->
+            <div class="p-3 bg-white rounded-3 border">
+              <label class="form-label small fw-bold text-dark mb-2">Add New Technical Skill</label>
+              <div class="row g-2 align-items-center">
+                <div class="col-12 col-md-5">
+                  <input type="text" class="form-control form-control-sm" id="addSkillNameInput" placeholder="Skill name (e.g. TypeScript, Redis, Kubernetes)...">
+                </div>
+                <div class="col-12 col-md-4">
+                  <select class="form-select form-select-sm" id="addSkillCategorySelect">
+                    <option value="Programming">Category: Programming</option>
+                    <option value="Backend">Category: Backend</option>
+                    <option value="Frontend">Category: Frontend</option>
+                    <option value="Database">Category: Database</option>
+                    <option value="Tools">Category: Tools & DevOps</option>
+                  </select>
+                </div>
+                <div class="col-12 col-md-3">
+                  <button type="button" class="btn btn-primary-custom btn-sm w-100" id="addSkillBtn">
+                    <i class="bi bi-plus-lg me-1"></i> Add Skill
+                  </button>
+                </div>
+              </div>
+              <small class="text-muted d-block mt-2" style="font-size: 0.72rem;">
+                <i class="bi bi-info-circle me-1"></i> Newly added skills are recorded as self-declared. Take an AI assessment from the dashboard to earn demo score validation.
+              </small>
+            </div>
+          </div>
+
+
+          <!-- 7. PROFESSIONAL & PORTFOLIO LINKS CARD -->
+          <div class="card border shadow-sm p-4 rounded-4 bg-white mb-4 profile-card-hover" id="socialLinksCard">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+              <div>
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-globe text-primary me-2"></i>Professional & Portfolio Links</h5>
+                <small class="text-muted">Validate and link your code repositories, network, and live projects.</small>
+              </div>
+              <span class="badge bg-light text-dark border">External Profiles</span>
+            </div>
+
+            <div class="row g-3">
+              <!-- GitHub -->
+              <div class="col-12 col-md-6">
+                <label for="inputGithub" class="form-label small fw-bold text-dark">
+                  <i class="bi bi-github me-1"></i> GitHub Profile URL
+                </label>
+                <div class="input-group profile-link-input-group">
+                  <span class="input-group-text"><i class="bi bi-github text-dark"></i></span>
+                  <input type="url" class="form-control" id="inputGithub" placeholder="https://github.com/your-username">
+                  <a class="btn btn-outline-secondary" id="openGithubBtn" target="_blank" rel="noopener noreferrer" title="Open GitHub Profile in new tab">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                  </a>
+                </div>
+                <div class="invalid-feedback">Please enter a valid URL starting with http:// or https://.</div>
+              </div>
+
+              <!-- LinkedIn -->
+              <div class="col-12 col-md-6">
+                <label for="inputLinkedin" class="form-label small fw-bold text-dark">
+                  <i class="bi bi-linkedin text-primary me-1"></i> LinkedIn Profile URL
+                </label>
+                <div class="input-group profile-link-input-group">
+                  <span class="input-group-text"><i class="bi bi-linkedin text-primary"></i></span>
+                  <input type="url" class="form-control" id="inputLinkedin" placeholder="https://linkedin.com/in/your-username">
+                  <a class="btn btn-outline-secondary" id="openLinkedinBtn" target="_blank" rel="noopener noreferrer" title="Open LinkedIn Profile in new tab">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                  </a>
+                </div>
+                <div class="invalid-feedback">Please enter a valid URL starting with http:// or https://.</div>
+              </div>
+
+              <!-- Portfolio Website URL -->
+              <div class="col-12 col-md-6">
+                <label for="inputPortfolio" class="form-label small fw-bold text-dark">
+                  <i class="bi bi-briefcase-fill text-success me-1"></i> Portfolio Website URL
+                </label>
+                <div class="input-group profile-link-input-group">
+                  <span class="input-group-text"><i class="bi bi-link-45deg text-success"></i></span>
+                  <input type="url" class="form-control" id="inputPortfolio" placeholder="https://yourportfolio.dev">
+                  <a class="btn btn-outline-secondary" id="openPortfolioBtn" target="_blank" rel="noopener noreferrer" title="Open Portfolio in new tab">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                  </a>
+                </div>
+                <div class="invalid-feedback">Please enter a valid URL starting with http:// or https://.</div>
+              </div>
+
+              <!-- Coding Platform (LeetCode / HackerRank) -->
+              <div class="col-12 col-md-6">
+                <label for="inputCodingProfile" class="form-label small fw-bold text-dark">
+                  <i class="bi bi-code-square text-warning me-1"></i> LeetCode / Coding Profile URL
+                </label>
+                <div class="input-group profile-link-input-group">
+                  <span class="input-group-text"><i class="bi bi-code-slash text-warning"></i></span>
+                  <input type="url" class="form-control" id="inputCodingProfile" placeholder="https://leetcode.com/your-username">
+                  <a class="btn btn-outline-secondary" id="openCodingProfileBtn" target="_blank" rel="noopener noreferrer" title="Open Coding Profile in new tab">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                  </a>
+                </div>
+                <div class="invalid-feedback">Please enter a valid URL starting with http:// or https://.</div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- 8. RESUME & DOCUMENT MANAGEMENT CARD -->
+          <div class="card border shadow-sm p-4 rounded-4 bg-white mb-4 profile-card-hover" id="resumeCard">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+              <div>
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Resume Management</h5>
+                <small class="text-muted">Manage your candidate PDF resume with Upload, Preview, Download, and Replace capabilities.</small>
+              </div>
+              <span class="badge bg-soft-primary text-primary px-2 py-1 rounded-pill small">Demo ATS Score: 91/100</span>
+            </div>
+
+            <div class="row g-4 align-items-center">
+              <div class="col-12 col-lg-7">
+                <!-- Active Resume Box -->
+                <div class="p-3 bg-light rounded-3 border d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-3 bg-white border p-2 shadow-xs d-flex align-items-center justify-content-center text-danger flex-shrink-0"
+                      style="width: 52px; height: 52px; font-size: 1.75rem;">
+                      <i class="bi bi-file-earmark-pdf-fill"></i>
+                    </div>
+                    <div>
+                      <h6 class="fw-bold text-dark mb-0" id="resumeFileNameDisplay">Yazh_S_Resume_2026.pdf</h6>
+                      <small class="text-muted">
+                        Uploaded: <span id="resumeUploadDateDisplay">15 Nov 2026</span> &bull; 
+                        Size: <span id="resumeFileSizeDisplay">420 KB</span> &bull; 
+                        <span class="badge bg-light text-muted border"><i class="bi bi-file-earmark-check me-1"></i>Sample PDF</span>
+                      </small>
+                    </div>
+                  </div>
+
+                  <!-- Resume Actions: Preview & Download -->
+                  <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-custom btn-sm px-3" id="previewResumeBtn" title="Preview Resume Document in modal">
+                      <i class="bi bi-eye me-1"></i> Preview
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-sm px-3" id="downloadResumeBtn" title="Download Current Resume PDF">
+                      <i class="bi bi-download me-1"></i> Download
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Replace / Upload Option -->
+                <div class="mt-3 d-flex align-items-center gap-2">
+                  <label for="resumeFileInput" class="btn btn-primary-custom btn-sm px-3 mb-0">
+                    <i class="bi bi-upload me-1"></i> Replace Resume (PDF)
+                  </label>
+                  <input type="file" id="resumeFileInput" class="d-none" accept="application/pdf">
+                  <small class="text-muted">Maximum file size: 5 MB (PDF format only).</small>
+                </div>
+              </div>
+
+              <!-- ATS Highlights Box -->
+              <div class="col-12 col-lg-5">
+                <div class="p-3 bg-white rounded-3 border">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small fw-bold text-dark"><i class="bi bi-shield-check text-success me-1"></i> AI Resume Parsing Summary</span>
+                    <span class="badge bg-soft-primary text-primary px-2 py-0-5 rounded-pill small">Demo Engine</span>
+                  </div>
+                  <ul class="list-unstyled small text-muted mb-0" style="font-size: 0.78rem;">
+                    <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1"></i> Extracted education: <strong>B.E. Computer Science</strong></li>
+                    <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1"></i> Identified key languages: <strong>Java, MySQL, Python</strong></li>
+                    <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1"></i> Frameworks detected: <strong>Spring Boot, REST APIs</strong></li>
+                    <li><i class="bi bi-check-circle-fill text-success me-1"></i> Format score: <strong>100% ATS Friendly</strong></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- 9. FORM ACTIONS BAR (CANCEL, RESET & SAVE CHANGES BESIDE EACH OTHER) -->
+          <div class="p-3 bg-white rounded-4 border shadow-sm d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 mb-4">
+            <div class="text-muted small">
+              <i class="bi bi-info-circle text-primary me-1"></i>
+              Changes saved will be securely stored in localStorage and synchronized with your student dashboard.
+            </div>
+            <div class="d-flex gap-2 w-100 w-sm-auto justify-content-end flex-wrap align-items-center">
+              <button type="button" class="btn btn-outline-secondary px-3 py-2" id="cancelProfileChangesBtn">
+                <i class="bi bi-x-lg me-1"></i> Cancel
+              </button>
+              <button type="button" class="btn btn-outline-warning text-dark px-3 py-2" id="resetProfileDefaultsBtn" title="Reset profile back to demo defaults">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Demo
+              </button>
+              <button type="submit" class="btn btn-primary-custom px-4 py-2" id="saveProfileChangesBtn">
+                <i class="bi bi-check-lg me-1"></i> Save Changes
+              </button>
+            </div>
+          </div>
+
+        </form>
+
+      </main>
+
+      <!-- Dashboard Footer -->
+      <footer class="bg-white border-top py-3 px-4 text-center text-md-start small text-muted">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+          <div>
+            &copy; 2026 SkillBridge. All rights reserved. &bull; <span class="badge bg-light text-dark border">Demo Version</span>
+          </div>
+          <div class="d-flex gap-3">
+            <a href="index.html" class="text-decoration-none text-muted">Homepage</a>
+            <a href="student-dashboard.html" class="text-decoration-none text-muted">Student Dashboard</a>
+            <a href="login.html" class="text-decoration-none text-muted">Switch Account</a>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+
+  <!-- ========================================================================
+       MODAL: Resume Preview Demo
+       ======================================================================== -->
+  <div class="modal fade" id="resumePreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header border-bottom">
+          <h5 class="modal-title fw-bold text-dark">
+            <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Resume Preview (Demo Document)
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4 bg-light">
+          <!-- Document Simulation Card -->
+          <div class="p-4 bg-white rounded-3 border shadow-sm mx-auto" style="max-width: 650px; min-height: 480px; font-family: sans-serif;">
+            <div class="border-bottom pb-3 mb-3 text-center">
+              <h4 class="fw-bold mb-1 text-dark user-full-name">Yazh S</h4>
+              <p class="text-muted small mb-1">Chennai, Tamil Nadu, India &bull; yazh.s@example.com &bull; +91 98765 43210</p>
+              <p class="text-primary small mb-0">github.com/yazh-demo &bull; linkedin.com/in/yazh-demo</p>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="fw-bold text-dark border-bottom pb-1 text-uppercase small">Professional Summary</h6>
+              <p class="text-muted small mb-0">
+                Final-year Computer Science Engineering student with solid technical foundations in Java, Spring Boot, MySQL, and Python. Demonstrated hands-on project experience building RESTful services, database optimizations, and responsive web applications.
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="fw-bold text-dark border-bottom pb-1 text-uppercase small">Education</h6>
+              <div class="d-flex justify-content-between small">
+                <div>
+                  <strong>B.E. Computer Science & Engineering</strong><br>
+                  <span class="text-muted">Anna University / College of Engineering</span>
+                </div>
+                <div class="text-end text-muted">
+                  <span>2022 – 2026</span><br>
+                  <span class="fw-semibold text-primary">CGPA: 8.8 / 10.0</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="fw-bold text-dark border-bottom pb-1 text-uppercase small">Technical Skills</h6>
+              <p class="text-muted small mb-0">
+                <strong>Programming:</strong> Java, Python, JavaScript, HTML5, CSS3<br>
+                <strong>Backend & Databases:</strong> Spring Boot, REST APIs, MySQL<br>
+                <strong>Tools & DevOps:</strong> Git, Docker, Postman, Maven
+              </p>
+            </div>
+
+            <div>
+              <h6 class="fw-bold text-dark border-bottom pb-1 text-uppercase small">Featured Projects</h6>
+              <div class="small mb-2">
+                <div class="fw-bold text-dark">SkillBridge - AI-Driven Career & Internship Matcher</div>
+                <span class="text-muted">Built responsive web frontends, integrated REST APIs, and implemented candidate skill benchmarking.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top">
+          <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary-custom" onclick="document.getElementById('downloadResumeBtn').click();">
+            <i class="bi bi-download me-1"></i> Download PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Bootstrap 5.3 JavaScript Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+
+  <!-- Profile Controller JavaScript -->
+  <script src="js/profile.js"></script>
+</body>
+
+</html>

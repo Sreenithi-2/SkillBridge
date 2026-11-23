@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="SkillBridge Student Dashboard - SaaS Portal to track internship applications, take AI skill assessments, explore recommended tech internships, and manage candidate profile.">
+  <title>Student Dashboard | SkillBridge</title>
+
+  <!-- ========================================================================
+       Role-Based Dashboard Access Protection Guard (Anti-Flicker & Session Check)
+       ======================================================================== -->
+  <style id="sbStudentGuardStyle">html { display: none !important; }</style>
+  <script>
+    (function () {
+      function getSession(key) {
+        try {
+          var val = localStorage.getItem(key) || sessionStorage.getItem(key);
+          if (!val) return null;
+          var parsed = JSON.parse(val);
+          return (parsed && typeof parsed === 'object') ? parsed : null;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function isValidStudent(sess) {
+        if (!sess) return false;
+        var role = (sess.role || sess.authRole || '').toString().toLowerCase();
+        var id = sess.id || sess.studentId || sess.student_id;
+        if (!id || (typeof id === 'string' && !id.trim())) return false;
+        if (role === 'recruiter' || role === 'role_recruiter' || role === 'company') return false;
+        if (sess.companyId || sess.company_id || sess.officialEmail) return false;
+        if (role === 'student' || role === 'role_student' || (!role && (sess.fullName || sess.full_name || sess.email))) return true;
+        return false;
+      }
+
+      function isValidRecruiter(sess) {
+        if (!sess) return false;
+        var role = (sess.role || sess.authRole || '').toString().toLowerCase();
+        var id = sess.id || sess.companyId || sess.company_id;
+        if (!id || (typeof id === 'string' && !id.trim())) return false;
+        if (role !== 'recruiter' && role !== 'role_recruiter' && role !== 'company') return false;
+        if (role === 'student' || role === 'role_student') return false;
+        return true;
+      }
+
+      function runGuard() {
+        var studSess = getSession('skillbridge_student_session') || getSession('skillbridge_registered_student');
+        var validStudent = isValidStudent(studSess);
+
+        // If valid student session exists, grant access
+        if (validStudent) {
+          var guardStyle = document.getElementById('sbStudentGuardStyle');
+          if (guardStyle && guardStyle.parentNode) {
+            guardStyle.parentNode.removeChild(guardStyle);
+          } else {
+            document.documentElement.style.display = '';
+          }
+          return;
+        }
+
+        // If no valid student session exists, redirect to login.html (never to recruiter dashboard)
+        console.warn('[SkillBridge Guard] No authenticated student session. Redirecting to login.html');
+        window.location.replace('login.html');
+      }
+
+      runGuard();
+      window.addEventListener('pageshow', function (e) {
+        if (e.persisted) runGuard();
+      });
+    })();
+  </script>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  <!-- SkillBridge Platform API Configuration -->
+  <script src="js/config.js"></script>
+</head>
+
+<body class="bg-body">
+
+  <div class="dashboard-container">
+
+    <!-- ========================================================================
+         Mobile Sidebar Backdrop
+         ======================================================================== -->
+    <div class="dashboard-sidebar-backdrop" id="dashboardSidebarBackdrop"></div>
+
+    <!-- ========================================================================
+         Fixed Left Sidebar
+         ======================================================================== -->
+    <aside class="dashboard-sidebar" id="dashboardSidebar">
+      <!-- Sidebar Brand Header -->
+      <div class="dashboard-sidebar-header">
+        <a class="brand-logo text-decoration-none" href="index.html">
+          <div class="brand-icon">
+            <i class="bi bi-mortarboard-fill"></i>
+          </div>
+          <span>Skill<span class="text-primary">Bridge</span></span>
+        </a>
+        <button type="button" class="btn btn-sm btn-light border d-lg-none" id="mobileSidebarClose"
+          aria-label="Close Sidebar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <!-- Sidebar Navigation Menu -->
+      <ul class="dashboard-nav-list">
+        <!-- 1. Overview -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link active" href="#overviewSection" data-view="overviewSection" data-title="Dashboard Overview" id="navLinkOverview">
+            <i class="bi bi-grid-fill"></i>
+            <span>Overview</span>
+          </a>
+        </li>
+
+        <!-- 2. My Profile -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#profileSection" data-view="profileSection" data-title="Candidate Profile" id="navLinkProfile">
+            <i class="bi bi-person-circle"></i>
+            <span>My Profile</span>
+          </a>
+        </li>
+
+        <!-- 3. Skill Assessment -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="skill-assessment.html" id="navLinkAssessment" data-title="Technical Skill Assessments">
+            <i class="bi bi-patch-check-fill"></i>
+            <span>Skill Assessment</span>
+            <span class="badge bg-soft-emerald text-success px-2 py-0-5 rounded-pill ms-auto">Verified</span>
+          </a>
+        </li>
+
+        <!-- 4. My Skills -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#skillsSection" data-view="skillsSection" data-title="Technical Skill Inventory" id="navLinkSkills">
+            <i class="bi bi-cpu-fill"></i>
+            <span>My Skills</span>
+          </a>
+        </li>
+
+        <!-- 5. Recommended Internships -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#internshipsSection" data-view="internshipsSection" data-title="Recommended Internships" id="navLinkInternships">
+            <i class="bi bi-briefcase-fill"></i>
+            <span>Recommended Internships</span>
+            <span class="badge bg-primary text-white px-2 py-0-5 rounded-pill ms-auto" id="sidebarRecBadge">6</span>
+          </a>
+        </li>
+
+        <!-- 6. My Applications -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#applicationsSection" data-view="applicationsSection" data-title="Application Tracking" id="navLinkApplications">
+            <i class="bi bi-send-check-fill"></i>
+            <span>My Applications</span>
+            <span class="badge bg-soft-primary text-primary px-2 py-0-5 rounded-pill ms-auto"
+              id="sidebarAppsBadge">5</span>
+          </a>
+        </li>
+
+        <!-- 7. Resume Management -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#resumeSection" data-view="resumeSection" data-title="Resume & Documents" id="navLinkResume">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>Resume Management</span>
+          </a>
+        </li>
+
+        <!-- 8. Settings -->
+        <li class="dashboard-nav-item">
+          <a class="dashboard-nav-link" href="#settingsSection" data-view="settingsSection" data-title="Account Settings" id="navLinkSettings">
+            <i class="bi bi-gear-fill"></i>
+            <span>Settings</span>
+          </a>
+        </li>
+
+        <li class="dashboard-nav-item pt-3 border-top mt-2">
+          <!-- 9. Logout -->
+          <a class="dashboard-nav-link text-danger dashboard-logout-trigger" role="button" id="navLinkLogout">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Sidebar User Profile Mini-Card -->
+      <div class="dashboard-sidebar-footer">
+        <div class="d-flex align-items-center gap-2">
+          <div
+            class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold user-avatar-initials flex-shrink-0"
+            style="width: 38px; height: 38px; font-size: 0.85rem;">
+            YS
+          </div>
+          <div class="overflow-hidden">
+            <div class="fw-bold small text-dark text-truncate user-full-name">Yazh S</div>
+            <small class="text-muted text-truncate d-block user-role-label" style="font-size: 0.72rem;">B.E. Final Year</small>
+          </div>
+          <button class="btn btn-sm btn-link text-muted ms-auto p-0 dashboard-logout-trigger" title="Log Out">
+            <i class="bi bi-box-arrow-right fs-6"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ========================================================================
+         Main Content Area
+         ======================================================================== -->
+    <div class="dashboard-main">
+
+      <!-- Top Sticky Dashboard Bar -->
+      <header class="dashboard-topbar d-flex justify-content-between align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <!-- Mobile Sidebar Toggle Hamburger -->
+          <button class="btn btn-sm btn-light border d-lg-none" id="mobileSidebarToggle" aria-label="Open Sidebar Menu">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+
+          <div>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a href="index.html" class="text-decoration-none text-muted">SkillBridge</a></li>
+                <li class="breadcrumb-item active text-primary fw-semibold" id="dashboardBreadcrumbCurrent">Overview</li>
+              </ol>
+            </nav>
+            <h5 class="fw-bold text-dark mb-0 d-none d-sm-block" id="dashboardPageTitle">Dashboard Overview</h5>
+          </div>
+        </div>
+
+        <!-- Top Right Actions & Student Profile Dropdown -->
+        <div class="d-flex align-items-center gap-2 gap-sm-3">
+          <!-- Demo Mode Badge -->
+          <span class="badge bg-soft-primary text-primary px-3 py-1 rounded-pill d-none d-md-inline-block">
+            <i class="bi bi-shield-check me-1"></i> Interactive Demo Portal
+          </span>
+
+          <!-- Notifications Dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-light border rounded-circle position-relative p-2" type="button"
+              data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+              <i class="bi bi-bell-fill text-muted"></i>
+              <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                <span class="visually-hidden">New alerts</span>
+              </span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border p-2" style="width: 290px;">
+              <li class="dropdown-header small fw-bold text-dark d-flex justify-content-between align-items-center">
+                <span>Recent Notifications (Demo)</span>
+                <span class="badge bg-primary">3 New</span>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <a class="dropdown-item py-2 rounded-2" href="#">
+                  <div class="fw-bold small text-dark"><i class="bi bi-calendar-event text-success me-1"></i> Interview Scheduled</div>
+                  <small class="text-muted d-block text-truncate">CloudScale Solutions: Nov 25 at 11:00 AM</small>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-2 rounded-2" href="#">
+                  <div class="fw-bold small text-dark"><i class="bi bi-award text-primary me-1"></i> Skill Verified</div>
+                  <small class="text-muted d-block text-truncate">Java Core assessment score: 92% (Advanced)</small>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-2 rounded-2" href="#">
+                  <div class="fw-bold small text-dark"><i class="bi bi-briefcase text-info me-1"></i> New Match Found</div>
+                  <small class="text-muted d-block text-truncate">FinTech Orbit: 94% Skill Fit opening</small>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- User Profile Dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-light border rounded-pill d-flex align-items-center gap-2 py-1 px-2"
+              type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <div
+                class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold user-avatar-initials"
+                style="width: 30px; height: 30px; font-size: 0.75rem;">
+                YS
+              </div>
+              <span class="fw-semibold small text-dark d-none d-sm-inline user-full-name">Yazh S</span>
+              <i class="bi bi-chevron-down text-muted small me-1"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border p-2">
+              <li class="px-2 py-1">
+                <div class="fw-bold small text-dark user-full-name">Yazh S</div>
+                <small class="text-muted user-role-label">B.E. Final Year</small>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <a class="dropdown-item small rounded-2 dashboard-nav-link" data-view="profileSection" data-title="Candidate Profile" href="#">
+                  <i class="bi bi-person me-2"></i> View Profile
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item small rounded-2 dashboard-nav-link" data-view="applicationsSection" data-title="Application Tracking" href="#">
+                  <i class="bi bi-send me-2"></i> Track Applications
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item small rounded-2 dashboard-nav-link" data-view="settingsSection" data-title="Account Settings" href="#">
+                  <i class="bi bi-gear me-2"></i> Settings
+                </a>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <a class="dropdown-item small rounded-2 text-danger dashboard-logout-trigger" href="#">
+                  <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dashboard Scrollable Body -->
+      <main class="dashboard-content">
+
+        <!-- ====================================================================
+             VIEW 1: OVERVIEW SECTION (DEFAULT VIEW)
+             ==================================================================== -->
+        <section class="dashboard-view-section active" id="overviewSection">
+
+          <!-- 1. Welcome Section -->
+          <div class="p-4 p-md-5 mb-4 rounded-4 bg-white border shadow-sm position-relative overflow-hidden">
+            <div class="row align-items-center g-4">
+              <div class="col-12 col-lg-8">
+                <span class="badge bg-soft-emerald px-3 py-1 rounded-pill mb-2 fw-semibold">
+                  <i class="bi bi-check-circle-fill me-1"></i> Verified Candidate Profile &bull; Demo Portal
+                </span>
+                <h2 class="fw-bold mb-1 text-dark">
+                  Welcome back, <span class="text-primary" id="welcomeStudentName">Yazh S</span>!
+                </h2>
+                <p class="text-muted mb-3" id="welcomeAcademicDetails">
+                  B.E. Computer Science &bull; Final Year &bull; Anna University &bull; Open to Internships
+                </p>
+
+                <!-- Profile Completion Bar -->
+                <div class="bg-light p-3 rounded-3 border">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small fw-bold text-dark">
+                      <i class="bi bi-speedometer2 text-primary me-1"></i> Profile Completion
+                    </span>
+                    <span class="small fw-bold text-primary" id="profileCompletionPercentage">85%</span>
+                  </div>
+                  <div class="progress mb-2" style="height: 8px; border-radius: 999px;">
+                    <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated"
+                      id="profileCompletionBar" role="progressbar" style="width: 85%;" aria-valuenow="85"
+                      aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <small class="text-muted d-block" id="profileCompletionNote" style="font-size: 0.78rem;">
+                    Add GitHub portfolio and project repository links to reach <strong>100%</strong>.
+                  </small>
+                </div>
+              </div>
+
+              <!-- Quick Action Box -->
+              <div class="col-12 col-lg-4 text-lg-end">
+                <div class="d-flex flex-column flex-sm-row flex-lg-column gap-2 justify-content-lg-end">
+                  <button class="btn btn-primary-custom px-4 py-2 dashboard-nav-link" data-view="internshipsSection"
+                    data-title="Recommended Internships">
+                    <i class="bi bi-search me-1"></i> Explore Recommended Internships
+                  </button>
+                  <a href="skill-assessment.html" class="btn btn-outline-custom px-4 py-2">
+                    <i class="bi bi-patch-check me-1"></i> Take Skill Assessment
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Statistics KPI Cards -->
+          <div class="row g-3 mb-4">
+            <!-- Verified Skills -->
+            <div class="col-12 col-sm-6 col-xl-3">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">Verified Skills</span>
+                  <div class="stat-icon-wrapper bg-soft-emerald text-success">
+                    <i class="bi bi-patch-check-fill"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0 text-dark" id="kpiVerifiedSkills">5</h3>
+                  <span class="badge bg-soft-emerald text-success px-2 py-0-5 rounded-pill" style="font-size: 0.72rem;">Demo Validated</span>
+                </div>
+                <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">Java, Spring, MySQL & Python</small>
+              </div>
+            </div>
+
+            <!-- Overall Skill Match Score -->
+            <div class="col-12 col-sm-6 col-xl-3">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">Overall Match Score</span>
+                  <div class="stat-icon-wrapper bg-soft-primary text-primary">
+                    <i class="bi bi-stars"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0 text-primary" id="kpiMatchScore">94%</h3>
+                </div>
+                <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">Across 6 live internship requirements</small>
+              </div>
+            </div>
+
+            <!-- Recommended Internships -->
+            <div class="col-12 col-sm-6 col-xl-3">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">Recommended Internships</span>
+                  <div class="stat-icon-wrapper bg-soft-amber text-warning">
+                    <i class="bi bi-briefcase-fill"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0 text-dark" id="kpiRecommendedCount">6</h3>
+                  <span class="badge bg-soft-amber text-warning px-2 py-0-5 rounded-pill" style="font-size: 0.72rem;">Active Openings</span>
+                </div>
+                <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">Stipends up to ₹40,000/mo (INR)</small>
+              </div>
+            </div>
+
+            <!-- Applications Submitted -->
+            <div class="col-12 col-sm-6 col-xl-3">
+              <div class="stat-kpi-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-muted">Applications Submitted</span>
+                  <div class="stat-icon-wrapper bg-soft-cyan text-info">
+                    <i class="bi bi-send-check-fill"></i>
+                  </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                  <h3 class="fw-bold mb-0 text-dark" id="kpiApplicationsCount">5</h3>
+                  <span class="badge bg-soft-cyan text-info px-2 py-0-5 rounded-pill" style="font-size: 0.72rem;">1 Interview</span>
+                </div>
+                <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">Track progress in real time</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Skill Assessment Section -->
+          <div class="card border shadow-sm p-4 rounded-4 bg-white mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+              <div>
+                <div class="d-flex align-items-center gap-2">
+                  <h5 class="fw-bold text-dark mb-0">AI Skill Assessment Breakdown</h5>
+                  <span class="badge bg-soft-primary text-primary px-2 py-1 rounded-pill small">Demo Assessment Engine</span>
+                </div>
+                <p class="text-muted small mb-0">Verified technical competency scores across primary stack technologies.</p>
+              </div>
+              <div>
+                <a href="skill-assessment.html" class="btn btn-outline-custom btn-sm px-3">
+                  <i class="bi bi-arrow-clockwise me-1"></i> Retake All Assessments
+                </a>
+              </div>
+            </div>
+
+            <div class="row g-3" id="skillAssessmentContainer">
+              <!-- Dynamically populated via dashboard.js -->
+            </div>
+          </div>
+
+          <!-- 4. Recommended Internships Section -->
+          <div class="card border shadow-sm p-4 rounded-4 bg-white mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+              <div>
+                <div class="d-flex align-items-center gap-2">
+                  <h5 class="fw-bold text-dark mb-0">Recommended Internships For You</h5>
+                  <span class="badge bg-soft-emerald text-success px-2 py-1 rounded-pill small" id="internshipsFilteredCount">6 Openings Found</span>
+                </div>
+                <p class="text-muted small mb-0">Matched against your verified Java, Spring Boot, MySQL, and Python proficiency.</p>
+              </div>
+
+              <!-- Quick category filter pills -->
+              <div class="d-flex flex-wrap gap-1">
+                <button class="btn btn-sm btn-primary internship-category-pill active" data-category="all">All</button>
+                <button class="btn btn-sm btn-outline-custom internship-category-pill" data-category="Java">Java & Spring</button>
+                <button class="btn btn-sm btn-outline-custom internship-category-pill" data-category="Python">Python</button>
+                <button class="btn btn-sm btn-outline-custom internship-category-pill" data-category="Web">Web Frontend</button>
+                <button class="btn btn-sm btn-outline-custom internship-category-pill" data-category="Database">Database</button>
+              </div>
+            </div>
+
+            <!-- Search and Workplace filter inputs -->
+            <div class="row g-2 mb-3">
+              <div class="col-12 col-md-8">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="internshipSearchInput"
+                    placeholder="Search by role, company name, skill or location...">
+                </div>
+              </div>
+              <div class="col-12 col-md-4">
+                <select class="form-select form-select-sm" id="internshipWorkplaceSelect">
+                  <option value="all">All Workplaces (Remote, Hybrid, Onsite)</option>
+                  <option value="Remote">Remote Only</option>
+                  <option value="Hybrid">Hybrid</option>
+                  <option value="Onsite">Onsite</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Internship cards grid -->
+            <div class="row g-3" id="recommendedInternshipsList">
+              <!-- Dynamically populated via dashboard.js -->
+            </div>
+          </div>
+
+          <!-- 5. My Applications (Application Tracking) -->
+          <div class="card border shadow-sm p-4 rounded-4 bg-white mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+              <div>
+                <div class="d-flex align-items-center gap-2">
+                  <h5 class="fw-bold text-dark mb-0">My Applications & Live Tracking</h5>
+                  <span class="badge bg-soft-primary text-primary px-2 py-1 rounded-pill small" id="applicationsFilterCount">5 Applications</span>
+                </div>
+                <p class="text-muted small mb-0">Real-time status updates and interview schedules for your submitted roles.</p>
+              </div>
+
+              <!-- Filter status -->
+              <div class="d-flex align-items-center gap-2">
+                <label for="applicationStatusFilter" class="small text-muted text-nowrap">Filter Status:</label>
+                <select class="form-select form-select-sm" id="applicationStatusFilter" style="width: 170px;">
+                  <option value="all">All Applications</option>
+                  <option value="Interview">Interview Scheduled</option>
+                  <option value="Review">Under Review</option>
+                  <option value="Shortlisted">Shortlisted</option>
+                  <option value="Submitted">Submitted</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Table of Applications -->
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0" style="font-size: 0.88rem;">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" class="py-3">Company</th>
+                    <th scope="col" class="py-3">Position & Stipend</th>
+                    <th scope="col" class="py-3">Applied On</th>
+                    <th scope="col" class="py-3">Application Status</th>
+                    <th scope="col" class="py-3">Interview Schedule</th>
+                    <th scope="col" class="py-3 text-end">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="applicationsTableBody">
+                  <!-- Dynamically populated via dashboard.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Bottom Row: 6. Skill Gap Analysis & 7. Recent Activity -->
+          <div class="row g-4">
+            <!-- 6. Skill Gap Analysis -->
+            <div class="col-12 col-xl-7">
+              <div class="card border shadow-sm p-4 rounded-4 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <h5 class="fw-bold text-dark mb-0">AI Skill Gap Analysis</h5>
+                    <p class="text-muted small mb-0">Targeted areas to improve to unlock higher match scores and premium stipends.</p>
+                  </div>
+                  <span class="badge bg-soft-amber text-warning px-2 py-1 rounded-pill small">AI Insights</span>
+                </div>
+
+                <div class="row g-3" id="skillGapContainer">
+                  <!-- Dynamically populated via dashboard.js -->
+                </div>
+              </div>
+            </div>
+
+            <!-- 7. Recent Activity -->
+            <div class="col-12 col-xl-5">
+              <div class="card border shadow-sm p-4 rounded-4 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <h5 class="fw-bold text-dark mb-0">Recent Candidate Activity</h5>
+                    <p class="text-muted small mb-0">Timeline of updates, assessments, and application submissions.</p>
+                  </div>
+                  <span class="badge bg-light text-dark border px-2 py-1 rounded-pill small">Real-time Feed</span>
+                </div>
+
+                <div class="activity-timeline" id="recentActivityFeed">
+                  <!-- Dynamically populated via dashboard.js -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ====================================================================
+             VIEW 2: MY PROFILE SECTION
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="profileSection">
+          <div class="card border shadow-sm p-4 p-md-5 rounded-4 bg-white mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+              <div>
+                <h4 class="fw-bold text-dark mb-1">Student Candidate Profile</h4>
+                <p class="text-muted mb-0 small">Update your personal, academic, and portfolio links. Connected with localStorage demo persistence.</p>
+              </div>
+              <span class="badge bg-soft-emerald text-success px-3 py-1 rounded-pill">
+                <i class="bi bi-shield-check me-1"></i> Student ID Verified
+              </span>
+            </div>
+
+            <form id="studentProfileForm">
+              <div class="row g-3 mb-4">
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold text-dark">Full Name</label>
+                  <input type="text" class="form-control" id="profileFullName" required>
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold text-dark">Email Address</label>
+                  <input type="email" class="form-control bg-light" id="profileEmail" readonly>
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold text-dark">Mobile Number</label>
+                  <input type="tel" class="form-control" id="profileMobile" required>
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold text-dark">College / University</label>
+                  <input type="text" class="form-control" id="profileCollege" required>
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-bold text-dark">Degree</label>
+                  <input type="text" class="form-control" id="profileDegree" required>
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-bold text-dark">Department</label>
+                  <input type="text" class="form-control" id="profileDepartment" required>
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-bold text-dark">Graduation Year</label>
+                  <input type="text" class="form-control" id="profileGradYear" required>
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-bold text-dark">Current CGPA / Percentage</label>
+                  <input type="text" class="form-control" id="profileCgpa" placeholder="e.g. 8.8 / 10.0">
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-bold text-dark">GitHub Profile Link</label>
+                  <input type="url" class="form-control" id="profileGithub" placeholder="https://github.com/username">
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-bold text-dark">LinkedIn Profile Link</label>
+                  <input type="url" class="form-control" id="profileLinkedin" placeholder="https://linkedin.com/in/username">
+                </div>
+                <div class="col-12">
+                  <label class="form-label small fw-bold text-dark">Candidate Bio / Professional Summary</label>
+                  <textarea class="form-control" id="profileBio" rows="3"></textarea>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label small fw-bold text-dark d-block">Verified Technical Skills</label>
+                <div class="d-flex flex-wrap gap-2" id="profileVerifiedSkillsPills">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                <button type="submit" class="btn btn-primary-custom px-4 py-2">
+                  <i class="bi bi-save me-1"></i> Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+
+        <!-- ====================================================================
+             VIEW 3: SKILL ASSESSMENT SECTION
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="assessmentSection">
+          <div class="card border shadow-sm p-4 p-md-5 rounded-4 bg-white mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h4 class="fw-bold text-dark mb-1">AI Skill Assessment Center</h4>
+                <p class="text-muted mb-0 small">Test your coding, problem solving, and framework competencies to boost your hiring partner match score.</p>
+              </div>
+              <span class="badge bg-soft-primary text-primary px-3 py-1 rounded-pill">Demo Assessment Modules</span>
+            </div>
+
+            <div class="row g-4 mt-1">
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-4 rounded-3 border bg-light h-100 d-flex flex-column">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="rounded p-2 bg-soft-amber text-warning">
+                      <i class="bi bi-cup-hot-fill fs-4"></i>
+                    </div>
+                    <span class="badge bg-success">Score: 92%</span>
+                  </div>
+                  <h6 class="fw-bold text-dark mb-1">Java Core & OOP</h6>
+                  <p class="text-muted small mb-3">Data structures, Collections framework, Exception handling, Multi-threading.</p>
+                  <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                    <span class="small text-muted">25 Questions</span>
+                    <button class="btn btn-sm btn-primary-custom retake-skill-btn" data-skill="Java Core">Retake Test</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-4 rounded-3 border bg-light h-100 d-flex flex-column">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="rounded p-2 bg-soft-emerald text-success">
+                      <i class="bi bi-layers-fill fs-4"></i>
+                    </div>
+                    <span class="badge bg-info text-dark">Score: 88%</span>
+                  </div>
+                  <h6 class="fw-bold text-dark mb-1">Spring Boot & REST APIs</h6>
+                  <p class="text-muted small mb-3">Dependency injection, Spring Data JPA, Hibernate, REST controller endpoints.</p>
+                  <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                    <span class="small text-muted">20 Questions</span>
+                    <button class="btn btn-sm btn-primary-custom retake-skill-btn" data-skill="Spring Boot">Retake Test</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-4 rounded-3 border bg-light h-100 d-flex flex-column">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="rounded p-2 bg-soft-cyan text-info">
+                      <i class="bi bi-database-fill fs-4"></i>
+                    </div>
+                    <span class="badge bg-info text-dark">Score: 85%</span>
+                  </div>
+                  <h6 class="fw-bold text-dark mb-1">MySQL Database Design</h6>
+                  <p class="text-muted small mb-3">Joins, Subqueries, Normalization, Indexing, and Transaction ACID properties.</p>
+                  <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                    <span class="small text-muted">20 Questions</span>
+                    <button class="btn btn-sm btn-primary-custom retake-skill-btn" data-skill="MySQL">Retake Test</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-4 rounded-3 border bg-light h-100 d-flex flex-column">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="rounded p-2 bg-soft-primary text-primary">
+                      <i class="bi bi-filetype-py fs-4"></i>
+                    </div>
+                    <span class="badge bg-primary">Score: 80%</span>
+                  </div>
+                  <h6 class="fw-bold text-dark mb-1">Python Programming</h6>
+                  <p class="text-muted small mb-3">Core syntax, List comprehensions, File I/O, Pandas data manipulation.</p>
+                  <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                    <span class="small text-muted">25 Questions</span>
+                    <button class="btn btn-sm btn-primary-custom retake-skill-btn" data-skill="Python">Retake Test</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-4 rounded-3 border bg-light h-100 d-flex flex-column">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="rounded p-2 bg-soft-pink text-danger">
+                      <i class="bi bi-code-slash fs-4"></i>
+                    </div>
+                    <span class="badge bg-success">Score: 90%</span>
+                  </div>
+                  <h6 class="fw-bold text-dark mb-1">HTML, CSS & JavaScript</h6>
+                  <p class="text-muted small mb-3">Semantic markup, Responsive layouts, ES6+ features, DOM manipulation.</p>
+                  <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                    <span class="small text-muted">30 Questions</span>
+                    <button class="btn btn-sm btn-primary-custom retake-skill-btn" data-skill="Web Frontend">Retake Test</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-4 rounded-3 border border-dashed bg-white h-100 d-flex flex-column justify-content-center text-center">
+                  <div class="rounded-circle p-3 bg-light text-muted mx-auto mb-2" style="width: 50px; height: 50px;">
+                    <i class="bi bi-plus-lg fs-5"></i>
+                  </div>
+                  <h6 class="fw-bold text-dark mb-1">Take New Assessment</h6>
+                  <p class="text-muted small mb-3">Assess Docker, Git, or Cloud Fundamentals.</p>
+                  <button class="btn btn-sm btn-outline-custom mt-auto mx-auto retake-skill-btn" data-skill="Docker & DevOps">
+                    Explore Tests
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ====================================================================
+             VIEW 4: MY SKILLS INVENTORY
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="skillsSection">
+          <div class="card border shadow-sm p-4 p-md-5 rounded-4 bg-white mb-4">
+            <h4 class="fw-bold text-dark mb-1">My Technical Skills Inventory</h4>
+            <p class="text-muted mb-4 small">Manage your verified skills and self-reported proficiencies.</p>
+
+            <div class="row g-3">
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-3 border rounded-3 bg-white">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold text-dark">Java</span>
+                    <span class="badge bg-success">Advanced</span>
+                  </div>
+                  <p class="text-muted small mb-2">Primary backend language for enterprise services.</p>
+                  <small class="text-muted"><i class="bi bi-check-circle-fill text-success me-1"></i> Verified by AI test</small>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-3 border rounded-3 bg-white">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold text-dark">Spring Boot</span>
+                    <span class="badge bg-info text-dark">Proficient</span>
+                  </div>
+                  <p class="text-muted small mb-2">RESTful microservices, JPA repositories, security.</p>
+                  <small class="text-muted"><i class="bi bi-check-circle-fill text-success me-1"></i> Verified by AI test</small>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-3 border rounded-3 bg-white">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold text-dark">MySQL</span>
+                    <span class="badge bg-info text-dark">Proficient</span>
+                  </div>
+                  <p class="text-muted small mb-2">Schema architecture, indexing, query optimization.</p>
+                  <small class="text-muted"><i class="bi bi-check-circle-fill text-success me-1"></i> Verified by AI test</small>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-3 border rounded-3 bg-white">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold text-dark">Python</span>
+                    <span class="badge bg-primary">Intermediate</span>
+                  </div>
+                  <p class="text-muted small mb-2">Automation, scripting, ETL pipelines, Pandas.</p>
+                  <small class="text-muted"><i class="bi bi-check-circle-fill text-success me-1"></i> Verified by AI test</small>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-3 border rounded-3 bg-white">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold text-dark">HTML5 & CSS3</span>
+                    <span class="badge bg-success">Advanced</span>
+                  </div>
+                  <p class="text-muted small mb-2">Modern responsive layouts, Flexbox, Grid, accessibility.</p>
+                  <small class="text-muted"><i class="bi bi-check-circle-fill text-success me-1"></i> Verified by AI test</small>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-3 border rounded-3 bg-white">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold text-dark">JavaScript (ES6+)</span>
+                    <span class="badge bg-success">Advanced</span>
+                  </div>
+                  <p class="text-muted small mb-2">Asynchronous JS, DOM manipulation, REST API integration.</p>
+                  <small class="text-muted"><i class="bi bi-check-circle-fill text-success me-1"></i> Verified by AI test</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ====================================================================
+             VIEW 5: RECOMMENDED INTERNSHIPS (DEDICATED FULL VIEW)
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="internshipsSection">
+          <div class="card border shadow-sm p-4 rounded-4 bg-white mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+              <div>
+                <div class="d-flex align-items-center gap-2">
+                  <h4 class="fw-bold text-dark mb-0">Recommended Tech Internships</h4>
+                  <span class="badge bg-soft-emerald text-success px-2.5 py-1 rounded-pill small" id="dedicatedInternshipsCount">Loading openings...</span>
+                </div>
+                <p class="text-muted small mb-0">Browse curated openings matching your verified technical skills, assessments, and preferred workplace modes.</p>
+              </div>
+
+              <!-- Quick category filter pills -->
+              <div class="d-flex flex-wrap gap-1">
+                <button class="btn btn-sm btn-primary dedicated-category-pill active" data-category="all">All</button>
+                <button class="btn btn-sm btn-outline-custom dedicated-category-pill" data-category="Backend">Backend</button>
+                <button class="btn btn-sm btn-outline-custom dedicated-category-pill" data-category="Frontend">Frontend</button>
+                <button class="btn btn-sm btn-outline-custom dedicated-category-pill" data-category="Full Stack">Full Stack</button>
+                <button class="btn btn-sm btn-outline-custom dedicated-category-pill" data-category="Cloud">Cloud/DevOps</button>
+                <button class="btn btn-sm btn-outline-custom dedicated-category-pill" data-category="Data">Data &amp; AI</button>
+              </div>
+            </div>
+
+            <!-- Search and Workplace filter inputs -->
+            <div class="row g-2 mb-4">
+              <div class="col-12 col-md-8">
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="dedicatedInternshipSearchInput"
+                    placeholder="Search by role, company name, skill or location...">
+                </div>
+              </div>
+              <div class="col-12 col-md-4">
+                <select class="form-select" id="dedicatedInternshipWorkplaceSelect">
+                  <option value="all">All Workplaces (Remote, Hybrid, Onsite)</option>
+                  <option value="Remote">Remote Only</option>
+                  <option value="Hybrid">Hybrid</option>
+                  <option value="Onsite">Onsite</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Internship cards grid -->
+            <div class="row g-3" id="dedicatedInternshipsList">
+              <!-- Dynamically populated via dashboard.js from live MySQL backend -->
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ====================================================================
+             VIEW 6: MY APPLICATIONS (DEDICATED FULL VIEW)
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="applicationsSection">
+          <div class="card border shadow-sm p-4 p-md-5 rounded-4 bg-white mb-4">
+            <h4 class="fw-bold text-dark mb-1">My Application Tracking Hub</h4>
+            <p class="text-muted mb-4 small">Full lifecycle tracking of submitted internship applications and interviews.</p>
+
+            <div class="p-3 bg-light rounded-3 border mb-4">
+              <div class="row text-center g-2">
+                <div class="col-3">
+                  <div class="fw-bold fs-5 text-dark" id="hubKpiTotalApplied">5</div>
+                  <small class="text-muted">Total Applied</small>
+                </div>
+                <div class="col-3 border-start">
+                  <div class="fw-bold fs-5 text-primary" id="hubKpiUnderReview">2</div>
+                  <small class="text-muted">Under Review</small>
+                </div>
+                <div class="col-3 border-start">
+                  <div class="fw-bold fs-5 text-success" id="hubKpiInterviews">1</div>
+                  <small class="text-muted">Interviews</small>
+                </div>
+                <div class="col-3 border-start">
+                  <div class="fw-bold fs-5 text-info" id="hubKpiShortlisted">1</div>
+                  <small class="text-muted">Shortlisted</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Table of Applications -->
+            <div class="table-responsive mt-2">
+              <table class="table table-hover align-middle mb-0" style="font-size: 0.88rem;">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" class="py-3">Company</th>
+                    <th scope="col" class="py-3">Position & Stipend</th>
+                    <th scope="col" class="py-3">Applied On</th>
+                    <th scope="col" class="py-3">Application Status</th>
+                    <th scope="col" class="py-3">Interview Schedule</th>
+                    <th scope="col" class="py-3 text-end">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="applicationsSectionTableBody">
+                  <!-- Dynamically populated via dashboard.js -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="d-flex justify-content-start mt-4 pt-3 border-top">
+              <button class="btn btn-outline-custom dashboard-nav-link" data-view="overviewSection" data-title="Dashboard Overview">
+                <i class="bi bi-arrow-left me-1"></i> Return to Overview Table
+              </button>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ====================================================================
+             VIEW 7: RESUME MANAGEMENT SECTION
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="resumeSection">
+          <div class="card border shadow-sm p-4 p-md-5 rounded-4 bg-white mb-4">
+            <h4 class="fw-bold text-dark mb-1">Resume & Document Management</h4>
+            <p class="text-muted mb-4 small">Manage your current active resume used by the SkillBridge AI matching engine.</p>
+
+            <div class="row g-4">
+              <div class="col-12 col-md-6">
+                <div class="p-4 border rounded-3 bg-light text-center h-100 d-flex flex-column justify-content-center">
+                  <div class="rounded-circle bg-white shadow-sm p-3 mx-auto mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-file-earmark-pdf-fill text-danger fs-1"></i>
+                  </div>
+                  <h6 class="fw-bold text-dark mb-1" id="resumeFileNameDisplay">Yazh_S_Resume_2026.pdf</h6>
+                  <small class="text-muted mb-3 d-block">Uploaded on <span id="resumeUploadDateDisplay">15 Nov 2026</span> &bull; 420 KB</small>
+                  
+                  <div class="d-flex gap-2 justify-content-center mt-auto">
+                    <button class="btn btn-outline-custom btn-sm px-3" onclick="alert('Demo: Opening Yazh_S_Resume_2026.pdf in browser preview.')">
+                      <i class="bi bi-eye me-1"></i> Preview PDF
+                    </button>
+                    <label class="btn btn-primary-custom btn-sm px-3 mb-0" for="resumeFileInput">
+                      <i class="bi bi-upload me-1"></i> Replace Resume
+                    </label>
+                    <input type="file" id="resumeFileInput" class="d-none" accept=".pdf">
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <div class="p-4 border rounded-3 bg-white h-100">
+                  <h6 class="fw-bold text-dark mb-2"><i class="bi bi-shield-check text-success me-1"></i> ATS Resume Score: 91/100 (Demo)</h6>
+                  <p class="text-muted small mb-3">Our parser successfully extracted your educational credentials, technical stack (Java, Spring Boot, MySQL, Python), and verified project entries.</p>
+
+                  <div class="small fw-bold text-dark mb-2">Resume Optimization Checklist:</div>
+                  <ul class="list-unstyled small text-muted mb-0">
+                    <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1"></i> Clean single-column layout</li>
+                    <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1"></i> Standard font and PDF encoding</li>
+                    <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-1"></i> Measurable project impact statements</li>
+                    <li><i class="bi bi-exclamation-circle-fill text-warning me-1"></i> Add link to deployed live web applications</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ====================================================================
+             VIEW 8: SETTINGS SECTION
+             ==================================================================== -->
+        <section class="dashboard-view-section" id="settingsSection">
+          <div class="card border shadow-sm p-4 p-md-5 rounded-4 bg-white mb-4">
+            <h4 class="fw-bold text-dark mb-1">Account & Notification Settings</h4>
+            <p class="text-muted mb-4 small">Configure platform notifications, password preferences, and demo account status.</p>
+
+            <div class="row g-3 mb-4">
+              <div class="col-12">
+                <h6 class="fw-bold text-dark mb-3">Notification Preferences</h6>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="notifyInternshipMatches" checked>
+                  <label class="form-check-label small text-dark" for="notifyInternshipMatches">
+                    Email alerts when new internships match your skill profile above 90%
+                  </label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="notifyInterviewSchedule" checked>
+                  <label class="form-check-label small text-dark" for="notifyInterviewSchedule">
+                    SMS and email reminders for confirmed technical interviews
+                  </label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="notifyWeeklyDigests">
+                  <label class="form-check-label small text-dark" for="notifyWeeklyDigests">
+                    Weekly career and skill improvement summary digests
+                  </label>
+                </div>
+              </div>
+
+              <div class="col-12 pt-3 border-top">
+                <h6 class="fw-bold text-dark mb-3">Password & Security</h6>
+                <div class="row g-2">
+                  <div class="col-12 col-md-6">
+                    <label class="form-label small fw-bold text-dark">New Password</label>
+                    <input type="password" class="form-control" placeholder="••••••••">
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="form-label small fw-bold text-dark">Confirm New Password</label>
+                    <input type="password" class="form-control" placeholder="••••••••">
+                  </div>
+                </div>
+                <button type="button" class="btn btn-outline-custom btn-sm mt-3" onclick="alert('Demo: Password updated successfully.')">
+                  Update Password
+                </button>
+              </div>
+
+              <div class="col-12 pt-3 border-top">
+                <h6 class="fw-bold text-danger mb-2">Session Management</h6>
+                <p class="text-muted small mb-3">Log out of your current student candidate session on this device.</p>
+                <button type="button" class="btn btn-outline-danger btn-sm dashboard-logout-trigger">
+                  <i class="bi bi-box-arrow-right me-1"></i> Log Out of SkillBridge
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Dashboard Footer -->
+      <footer class="bg-white border-top py-3 px-4 text-center text-md-start small text-muted">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+          <div>
+            &copy; 2026 SkillBridge. All rights reserved. &bull; <span class="badge bg-light text-dark border">Demo Version</span>
+          </div>
+          <div class="d-flex gap-3">
+            <a href="index.html" class="text-decoration-none text-muted">Homepage</a>
+            <a href="index.html#explore-internships" class="text-decoration-none text-muted">Browse Internships</a>
+            <a href="login.html" class="text-decoration-none text-muted">Switch Account</a>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+
+  <!-- ========================================================================
+       MODAL: Internship Details
+       ======================================================================== -->
+  <div class="modal fade" id="internshipDetailsModal" tabindex="-1" aria-labelledby="internshipModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header border-bottom pb-3">
+          <div>
+            <h5 class="modal-title fw-bold text-dark" id="internshipModalTitle">Internship Role</h5>
+            <small class="text-muted" id="internshipModalCompany">Company Name</small>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+              <div class="p-2 bg-light rounded-3 border text-center">
+                <small class="text-muted d-block" style="font-size: 0.75rem;">Stipend (INR)</small>
+                <span class="fw-bold text-success" id="internshipModalStipend">₹35,000/mo</span>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="p-2 bg-light rounded-3 border text-center">
+                <small class="text-muted d-block" style="font-size: 0.75rem;">Location</small>
+                <span class="fw-bold text-dark small" id="internshipModalLocation">Bengaluru</span>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="p-2 bg-light rounded-3 border text-center">
+                <small class="text-muted d-block" style="font-size: 0.75rem;">Duration</small>
+                <span class="fw-bold text-dark small" id="internshipModalDuration">6 Months</span>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="p-2 bg-light rounded-3 border text-center">
+                <small class="text-muted d-block" style="font-size: 0.75rem;">AI Fit</small>
+                <span class="fw-bold text-primary small" id="internshipModalMatch">97% (Demo)</span>
+              </div>
+            </div>
+          </div>
+
+          <h6 class="fw-bold text-dark mb-2">Role Overview & Responsibilities</h6>
+          <p class="text-muted small mb-4" id="internshipModalDescription">
+            Job description details.
+          </p>
+
+          <h6 class="fw-bold text-dark mb-2">Required Technical Stack</h6>
+          <div class="mb-4" id="internshipModalSkills">
+            <!-- Badges -->
+          </div>
+
+          <div class="alert alert-light border small text-muted mb-0">
+            <i class="bi bi-info-circle text-primary me-1"></i>
+            Applying will submit your verified skill assessment scores and resume to the recruiter portal.
+          </div>
+        </div>
+        <div class="modal-footer border-top">
+          <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary-custom" id="internshipModalApplyBtn">Apply Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================
+       MODAL: Application Tracker Details
+       ======================================================================== -->
+  <div class="modal fade" id="applicationTrackerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header border-bottom">
+          <h5 class="modal-title fw-bold text-dark">Application Status Tracker</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4" id="applicationTrackerModalBody">
+          <!-- Populated dynamically via dashboard.js -->
+        </div>
+        <div class="modal-footer border-top">
+          <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Bootstrap 5.3 JavaScript Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+
+  <!-- Dashboard Controller JavaScript -->
+  <script src="js/dashboard.js"></script>
+</body>
+
+</html>
