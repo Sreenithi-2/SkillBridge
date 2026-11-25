@@ -48,8 +48,8 @@
   function getLoggedInCompanyId() {
     try {
       const sessionRaw = (typeof window !== 'undefined' && window.sessionStorage && window.sessionStorage.getItem('skillbridge_recruiter_session')) ||
-                         (typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('skillbridge_recruiter_session')) ||
-                         (typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('skillbridge_company_session'));
+        (typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('skillbridge_recruiter_session')) ||
+        (typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('skillbridge_company_session'));
       if (sessionRaw) {
         const parsed = typeof sessionRaw === 'string' ? JSON.parse(sessionRaw) : sessionRaw;
         if (parsed && typeof parsed === 'object') {
@@ -62,7 +62,7 @@
     } catch (err) {
       console.warn('[SkillBridge Recruiter] Error retrieving company ID:', err);
     }
-    return 'comp-101';
+    return null;
   }
 
   function normalizeBackendInternship(backendItem) {
@@ -293,7 +293,7 @@
         if (typeof window !== 'undefined' && window.sessionStorage) {
           try {
             window.sessionStorage.setItem('skillbridge_recruiter_session', JSON.stringify(activeRecruiter));
-          } catch (e) {}
+          } catch (e) { }
         }
 
         populateRecruiterBranding();
@@ -427,7 +427,7 @@
       if (typeof window !== 'undefined' && window.sessionStorage) {
         try {
           window.sessionStorage.setItem('skillbridge_recruiter_session', JSON.stringify(activeRecruiter));
-        } catch (e) {}
+        } catch (e) { }
       }
 
       // Re-populate branding across entire dashboard
@@ -503,7 +503,7 @@
       }
 
       const sessionRaw = window.sessionStorage.getItem('skillbridge_recruiter_session') ||
-                         window.localStorage.getItem('skillbridge_recruiter_session');
+        window.localStorage.getItem('skillbridge_recruiter_session');
       if (sessionRaw) {
         const parsed = JSON.parse(sessionRaw);
         if (parsed && (parsed.role === 'ROLE_RECRUITER' || parsed.authRole === 'recruiter' || parsed.companyName)) {
@@ -1227,7 +1227,7 @@
           <div class="d-flex align-items-center gap-2">
             <div class="rounded-circle bg-soft-primary text-primary d-flex align-items-center justify-content-center fw-bold"
               style="width: 34px; height: 34px; font-size: 0.78rem;">
-              ${app.candidateName.split(' ').map(n=>n[0]).join('')}
+              ${app.candidateName.split(' ').map(n => n[0]).join('')}
             </div>
             <div>
               <div class="fw-bold text-dark">${app.candidateName}</div>
@@ -1237,7 +1237,7 @@
         </td>
         <td>
           <div class="fw-semibold text-dark">${app.appliedRole}</div>
-          <div class="text-muted" style="font-size: 0.72rem;">${app.skills.map(s=>s.name).slice(0, 3).join(', ')}</div>
+          <div class="text-muted" style="font-size: 0.72rem;">${app.skills.map(s => s.name).slice(0, 3).join(', ')}</div>
         </td>
         <td>
           <div class="ai-match-meter">
@@ -1386,7 +1386,7 @@
           <div class="d-flex align-items-center gap-2">
             <div class="rounded-circle bg-soft-primary text-primary d-flex align-items-center justify-content-center fw-bold"
               style="width: 36px; height: 36px; font-size: 0.82rem;">
-              ${app.candidateName.split(' ').map(n=>n[0]).join('')}
+              ${app.candidateName.split(' ').map(n => n[0]).join('')}
             </div>
             <div>
               <div class="fw-bold text-dark">${app.candidateName}</div>
@@ -1499,6 +1499,7 @@
     const grid = document.getElementById('aiCandidateCardsGrid');
     if (!grid) return;
 
+    const topMatches = [...applicantsList].sort((a, b) => b.fitScore - a.fitScore);
     let candidates = aiMatchesList.length > 0 ? aiMatchesList : applicantsList;
     if (!candidates || candidates.length === 0) {
       grid.innerHTML = `
@@ -1514,7 +1515,7 @@
     const sorted = [...candidates].sort((a, b) => b.fitScore - a.fitScore);
 
     grid.innerHTML = sorted.map((cand, idx) => {
-      const matched = Array.isArray(cand.matchedSkills) ? cand.matchedSkills : (cand.skills || []);
+      const matched = Array.isArray(cand.matchedSkills) ? cand.matchedSkills : (Array.isArray(cand.skills) ? cand.skills : []);
       const missing = Array.isArray(cand.missingSkills) ? cand.missingSkills : [];
       const assessSummary = cand.assessmentSummary || (matched.length > 0 ? matched.map(s => `${s.name || s} (${s.score ? s.score + '%' : '90%'})`).join(', ') : 'Verified Assessment Passed');
 
@@ -1525,7 +1526,7 @@
               <div class="d-flex align-items-center gap-2">
                 <span class="badge ${idx === 0 ? 'bg-primary' : 'bg-dark'} text-white rounded-pill px-2.5 py-1 fw-bold">#${idx + 1}</span>
                 <div>
-                  <h6 class="fw-bold mb-0 text-dark">${cand.candidateName}</h6>
+                  <h6 class="fw-bold mb-0 text-dark">${cand.candidateName || 'Candidate'}</h6>
                   <small class="text-muted">${cand.college || 'Engineering College'}</small>
                 </div>
               </div>
@@ -1536,8 +1537,8 @@
             </div>
 
             <div class="mb-3">
-              <div class="fw-semibold text-dark small mb-1">Target Internship Role:</div>
-              <div class="text-muted small fw-medium">${cand.appliedRole}</div>
+              <div class="fw-semibold text-dark small mb-1">Target Role:</div>
+              <div class="text-muted small">${cand.appliedRole || 'Full Stack Engineer'}</div>
             </div>
 
             <div class="mb-3">
@@ -1545,11 +1546,11 @@
                 <i class="bi bi-check-circle-fill me-1"></i> Matched Competencies:
               </div>
               <div class="d-flex flex-wrap gap-1">
-                ${matched.map(s => `
+                ${matched.length > 0 ? matched.map(s => `
                   <span class="badge bg-soft-emerald text-success border border-success-subtle small">
                     ${s.name || s}: <strong>${s.score ? s.score + '%' : 'Verified'}</strong>
                   </span>
-                `).join('')}
+                `).join('') : '<span class="text-muted small">General Competencies Verified</span>'}
               </div>
             </div>
 
@@ -1576,7 +1577,7 @@
               ${getStatusBadge(cand.status || 'Applied')}
               <div class="d-flex gap-1">
                 <button type="button" class="btn btn-sm btn-outline-custom view-candidate-btn" data-id="${cand.id || cand.candidateId}">Profile</button>
-                <button type="button" class="btn btn-sm btn-primary-custom schedule-candidate-btn" data-id="${cand.id || cand.candidateId}">Schedule</button>
+                <button type="button" class="btn btn-sm btn-primary-custom schedule-candidate-btn" data-id="${cand.id || cand.candidateId}">Interview</button>
               </div>
             </div>
           </div>
@@ -1977,8 +1978,8 @@
 
   function populateOfferFormForCandidate(candNameOrId) {
     if (!candNameOrId) return;
-    const cand = applicantsList.find(a => 
-      a.id === candNameOrId || 
+    const cand = applicantsList.find(a =>
+      a.id === candNameOrId ||
       (a.candidateName && a.candidateName.toLowerCase() === candNameOrId.toLowerCase())
     );
     if (!cand) return;
@@ -1994,8 +1995,8 @@
     const termsInput = document.getElementById('offerTermsInput');
 
     // Look up matching internship details from internshipsList
-    const intn = internshipsList.find(i => 
-      i.id === cand.appliedInternshipId || 
+    const intn = internshipsList.find(i =>
+      i.id === cand.appliedInternshipId ||
       (i.title && cand.appliedRole && i.title.toLowerCase() === cand.appliedRole.toLowerCase())
     );
 
@@ -2005,11 +2006,11 @@
     if (stipendInput) stipendInput.value = (intn && intn.stipend) ? intn.stipend : '₹35,000 / month';
     if (durationInput) durationInput.value = (intn && intn.duration) ? intn.duration : '6 Months (Jan - Jun 2027)';
     if (locationInput) locationInput.value = (intn && intn.location) ? intn.location : (activeRecruiter.location || 'Bengaluru, Karnataka (Hybrid)');
-    
+
     // Default valid future dates
     if (joiningInput && !joiningInput.value) joiningInput.value = '2027-01-05';
     if (expiryInput && !expiryInput.value) expiryInput.value = '2026-11-28';
-    
+
     if (termsInput && !termsInput.value.trim()) {
       termsInput.value = `1. Standard NDA and intellectual property assignment applies to all source code and infrastructure scripts.\n2. Full-time Pre-Placement Offer (PPO) evaluation conducted at 4-month performance review.\n3. High-spec workstation and cloud infrastructure sandbox access will be provisioned on Day 1.`;
     }
@@ -2036,8 +2037,8 @@
     }
 
     container.innerHTML = eligible.map(cand => {
-      const existingOffer = offersList.find(o => 
-        o.candidateName.toLowerCase() === cand.candidateName.toLowerCase() && 
+      const existingOffer = offersList.find(o =>
+        o.candidateName.toLowerCase() === cand.candidateName.toLowerCase() &&
         o.status !== 'Rejected' && o.status !== 'Withdrawn'
       );
       const hasOffer = !!existingOffer;
@@ -2120,7 +2121,7 @@
     const rolesFromOffers = offersList.map(o => o.role).filter(Boolean);
     const rolesFromInternships = internshipsList.map(i => i.title).filter(Boolean);
     const roles = Array.from(new Set([...rolesFromOffers, ...rolesFromInternships]));
-    
+
     filter.innerHTML = '<option value="all">All Roles</option>' + roles.map(r => `
       <option value="${r}">${r}</option>
     `).join('');
@@ -2142,7 +2143,7 @@
     let filtered = [...offersList];
 
     if (search) {
-      filtered = filtered.filter(o => 
+      filtered = filtered.filter(o =>
         (o.candidateName || '').toLowerCase().includes(search) ||
         (o.role || '').toLowerCase().includes(search)
       );
@@ -2548,7 +2549,7 @@ ${400 + streamLen}
   // Window-level handlers for offer table and card interactions
   const globalObj = typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : {});
 
-  globalObj.viewOfferDetails = function(offerId) {
+  globalObj.viewOfferDetails = function (offerId) {
     const ofr = offersList.find(o => o.id === offerId);
     if (!ofr) return;
 
@@ -2560,7 +2561,7 @@ ${400 + streamLen}
     if (subtitle) subtitle.textContent = `Official Corporate Offer Letterhead • Status: ${ofr.status}`;
     if (releaseBtn) {
       releaseBtn.style.display = ofr.status === 'Draft' ? 'inline-block' : 'none';
-      releaseBtn.onclick = function() {
+      releaseBtn.onclick = function () {
         globalObj.releaseOfferDirect(ofr.id);
         const modalEl = document.getElementById('offerLetterPreviewModal');
         if (modalEl && typeof bootstrap !== 'undefined') {
@@ -2576,12 +2577,12 @@ ${400 + streamLen}
     }
   };
 
-  globalObj.downloadOfferPdfById = function(offerId) {
+  globalObj.downloadOfferPdfById = function (offerId) {
     const ofr = offersList.find(o => o.id === offerId);
     if (ofr) downloadOfferLetterPdf(ofr);
   };
 
-  globalObj.prefillOfferForCandidate = function(candidateId) {
+  globalObj.prefillOfferForCandidate = function (candidateId) {
     const cand = applicantsList.find(a => a.id === candidateId || a.candidateName === candidateId);
     if (!cand) return;
 
@@ -2595,7 +2596,7 @@ ${400 + streamLen}
     }
   };
 
-  globalObj.editOfferDraft = function(offerId) {
+  globalObj.editOfferDraft = function (offerId) {
     const ofr = offersList.find(o => o.id === offerId);
     if (!ofr) return;
 
@@ -2618,7 +2619,7 @@ ${400 + streamLen}
     if (formCard) formCard.scrollIntoView({ behavior: 'smooth' });
   };
 
-  globalObj.releaseOfferDirect = function(offerId) {
+  globalObj.releaseOfferDirect = function (offerId) {
     const ofr = offersList.find(o => o.id === offerId);
     if (!ofr) return;
 
@@ -2646,7 +2647,7 @@ ${400 + streamLen}
     renderDashboardOverview();
   };
 
-  globalObj.openRecordResponseModal = function(offerId) {
+  globalObj.openRecordResponseModal = function (offerId) {
     const ofr = offersList.find(o => o.id === offerId);
     if (!ofr) return;
 
@@ -2663,7 +2664,7 @@ ${400 + streamLen}
     }
   };
 
-  globalObj.withdrawOfferPrompt = function(offerId) {
+  globalObj.withdrawOfferPrompt = function (offerId) {
     const ofr = offersList.find(o => o.id === offerId);
     if (!ofr) return;
 
@@ -2698,7 +2699,7 @@ ${400 + streamLen}
     renderDashboardOverview();
   };
 
-  globalObj.extendOfferExpiry = function(offerId) {
+  globalObj.extendOfferExpiry = function (offerId) {
     const ofr = offersList.find(o => o.id === offerId);
     if (!ofr) return;
 
@@ -2725,7 +2726,7 @@ ${400 + streamLen}
   function syncConversationsWithApplicants() {
     let updated = false;
     applicantsList.forEach(cand => {
-      let convo = messagesList.find(m => 
+      let convo = messagesList.find(m =>
         (m.candidateId && m.candidateId === cand.id) ||
         (m.candidateName && m.candidateName.toLowerCase() === cand.candidateName.toLowerCase())
       );
@@ -2817,7 +2818,7 @@ ${400 + streamLen}
 
     if (messagesSearchTerm) {
       const q = messagesSearchTerm.toLowerCase();
-      convos = convos.filter(m => 
+      convos = convos.filter(m =>
         (m.candidateName && m.candidateName.toLowerCase().includes(q)) ||
         (m.role && m.role.toLowerCase().includes(q)) ||
         (m.college && m.college.toLowerCase().includes(q)) ||
@@ -2850,7 +2851,7 @@ ${400 + streamLen}
     });
 
     threadList.innerHTML = convos.map(m => {
-      const initials = (m.candidateName || 'Candidate').split(' ').map(n=>n[0]).join('').slice(0, 2).toUpperCase();
+      const initials = (m.candidateName || 'Candidate').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
       const isActive = (m.candidateId === activeConversationCandidateId) || (!activeConversationCandidateId && convos[0] && m.candidateId === convos[0].candidateId);
       const unreadCount = m.unreadCount || (m.unread ? 1 : 0);
       const hasUnread = unreadCount > 0;
@@ -2959,7 +2960,7 @@ ${400 + streamLen}
 
     const avatarEl = document.getElementById('chatActiveAvatar');
     if (avatarEl) {
-      avatarEl.textContent = (convo.candidateName || 'Candidate').split(' ').map(n=>n[0]).join('').slice(0, 2).toUpperCase();
+      avatarEl.textContent = (convo.candidateName || 'Candidate').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
     }
 
     const matchEl = document.getElementById('chatActiveMatchScore');
@@ -3074,11 +3075,11 @@ ${400 + streamLen}
   }
 
   // Window-level helper to trigger chat with any candidate from any view
-  globalObj.openCandidateChat = function(candidateNameOrId) {
+  globalObj.openCandidateChat = function (candidateNameOrId) {
     if (!candidateNameOrId) return;
     syncConversationsWithApplicants();
-    const convo = messagesList.find(m => 
-      m.candidateId === candidateNameOrId || 
+    const convo = messagesList.find(m =>
+      m.candidateId === candidateNameOrId ||
       (m.candidateName && m.candidateName.toLowerCase() === candidateNameOrId.toLowerCase())
     );
     if (convo) {
@@ -3101,7 +3102,7 @@ ${400 + streamLen}
         const cand = applicantsList.find(a => a.id === id);
         if (!cand) return;
 
-        document.getElementById('modalProfileAvatar').textContent = cand.candidateName.split(' ').map(n=>n[0]).join('');
+        document.getElementById('modalProfileAvatar').textContent = cand.candidateName.split(' ').map(n => n[0]).join('');
         document.getElementById('modalProfileName').textContent = cand.candidateName;
         document.getElementById('modalProfileRole').textContent = `${cand.appliedRole} • ${cand.college}`;
         document.getElementById('modalProfileFitScore').textContent = `${cand.fitScore}%`;
@@ -3290,6 +3291,8 @@ ${400 + streamLen}
         'section-manage-internships': 'manageInternshipsSection',
         'section-applicants': 'applicantsSection',
         'section-ai-matching': 'aiMatchingSection',
+        'section-skill-assessment': 'aiMatchingSection',
+        'skillAssessmentSection': 'aiMatchingSection',
         'section-skill-assessment': 'skillAssessmentSection',
         'skillAssessmentSection': 'skillAssessmentSection',
         'section-interviews': 'interviewsSection',
@@ -3335,7 +3338,7 @@ ${400 + streamLen}
       if (typeof history !== 'undefined' && history.replaceState) {
         history.replaceState(null, '', `#${viewId}`);
       }
-    } catch (e) {}
+    } catch (e) { }
 
     // Scroll main viewport to top
     if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
@@ -3358,6 +3361,7 @@ ${400 + streamLen}
     } else if (viewId === 'manageInternshipsSection') {
       renderManageInternshipsTable();
     } else if (viewId === 'aiMatchingSection') {
+      renderAiCandidateMatchingGrid();
       const companyId = getLoggedInCompanyId();
       if (companyId) {
         refreshAiMatchingFromBackend(companyId);
@@ -3939,7 +3943,7 @@ ${400 + streamLen}
         if (subtitle) subtitle.textContent = `Draft Offer Letter Preview • ${data.candidateName}`;
         if (releaseBtn) {
           releaseBtn.style.display = 'inline-block';
-          releaseBtn.onclick = function() {
+          releaseBtn.onclick = function () {
             releaseOfferFromData(data);
             const modalEl = document.getElementById('offerLetterPreviewModal');
             if (modalEl && typeof bootstrap !== 'undefined') {
@@ -3980,8 +3984,8 @@ ${400 + streamLen}
     function releaseOfferFromData(data) {
       // Prevent duplicate active offers for same candidate & internship
       const editingId = document.getElementById('editingOfferId')?.value;
-      const duplicate = offersList.find(o => 
-        o.id !== editingId && 
+      const duplicate = offersList.find(o =>
+        o.id !== editingId &&
         o.candidateName.toLowerCase() === data.candidateName.toLowerCase() &&
         (o.status === 'Released' || o.status === 'Accepted' || o.status === 'Viewed')
       );
@@ -4303,14 +4307,14 @@ ${400 + streamLen}
               window.sessionStorage.removeItem('skillbridge_company_session');
               window.sessionStorage.removeItem('skillbridge_auth_role');
               window.sessionStorage.removeItem('skillbridge_active_session');
-              try { window.name = ''; } catch(e) {}
-              try { document.cookie = 'skillbridge_recruiter_session=; path=/; max-age=0'; } catch(e) {}
-              try { document.cookie = 'skillbridge_auth_role=; path=/; max-age=0'; } catch(e) {}
-              try { document.cookie = 'skillbridge_active_session=; path=/; max-age=0'; } catch(e) {}
-              window.location.href = 'index.html';
+              try { window.name = ''; } catch (e) { }
+              try { document.cookie = 'skillbridge_recruiter_session=; path=/; max-age=0'; } catch (e) { }
+              try { document.cookie = 'skillbridge_auth_role=; path=/; max-age=0'; } catch (e) { }
+              try { document.cookie = 'skillbridge_active_session=; path=/; max-age=0'; } catch (e) { }
+              window.location.href = 'company-login.html';
             }
           } catch (err) {
-            window.location.href = 'index.html';
+            window.location.href = 'company-login.html';
           }
         }
       });
@@ -4441,7 +4445,7 @@ ${400 + streamLen}
         if (convo && convo.candidateId) {
           const cand = applicantsList.find(a => a.id === convo.candidateId || a.candidateName === convo.candidateName);
           if (cand) {
-            document.getElementById('modalProfileAvatar').textContent = cand.candidateName.split(' ').map(n=>n[0]).join('');
+            document.getElementById('modalProfileAvatar').textContent = cand.candidateName.split(' ').map(n => n[0]).join('');
             document.getElementById('modalProfileName').textContent = cand.candidateName;
             document.getElementById('modalProfileRole').textContent = `${cand.appliedRole} • ${cand.college}`;
             document.getElementById('modalProfileFitScore').textContent = `${cand.fitScore}%`;
@@ -4548,7 +4552,7 @@ ${400 + streamLen}
       avatarInput.addEventListener('change', () => {
         if (avatarInput.files && avatarInput.files[0]) {
           const reader = new FileReader();
-          reader.onload = function(evt) {
+          reader.onload = function (evt) {
             const imgBox = document.getElementById('accountAvatarPreview') || document.getElementById('settingsAvatarInitial');
             if (imgBox) {
               imgBox.innerHTML = `<img src="${evt.target.result}" alt="Avatar" class="w-100 h-100 rounded-circle object-fit-cover">`;
@@ -4647,11 +4651,11 @@ ${400 + streamLen}
             window.sessionStorage.removeItem('skillbridge_company_session');
             window.sessionStorage.removeItem('skillbridge_auth_role');
             window.sessionStorage.removeItem('skillbridge_active_session');
-            try { window.name = ''; } catch(e) {}
-            try { document.cookie = 'skillbridge_recruiter_session=; path=/; max-age=0'; } catch(e) {}
-            try { document.cookie = 'skillbridge_auth_role=; path=/; max-age=0'; } catch(e) {}
-            try { document.cookie = 'skillbridge_active_session=; path=/; max-age=0'; } catch(e) {}
-          } catch(e) {}
+            try { window.name = ''; } catch (e) { }
+            try { document.cookie = 'skillbridge_recruiter_session=; path=/; max-age=0'; } catch (e) { }
+            try { document.cookie = 'skillbridge_auth_role=; path=/; max-age=0'; } catch (e) { }
+            try { document.cookie = 'skillbridge_active_session=; path=/; max-age=0'; } catch (e) { }
+          } catch (e) { }
           alert('Successfully logged out from all active devices.');
           window.location.href = 'index.html';
         }
@@ -4754,7 +4758,7 @@ ${400 + streamLen}
             window.localStorage.removeItem('skillbridge_auth_role');
             window.sessionStorage.removeItem('skillbridge_recruiter_session');
             window.sessionStorage.removeItem('skillbridge_auth_role');
-          } catch(e) {}
+          } catch (e) { }
           alert('Recruiter company account has been permanently deleted.');
           window.location.href = 'company-login.html';
         }
@@ -4855,7 +4859,7 @@ ${400 + streamLen}
   function switchSettingsTab(tabKey) {
     if (!tabKey) return;
     const cleanKey = tabKey.replace(/^#?settingsPane/, '').toLowerCase();
-    
+
     const paneMap = {
       'account': 'settingsPaneAccount',
       'company': 'settingsPaneCompany',
@@ -4966,7 +4970,7 @@ ${400 + streamLen}
     if (!currInput || !newInput || !confInput) return;
 
     const currentSaved = (typeof window !== 'undefined' && window.localStorage.getItem('skillbridge_recruiter_password')) || 'Recruiter@123';
-    
+
     if (currInput.value !== currentSaved) {
       alert('Incorrect current password. Please re-enter.');
       currInput.focus();
@@ -5383,9 +5387,11 @@ ${400 + streamLen}
 
     // 1. Account Settings
     const accName = document.getElementById('accountSettingsName');
+    if (accName) accName.value = activeRecruiter.contactPerson;
     if (accName) accName.value = personName;
 
     const accEmail = document.getElementById('accountSettingsEmail');
+    if (accEmail) accEmail.value = activeRecruiter.officialEmail;
     if (accEmail) accEmail.value = offEmail;
 
     const accPhone = document.getElementById('accountSettingsPhone');
@@ -5398,28 +5404,36 @@ ${400 + streamLen}
     if (accBio) accBio.value = activeRecruiter.bio || 'Directing campus talent acquisition for CloudScale Solutions. Focused on cloud platforms, distributed architectures, and distributed systems engineering talent.';
 
     const avatarInitial = document.getElementById('accountAvatarPreview') || document.getElementById('settingsAvatarInitial');
+    if (avatarInitial) avatarInitial.textContent = activeRecruiter.contactPerson.charAt(0);
     if (avatarInitial) avatarInitial.textContent = (personName || 'P').charAt(0).toUpperCase();
 
     // 2. Company Settings
     const compName = document.getElementById('companySettingsName');
+    if (compName) compName.value = activeRecruiter.companyName;
     if (compName) compName.value = compNameVal;
 
     const compWeb = document.getElementById('companySettingsWebsite');
+    if (compWeb) compWeb.value = activeRecruiter.website;
     if (compWeb) compWeb.value = activeRecruiter.website || 'https://cloudscale.io';
 
     const compEmail = document.getElementById('companySettingsEmail');
+    if (compEmail) compEmail.value = activeRecruiter.officialEmail;
     if (compEmail) compEmail.value = offEmail;
 
     const compInd = document.getElementById('companySettingsIndustry');
+    if (compInd) compInd.value = activeRecruiter.industry;
     if (compInd) compInd.value = activeRecruiter.industry || 'Cloud & SaaS';
 
     const compSize = document.getElementById('companySettingsSize');
+    if (compSize) compSize.value = activeRecruiter.companySize;
     if (compSize) compSize.value = activeRecruiter.companySize || '200-500 Employees';
 
     const compLoc = document.getElementById('companySettingsLocation');
+    if (compLoc) compLoc.value = activeRecruiter.location;
     if (compLoc) compLoc.value = activeRecruiter.location || 'Bengaluru, Karnataka (Hybrid)';
 
     const compDesc = document.getElementById('companySettingsDescription');
+    if (compDesc) compDesc.value = activeRecruiter.description;
     if (compDesc) compDesc.value = activeRecruiter.description || 'CloudScale builds high-throughput cloud microservices, distributed SaaS platforms, and enterprise data infrastructure for global clients.';
 
     // 3. Notifications
@@ -5462,7 +5476,7 @@ ${400 + streamLen}
 
   // Window-level exports for Settings module
   globalObj.switchSettingsTab = switchSettingsTab;
-  globalObj.editTeamMember = function(memberId) {
+  globalObj.editTeamMember = function (memberId) {
     openTeamMemberModal(memberId);
   };
   globalObj.removeTeamMember = removeTeamMember;
@@ -5576,7 +5590,7 @@ ${400 + streamLen}
       let matched = false;
       for (let i = 0; i < inputIndustry.options.length; i++) {
         if (inputIndustry.options[i].value.toLowerCase() === industry.toLowerCase() ||
-            inputIndustry.options[i].text.toLowerCase() === industry.toLowerCase()) {
+          inputIndustry.options[i].text.toLowerCase() === industry.toLowerCase()) {
           inputIndustry.selectedIndex = i;
           matched = true;
           break;

@@ -62,7 +62,7 @@
     } catch (err) {
       console.warn('[SkillBridge Recruiter] Error retrieving company ID:', err);
     }
-    return 'comp-101';
+    return null;
   }
 
   function normalizeBackendInternship(backendItem) {
@@ -1499,6 +1499,7 @@
     const grid = document.getElementById('aiCandidateCardsGrid');
     if (!grid) return;
 
+    const topMatches = [...applicantsList].sort((a, b) => b.fitScore - a.fitScore);
     let candidates = aiMatchesList.length > 0 ? aiMatchesList : applicantsList;
     if (!candidates || candidates.length === 0) {
       grid.innerHTML = `
@@ -1514,7 +1515,7 @@
     const sorted = [...candidates].sort((a, b) => b.fitScore - a.fitScore);
 
     grid.innerHTML = sorted.map((cand, idx) => {
-      const matched = Array.isArray(cand.matchedSkills) ? cand.matchedSkills : (cand.skills || []);
+      const matched = Array.isArray(cand.matchedSkills) ? cand.matchedSkills : (Array.isArray(cand.skills) ? cand.skills : []);
       const missing = Array.isArray(cand.missingSkills) ? cand.missingSkills : [];
       const assessSummary = cand.assessmentSummary || (matched.length > 0 ? matched.map(s => `${s.name || s} (${s.score ? s.score + '%' : '90%'})`).join(', ') : 'Verified Assessment Passed');
 
@@ -1525,7 +1526,7 @@
               <div class="d-flex align-items-center gap-2">
                 <span class="badge ${idx === 0 ? 'bg-primary' : 'bg-dark'} text-white rounded-pill px-2.5 py-1 fw-bold">#${idx + 1}</span>
                 <div>
-                  <h6 class="fw-bold mb-0 text-dark">${cand.candidateName}</h6>
+                  <h6 class="fw-bold mb-0 text-dark">${cand.candidateName || 'Candidate'}</h6>
                   <small class="text-muted">${cand.college || 'Engineering College'}</small>
                 </div>
               </div>
@@ -1536,8 +1537,8 @@
             </div>
 
             <div class="mb-3">
-              <div class="fw-semibold text-dark small mb-1">Target Internship Role:</div>
-              <div class="text-muted small fw-medium">${cand.appliedRole}</div>
+              <div class="fw-semibold text-dark small mb-1">Target Role:</div>
+              <div class="text-muted small">${cand.appliedRole || 'Full Stack Engineer'}</div>
             </div>
 
             <div class="mb-3">
@@ -1545,11 +1546,11 @@
                 <i class="bi bi-check-circle-fill me-1"></i> Matched Competencies:
               </div>
               <div class="d-flex flex-wrap gap-1">
-                ${matched.map(s => `
+                ${matched.length > 0 ? matched.map(s => `
                   <span class="badge bg-soft-emerald text-success border border-success-subtle small">
                     ${s.name || s}: <strong>${s.score ? s.score + '%' : 'Verified'}</strong>
                   </span>
-                `).join('')}
+                `).join('') : '<span class="text-muted small">General Competencies Verified</span>'}
               </div>
             </div>
 
@@ -1576,7 +1577,7 @@
               ${getStatusBadge(cand.status || 'Applied')}
               <div class="d-flex gap-1">
                 <button type="button" class="btn btn-sm btn-outline-custom view-candidate-btn" data-id="${cand.id || cand.candidateId}">Profile</button>
-                <button type="button" class="btn btn-sm btn-primary-custom schedule-candidate-btn" data-id="${cand.id || cand.candidateId}">Schedule</button>
+                <button type="button" class="btn btn-sm btn-primary-custom schedule-candidate-btn" data-id="${cand.id || cand.candidateId}">Interview</button>
               </div>
             </div>
           </div>
@@ -3290,6 +3291,8 @@ ${400 + streamLen}
         'section-manage-internships': 'manageInternshipsSection',
         'section-applicants': 'applicantsSection',
         'section-ai-matching': 'aiMatchingSection',
+        'section-skill-assessment': 'aiMatchingSection',
+        'skillAssessmentSection': 'aiMatchingSection',
         'section-skill-assessment': 'skillAssessmentSection',
         'skillAssessmentSection': 'skillAssessmentSection',
         'section-interviews': 'interviewsSection',
@@ -3358,6 +3361,7 @@ ${400 + streamLen}
     } else if (viewId === 'manageInternshipsSection') {
       renderManageInternshipsTable();
     } else if (viewId === 'aiMatchingSection') {
+      renderAiCandidateMatchingGrid();
       const companyId = getLoggedInCompanyId();
       if (companyId) {
         refreshAiMatchingFromBackend(companyId);
@@ -4307,10 +4311,10 @@ ${400 + streamLen}
               try { document.cookie = 'skillbridge_recruiter_session=; path=/; max-age=0'; } catch (e) { }
               try { document.cookie = 'skillbridge_auth_role=; path=/; max-age=0'; } catch (e) { }
               try { document.cookie = 'skillbridge_active_session=; path=/; max-age=0'; } catch (e) { }
-              window.location.href = 'index.html';
+              window.location.href = 'company-login.html';
             }
           } catch (err) {
-            window.location.href = 'index.html';
+            window.location.href = 'company-login.html';
           }
         }
       });
@@ -5383,9 +5387,11 @@ ${400 + streamLen}
 
     // 1. Account Settings
     const accName = document.getElementById('accountSettingsName');
+    if (accName) accName.value = activeRecruiter.contactPerson;
     if (accName) accName.value = personName;
 
     const accEmail = document.getElementById('accountSettingsEmail');
+    if (accEmail) accEmail.value = activeRecruiter.officialEmail;
     if (accEmail) accEmail.value = offEmail;
 
     const accPhone = document.getElementById('accountSettingsPhone');
@@ -5398,28 +5404,36 @@ ${400 + streamLen}
     if (accBio) accBio.value = activeRecruiter.bio || 'Directing campus talent acquisition for CloudScale Solutions. Focused on cloud platforms, distributed architectures, and distributed systems engineering talent.';
 
     const avatarInitial = document.getElementById('accountAvatarPreview') || document.getElementById('settingsAvatarInitial');
+    if (avatarInitial) avatarInitial.textContent = activeRecruiter.contactPerson.charAt(0);
     if (avatarInitial) avatarInitial.textContent = (personName || 'P').charAt(0).toUpperCase();
 
     // 2. Company Settings
     const compName = document.getElementById('companySettingsName');
+    if (compName) compName.value = activeRecruiter.companyName;
     if (compName) compName.value = compNameVal;
 
     const compWeb = document.getElementById('companySettingsWebsite');
+    if (compWeb) compWeb.value = activeRecruiter.website;
     if (compWeb) compWeb.value = activeRecruiter.website || 'https://cloudscale.io';
 
     const compEmail = document.getElementById('companySettingsEmail');
+    if (compEmail) compEmail.value = activeRecruiter.officialEmail;
     if (compEmail) compEmail.value = offEmail;
 
     const compInd = document.getElementById('companySettingsIndustry');
+    if (compInd) compInd.value = activeRecruiter.industry;
     if (compInd) compInd.value = activeRecruiter.industry || 'Cloud & SaaS';
 
     const compSize = document.getElementById('companySettingsSize');
+    if (compSize) compSize.value = activeRecruiter.companySize;
     if (compSize) compSize.value = activeRecruiter.companySize || '200-500 Employees';
 
     const compLoc = document.getElementById('companySettingsLocation');
+    if (compLoc) compLoc.value = activeRecruiter.location;
     if (compLoc) compLoc.value = activeRecruiter.location || 'Bengaluru, Karnataka (Hybrid)';
 
     const compDesc = document.getElementById('companySettingsDescription');
+    if (compDesc) compDesc.value = activeRecruiter.description;
     if (compDesc) compDesc.value = activeRecruiter.description || 'CloudScale builds high-throughput cloud microservices, distributed SaaS platforms, and enterprise data infrastructure for global clients.';
 
     // 3. Notifications
